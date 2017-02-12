@@ -1,0 +1,53 @@
+        <!-- FOOTER CONTENT -->
+        
+        <!-- Page footer and copyright -->
+        <div class="page-footer">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 text-align-center">
+                    <span class="txt-color-white">NeoSentry NMS v0.1 <span class="hidden-xs"> - Network and Security Device Monitoring</span> © 2014-2018</span>
+                </div>
+            </div>
+        </div>
+        
+        </div> <!-- End Top Menu and Content Page Wrapper Added in the header -->
+        
+        <!-- common templates for the top menu -->
+        <script type="text/template" id="settings-template">
+            <div class="setting clearfix">
+                <div>Sidebar on the</div>
+                <div id="sidebar-toggle" class="pull-left btn-group" data-toggle="buttons-radio">
+                    <% onRight = sidebar == 'right'%>
+                    <button type="button" data-value="left" class="btn btn-sm btn-default <%= onRight? '' : 'active' %>">Left</button>
+                    <button type="button" data-value="right" class="btn btn-sm btn-default <%= onRight? 'active' : '' %>">Right</button>
+                </div>
+            </div>
+            <div class="setting clearfix">
+                <div>Sidebar</div>
+                <div id="display-sidebar-toggle" class="pull-left btn-group" data-toggle="buttons-radio">
+                    <% display = displaySidebar%>
+                    <button type="button" data-value="true" class="btn btn-sm btn-default <%= display? 'active' : '' %>">Show</button>
+                    <button type="button" data-value="false" class="btn btn-sm btn-default <%= display? '' : 'active' %>">Hide</button>
+                </div>
+            </div>
+        </script>
+
+        <script type="text/template" id="sidebar-settings-template">
+            <% auto = sidebarState == 'auto'%>
+            <% if (auto) {%>
+            <button type="button"
+                    data-value="icons"
+                    class="btn-icons btn btn-transparent btn-sm">Icons</button>
+            <button type="button"
+                    data-value="auto"
+                    class="btn-auto btn btn-transparent btn-sm">Auto</button>
+            <%} else {%>
+            <button type="button"
+                    data-value="auto"
+                    class="btn btn-transparent btn-sm">Auto</button>
+            <% } %>
+        </script>
+
+        
+        
+    </body>
+</html>

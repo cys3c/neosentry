@@ -1,0 +1,76 @@
+{
+    "Server Settings":{
+        "Timezone": "America/New_York"
+    },
+    "Mail Settings":{
+        "Host": "smtp.google.com",
+        "From": "NMS-Notifications@company.com",
+        "To": "testing@company.com",
+        "Username": "authuser",
+        "Password": "encrypted-pass",
+        "SMTPAuth": true,
+        "Security": "tls/ssl",
+        "Port": 587
+    },
+    "Ping Traceroute": {
+        "Ping Interval": "5 min",
+        "Traceroute Interval": "1 day",
+        "Data History": 365,
+        "Change History": 365,
+        "Alert History": 365
+    },
+    "SNMP": {
+        "System Interval": "1 day",
+        "HW Interval": "15 min",
+        "Network Interval": "5 min",
+        "Routing Interval": "1 hour",
+        "Data History": 365,
+        "Change History": 365,
+        "Alert History": 365,
+        "SNMP Strings": [
+            {"value": "-v2c -c \"public\""},
+            {"value": "-v2c -c \"H0m3<ommunityMon\""},
+            {"value": "-v2c -c \"Tyc0-safety-pr0d\""}
+        ]
+    },
+    "Service":{
+        "Description": "Uses nmap/wget/etc to collect and monitor if ports are open and service information."
+    },
+    "Netflow":{
+        "Description": "Collects netflow stats and runs reports"
+    },
+    "TACACS":{
+        "Description": "TACACS+ Server Configuration"
+    },
+    "Alerts":{
+        "Description": "Alert settings, only email alerts for now",
+        "Email": "send-all-alerts-to-here@company.com",
+        "Alert Site Contacts": "yes/no, this will email the contact configured for the site where the device is located",
+        "Ping":{
+            "Enabled": true,
+            "Threshold": "5, trigger an alert after this many ping fails."
+        },
+        "SNMP":{
+            
+        }
+    },
+    
+    "Site Information":[
+        {   "Name": "Boca Raton, FL, USA",
+            "Address": "",
+            "Notes": "",
+            "Contacts": [{"Email": "johndoe@company.com, additional info matched from the contacts section"}]
+        }
+            
+    ],
+    
+    "Contacts":{   
+        "johndoe@company.com": {
+            "Name": "John Doe", 
+            "Title": "",
+            "Phone": "",
+            "Notes": ""
+        }
+    }
+    
+}

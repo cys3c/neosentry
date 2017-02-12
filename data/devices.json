@@ -1,0 +1,29 @@
+{
+    "localhost": {
+        "Date Added": "May 16, 2016",
+        "Org Group": "Networking",
+        "Site": "Boca Raton, FL, USA",
+        "Device Type": "Server",
+        "Device Name": "QNMS / Sentry NMS",
+        "Monitoring": {
+            "Ping": "yes",
+            "SNMP": "yes",
+            "Services": "22,80",
+            "Netflow Port": ""
+        }
+    },
+    "192.168.1.1": {
+        "Date Added": "May 16, 2016",
+        "Org Group": "Networking",
+        "Site": "",
+        "Device Type": "Router",
+        "Device Name": "core-rt1",
+        "Monitoring": {
+            "Ping": "yes",
+            "SNMP": "yes",
+            "Services": "22",
+            "Netflow Port": ""
+        }
+    }
+    
+}

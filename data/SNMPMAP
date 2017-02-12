@@ -1,0 +1,142 @@
+This is a JSON representation of the array map
+
+# use this to pull custom snmp information from devices.  cpu, mem, hdd, fan, and powersupply are some that are in different oid's for different vendors
+# within the <> brackets, the text must be capitalized
+#	The values before the = sign are unique to this process and must not be changed for CPU, MEM, or HDD. Other is stored in a text file so thats fine to change.
+#	Each value is separated by a comma
+
+SEARCHSTRING:	Must be unique and is found in the SNMP System Description
+CPU:	"LoadMax" in the CPU section is the number to divide the cpu return string by to get a %
+MEM:	The oid's point to a single value, not an OID
+HDD:	This is a table. but the base value here, snmpwalk will use a get-next to cycle through the values.
+
+
+//SOME ADDITIONAL OIDS FOR CPU
+
+# Generic with host-ressource-mib
+my $base_proc = "1.3.6.1.2.1.25.3.3.1";   # oid for all proc info
+my $proc_id   = "1.3.6.1.2.1.25.3.3.1.1"; # list of processors (product ID)
+my $proc_load = "1.3.6.1.2.1.25.3.3.1.2"; # %time the proc was not idle over last minute
+
+# Linux load 
+
+my $linload_table= "1.3.6.1.4.1.2021.10.1";   # net-snmp load table
+my $linload_name = "1.3.6.1.4.1.2021.10.1.2"; # text 'Load-1','Load-5', 'Load-15'
+my $linload_load = "1.3.6.1.4.1.2021.10.1.3"; # effective load table
+
+# Cisco cpu/load
+
+my $cisco_cpu_5m = "1.3.6.1.4.1.9.2.1.58.0"; # Cisco CPU load (5min %)
+my $cisco_cpu_1m = "1.3.6.1.4.1.9.2.1.57.0"; # Cisco CPU load (1min %)
+my $cisco_cpu_5s = "1.3.6.1.4.1.9.2.1.56.0"; # Cisco CPU load (5sec %)
+
+# Cisco catalyst cpu/load
+
+my $ciscocata_cpu_5m = ".1.3.6.1.4.1.9.9.109.1.1.1.1.5.9"; # Cisco CPU load (5min %)
+my $ciscocata_cpu_1m = ".1.3.6.1.4.1.9.9.109.1.1.1.1.3.9"; # Cisco CPU load (1min %)
+my $ciscocata_cpu_5s = ".1.3.6.1.4.1.9.9.109.1.1.1.1.4.9"; # Cisco CPU load (5sec %)
+
+# Netscreen cpu/load
+
+my $nsc_cpu_5m = "1.3.6.1.4.1.3224.16.1.4.0"; # NS CPU load (5min %)
+my $nsc_cpu_1m = "1.3.6.1.4.1.3224.16.1.2.0"; # NS CPU load (1min %)
+my $nsc_cpu_5s = "1.3.6.1.4.1.3224.16.1.3.0"; # NS CPU load (5sec %)
+
+# AS/400 CPU
+
+my $as400_cpu = "1.3.6.1.4.1.2.6.4.5.1.0"; # AS400 CPU load (10000=100%);
+
+# Net-SNMP CPU
+
+my $ns_cpu_idle   = "1.3.6.1.4.1.2021.11.11.0"; # Net-snmp cpu idle
+my $ns_cpu_user   = "1.3.6.1.4.1.2021.11.9.0";  # Net-snmp user cpu usage
+my $ns_cpu_system = "1.3.6.1.4.1.2021.11.10.0"; # Net-snmp system cpu usage
+
+# Procurve CPU
+my $procurve_cpu = "1.3.6.1.4.1.11.2.14.11.5.1.9.6.1.0"; # Procurve CPU Counter
+
+# Nokia CPU
+my $nokia_cpu = "1.3.6.1.4.1.94.1.21.1.7.1.0"; # Nokia CPU % usage
+
+# Bluecoat Appliance
+my $bluecoat_cpu = "1.3.6.1.4.1.3417.2.4.1.1.1.4.1"; # Bluecoat %cpu usage.
+
+# Fortigate CPU
+my $fortigate_cpu = ".1.3.6.1.4.1.12356.1.8.0"; # Fortigate CPU % usage
+
+# Linkproof Appliance
+my $linkproof_cpu= "1.3.6.1.4.1.89.35.1.55.0"; # CPU RE (Routing Engine Tasks)
+# 1.3.6.1.4.1.89.35.1.53.0 : Ressource utilisation (%) Considers network utilization and internal CPU utilization
+# 1.3.6.1.4.1.89.35.1.54 : CPU only (%)
+# 1.3.6.1.4.1.89.35.1.55 : network only (%)
+
+# HP-UX cpu usage (thanks to krizb for the OIDs).
+my $hpux_load_1_min="1.3.6.1.4.1.11.2.3.1.1.3.0";
+my $hpux_load_5_min="1.3.6.1.4.1.11.2.3.1.1.4.0";
+my $hpux_load_15_min="1.3.6.1.4.1.11.2.3.1.1.5.0";
+
+
+
+
+
+# Don't use any brackets before this point.
+{
+	"Linux": {
+		"SEARCHSTRING":"Linux",
+		"CPU": {"Load1":".1.3.6.1.4.1.2021.10.1.3.1","Load5":".1.3.6.1.4.1.2021.10.1.3.2","Load15":".1.3.6.1.4.1.2021.10.1.3.3",
+				"Load1Max":".1.3.6.1.4.1.2021.10.1.4.1","Load5Max":".1.3.6.1.4.1.2021.10.1.4.2","Load15Max":".1.3.6.1.4.1.2021.10.1.4.3","Subtract":0 },
+		"MEM": {"TotalSwap":".1.3.6.1.4.1.2021.4.3.0", "AvailSwap":".1.3.6.1.4.1.2021.4.4.0", "TotalReal":".1.3.6.1.4.1.2021.4.5.0", "AvailReal":".1.3.6.1.4.1.2021.4.6.0",
+				"TotalFree":".1.3.6.1.4.1.2021.4.11.0", "Shared":".1.3.6.1.4.1.2021.4.13.0", "Buffered":".1.3.6.1.4.1.2021.4.14.0", "Cached":".1.3.6.1.4.1.2021.4.15.0"},
+		"HDD": {"dskIndex":".1.3.6.1.4.1.2021.9.1.1", "dskPath":".1.3.6.1.4.1.2021.9.1.2", "dskDevice":".1.3.6.1.4.1.2021.9.1.3", 
+				"dskTotal":".1.3.6.1.4.1.2021.9.1.6", "dskAvail":".1.3.6.1.4.1.2021.9.1.7", "dskUsed":".1.3.6.1.4.1.2021.9.1.8",
+				"dskPercentUsed":".1.3.6.1.4.1.2021.9.1.9", "dskErrorFlag":".1.3.6.1.4.1.2021.9.1.100", "dskErrorMsg":".1.3.6.1.4.1.2021.9.1.101"},
+		"OTHER": {
+			"Arp Table": {"MAC":"1.3.6.1.2.1.4.22.1.2", "IP Address":"1.3.6.1.2.1.4.22.1.3", "ifIndex":"1.3.6.1.2.1.4.22.1.1", "Type":"1.3.6.1.2.1.4.22.1.4"},
+			"TCP Active Open": ".1.3.6.1.2.1.6.5.0",
+			"TCP Max Connections": ".1.3.6.1.2.1.6.4.0",
+			"TCP Established Connections": ".1.3.6.1.2.1.6.9.0",
+			"Logged In Users": "hrSystemNumUsers",
+			"System Processes": "hrSystemProcesses",
+			"System Date-Time": "hrSystemDate"
+		}
+	},
+
+	"Juniper": {
+		"SEARCHSTRING":"Juniper",
+		"CPU": {"Load1":".1.3.6.1.4.1.2021.10.1.3.1","Load5":".1.3.6.1.4.1.2021.10.1.3.2","Load15":".1.3.6.1.4.1.2021.10.1.3.3",
+				"Load1Max":1,"Load5Max":1,"Load15Max":1,"Subtract":1 },
+		"MEM": {"TotalSwap":".1.3.6.1.4.1.2021.4.3.0", "AvailSwap":".1.3.6.1.4.1.2021.4.4.0", "TotalReal":".1.3.6.1.4.1.2021.4.5.0", "AvailReal":".1.3.6.1.4.1.2021.4.6.0",
+				"TotalFree":".1.3.6.1.4.1.2021.4.11.0", "Shared":".1.3.6.1.4.1.2021.4.13.0", "Buffered":".1.3.6.1.4.1.2021.4.14.0", "Cached":".1.3.6.1.4.1.2021.4.15.0"},
+		"HDD": {"dskIndex":".1.3.6.1.4.1.2021.9.1.1", "dskPath":".1.3.6.1.4.1.2021.9.2.1", "dskDevice":".1.3.6.1.4.1.2021.9.3.1", 
+				"dskTotal":".1.3.6.1.4.1.2021.9.1.6", "dskAvail":".1.3.6.1.4.1.2021.9.1.7", "dskUsed":".1.3.6.1.4.1.2021.9.1.8",
+				"dskPercent":".1.3.6.1.4.1.2021.9.1.9", "dskErrorFlag":".1.3.6.1.4.1.2021.9.1.100", "dskErrorMsg":".1.3.6.1.4.1.2021.9.1.101"},
+		"OTHER": {}
+	},
+	
+	"BlueCoat": {
+		"SEARCHSTRING":"Blue Coat",
+		"CPU": {"Load1":"1.3.6.1.4.1.3417.2.4.1.1.1.4.1","Load5":"","Load15":"",
+				"Load1Max":100,"Load5Max":"","Load15Max":"","Subtract":0},
+		"MEM": {"TotalSwap":"", "AvailSwap":"", "TotalReal":"1.3.6.1.4.1.3417.2.11.2.3.1.0", "AvailReal":"1.3.6.1.4.1.3417.2.11.2.3.2.0",
+				"TotalFree":"", "Shared":"", "Buffered":"1.3.6.1.4.1.3417.2.11.2.3.3.0", "Cached":"",
+				"DivideForKB":1024},
+		"HDD": {"dskVendor":"1.3.6.1.4.1.3417.2.2.1.1.1.1.5", "dskProduct":"1.3.6.1.4.1.3417.2.2.1.1.1.1.6", "dskSerial":"1.3.6.1.4.1.3417.2.2.1.1.1.1.8",
+				"dskIndex":"", "dskTotal":"", "dskAvail":"", "dskUsed":"",
+				"dskPercent":"", "dskErrorFlag":"", "dskErrorMsg":""},
+		"OTHER": {"SensorType":".1.3.6.1.4.1.3417.2.1.1.1.1.1.9","SensorVal":".1.3.6.1.4.1.3417.2.1.1.1.1.1.5","SerialNumber":".1.3.6.1.4.1.3417.2.11.1.4.0",
+				"TcpCurrentConnections":"TCP-MIB::tcpCurrEstab.0"}
+	},
+	
+	"Cisco": {
+		"SEARCHSTRING":"Cisco",
+		"CPU": {"Load1":"1.3.6.1.4.1.9.2.1.57.0","Load5":"1.3.6.1.4.1.9.2.1.58.0","Load15":"",
+				"Load1Max":100,"Load5Max":100,"Load15Max":""},
+		"MEM": {"TotalSwap":".1.3.6.1.4.1.2021.4.3.0", "AvailSwap":".1.3.6.1.4.1.2021.4.4.0", "TotalReal":".1.3.6.1.4.1.2021.4.5.0", "AvailReal":".1.3.6.1.4.1.2021.4.6.0",
+				"TotalFree":".1.3.6.1.4.1.2021.4.11.0", "Shared":".1.3.6.1.4.1.2021.4.13.0", "Buffered":".1.3.6.1.4.1.2021.4.14.0", "Cached":".1.3.6.1.4.1.2021.4.15.0"},
+		"HDD": {"dskIndex":".1.3.6.1.4.1.2021.9.1.1", "dskTotal":".1.3.6.1.4.1.2021.9.1.6", "dskAvail":".1.3.6.1.4.1.2021.9.1.7", "dskUsed":".1.3.6.1.4.1.2021.9.1.8",
+				"dskPercent":".1.3.6.1.4.1.2021.9.1.9", "dskErrorFlag":".1.3.6.1.4.1.2021.9.1.100", "dskErrorMsg":".1.3.6.1.4.1.2021.9.1.101"},
+		"OTHER": {}
+	}
+	
+}
+

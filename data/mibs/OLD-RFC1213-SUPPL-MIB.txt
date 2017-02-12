@@ -1,0 +1,674 @@
+-- This information was selectively extracted from RFC1213-MIB
+-- by ByteSphere Technologies, LLC. Do not compile and use this mib
+-- for any other purpose than for use with the ByteSphere OidView
+-- MibBrowser. It is meant as a supplement to a group of newer MIBs,
+-- namely IF-MIB,IP-MIB,UDP-MIB,TCP-MIB,SNMPv2-MIB.
+
+
+          OLD-RFC1213-SUPPL-MIB DEFINITIONS ::= BEGIN
+
+          -- groups in MIB-II
+
+          	at        OBJECT IDENTIFIER ::= { mib-2 3 }
+
+	  	ip        OBJECT IDENTIFIER ::= { mib-2 4 }
+
+          	egp       OBJECT IDENTIFIER ::= { mib-2 8 }
+
+          -- the Address Translation group
+
+          -- Implementation of the Address Translation group is
+          -- mandatory for all systems.  Note however that this group
+          -- is deprecated by MIB-II. That is, it is being included
+          -- solely for compatibility with MIB-I nodes, and will most
+          -- likely be excluded from MIB-III nodes.  From MIB-II and
+          -- onwards, each network protocol group contains its own
+          -- address translation tables.
+
+          -- The Address Translation group contains one table which is
+          -- the union across all interfaces of the translation tables
+          -- for converting a NetworkAddress (e.g., an IP address) into
+          -- a subnetwork-specific address.  For lack of a better term,
+          -- this document refers to such a subnetwork-specific address
+          -- as a `physical' address.
+
+          -- Examples of such translation tables are: for broadcast
+          -- media where ARP is in use, the translation table is
+          -- equivalent to the ARP cache; or, on an X.25 network where
+          -- non-algorithmic translation to X.121 addresses is
+          -- required, the translation table contains the
+          -- NetworkAddress to X.121 address equivalences.
+
+          atTable OBJECT-TYPE
+              SYNTAX  SEQUENCE OF AtEntry
+              ACCESS  not-accessible
+              STATUS  deprecated
+              DESCRIPTION
+                      "The Address Translation tables contain the
+                      NetworkAddress to `physical' address equivalences.
+                      Some interfaces do not use translation tables for
+                      determining address equivalences (e.g., DDN-X.25
+                      has an algorithmic method); if all interfaces are
+                      of this type, then the Address Translation table
+                      is empty, i.e., has zero entries."
+              ::= { at 1 }
+
+          atEntry OBJECT-TYPE
+              SYNTAX  AtEntry
+              ACCESS  not-accessible
+              STATUS  deprecated
+              DESCRIPTION
+                      "Each entry contains one NetworkAddress to
+                      `physical' address equivalence."
+              INDEX   { atIfIndex,
+                        atNetAddress }
+              ::= { atTable 1 }
+
+          AtEntry ::=
+              SEQUENCE {
+                  atIfIndex
+                      INTEGER,
+
+                  atPhysAddress
+                      PhysAddress,
+                  atNetAddress
+                      NetworkAddress
+              }
+
+          atIfIndex OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-write
+              STATUS  deprecated
+              DESCRIPTION
+                      "The interface on which this entry's equivalence
+                      is effective.  The interface identified by a
+                      particular value of this index is the same
+                      interface as identified by the same value of
+                      ifIndex."
+              ::= { atEntry 1 }
+
+          atPhysAddress OBJECT-TYPE
+              SYNTAX  PhysAddress
+              ACCESS  read-write
+              STATUS  deprecated
+              DESCRIPTION
+                      "The media-dependent `physical' address.
+
+                      Setting this object to a null string (one of zero
+                      length) has the effect of invaliding the
+                      corresponding entry in the atTable object.  That
+                      is, it effectively dissasociates the interface
+                      identified with said entry from the mapping
+                      identified with said entry.  It is an
+                      implementation-specific matter as to whether the
+                      agent removes an invalidated entry from the table.
+                      Accordingly, management stations must be prepared
+                      to receive tabular information from agents that
+                      corresponds to entries not currently in use.
+                      Proper interpretation of such entries requires
+                      examination of the relevant atPhysAddress object."
+              ::= { atEntry 2 }
+
+          atNetAddress OBJECT-TYPE
+              SYNTAX  NetworkAddress
+              ACCESS  read-write
+              STATUS  deprecated
+              DESCRIPTION
+                      "The NetworkAddress (e.g., the IP address)
+                      corresponding to the media-dependent `physical'
+                      address."
+              ::= { atEntry 3 }
+
+
+          -- The IP routing table contains an entry for each route
+          -- presently known to this entity.
+
+          ipRouteTable OBJECT-TYPE
+              SYNTAX  SEQUENCE OF IpRouteEntry
+              ACCESS  not-accessible
+              STATUS  mandatory
+              DESCRIPTION
+                      "This entity's IP Routing table."
+              ::= { ip 21 }
+
+          ipRouteEntry OBJECT-TYPE
+              SYNTAX  IpRouteEntry
+              ACCESS  not-accessible
+              STATUS  mandatory
+              DESCRIPTION
+                      "A route to a particular destination."
+              INDEX   { ipRouteDest }
+              ::= { ipRouteTable 1 }
+
+          IpRouteEntry ::=
+              SEQUENCE {
+                  ipRouteDest
+                      IpAddress,
+                  ipRouteIfIndex
+                      INTEGER,
+                  ipRouteMetric1
+                      INTEGER,
+                  ipRouteMetric2
+                      INTEGER,
+                  ipRouteMetric3
+                      INTEGER,
+                  ipRouteMetric4
+                      INTEGER,
+                  ipRouteNextHop
+                      IpAddress,
+                  ipRouteType
+                      INTEGER,
+                  ipRouteProto
+                      INTEGER,
+                  ipRouteAge
+                      INTEGER,
+                  ipRouteMask
+                      IpAddress,
+                  ipRouteMetric5
+                      INTEGER,
+
+                  ipRouteInfo
+                      OBJECT IDENTIFIER
+              }
+
+          ipRouteDest OBJECT-TYPE
+              SYNTAX  IpAddress
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "The destination IP address of this route.  An
+                      entry with a value of 0.0.0.0 is considered a
+                      default route.  Multiple routes to a single
+                      destination can appear in the table, but access to
+                      such multiple entries is dependent on the table-
+                      access mechanisms defined by the network
+                      management protocol in use."
+              ::= { ipRouteEntry 1 }
+
+          ipRouteIfIndex OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "The index value which uniquely identifies the
+                      local interface through which the next hop of this
+                      route should be reached.  The interface identified
+                      by a particular value of this index is the same
+                      interface as identified by the same value of
+                      ifIndex."
+              ::= { ipRouteEntry 2 }
+
+          ipRouteMetric1 OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "The primary routing metric for this route.  The
+                      semantics of this metric are determined by the
+                      routing-protocol specified in the route's
+                      ipRouteProto value.  If this metric is not used,
+                      its value should be set to -1."
+              ::= { ipRouteEntry 3 }
+
+          ipRouteMetric2 OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "An alternate routing metric for this route.  The
+                      semantics of this metric are determined by the
+                      routing-protocol specified in the route's
+                      ipRouteProto value.  If this metric is not used,
+                      its value should be set to -1."
+              ::= { ipRouteEntry 4 }
+
+          ipRouteMetric3 OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "An alternate routing metric for this route.  The
+                      semantics of this metric are determined by the
+                      routing-protocol specified in the route's
+                      ipRouteProto value.  If this metric is not used,
+                      its value should be set to -1."
+              ::= { ipRouteEntry 5 }
+
+          ipRouteMetric4 OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "An alternate routing metric for this route.  The
+                      semantics of this metric are determined by the
+                      routing-protocol specified in the route's
+                      ipRouteProto value.  If this metric is not used,
+                      its value should be set to -1."
+              ::= { ipRouteEntry 6 }
+
+          ipRouteNextHop OBJECT-TYPE
+              SYNTAX  IpAddress
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "The IP address of the next hop of this route.
+                      (In the case of a route bound to an interface
+                      which is realized via a broadcast media, the value
+                      of this field is the agent's IP address on that
+                      interface.)"
+              ::= { ipRouteEntry 7 }
+
+          ipRouteType OBJECT-TYPE
+              SYNTAX  INTEGER {
+                          other(1),        -- none of the following
+
+                          invalid(2),      -- an invalidated route
+                                           -- route to directly
+                          direct(3),       -- connected (sub-)network
+
+                                           -- route to a non-local
+                          indirect(4)      -- host/network/sub-network
+                      }
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "The type of route.  Note that the values
+                      direct(3) and indirect(4) refer to the notion of
+                      direct and indirect routing in the IP
+                      architecture.
+
+                      Setting this object to the value invalid(2) has
+                      the effect of invalidating the corresponding entry
+                      in the ipRouteTable object.  That is, it
+                      effectively dissasociates the destination
+                      identified with said entry from the route
+                      identified with said entry.  It is an
+                      implementation-specific matter as to whether the
+                      agent removes an invalidated entry from the table.
+                      Accordingly, management stations must be prepared
+                      to receive tabular information from agents that
+                      corresponds to entries not currently in use.
+                      Proper interpretation of such entries requires
+                      examination of the relevant ipRouteType object."
+              ::= { ipRouteEntry 8 }
+
+          ipRouteProto OBJECT-TYPE
+              SYNTAX  INTEGER {
+                          other(1),       -- none of the following
+
+                                          -- non-protocol information,
+                                          -- e.g., manually configured
+                          local(2),       -- entries
+
+                                          -- set via a network
+                          netmgmt(3),     -- management protocol
+
+                                          -- obtained via ICMP,
+                          icmp(4),        -- e.g., Redirect
+
+                                          -- the remaining values are
+                                          -- all gateway routing
+                                          -- protocols
+                          egp(5),
+                          ggp(6),
+                          hello(7),
+                          rip(8),
+                          is-is(9),
+                          es-is(10),
+                          ciscoIgrp(11),
+                          bbnSpfIgp(12),
+                          ospf(13),
+                          bgp(14)
+                      }
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The routing mechanism via which this route was
+                      learned.  Inclusion of values for gateway routing
+                      protocols is not intended to imply that hosts
+                      should support those protocols."
+              ::= { ipRouteEntry 9 }
+
+          ipRouteAge OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of seconds since this route was last
+                      updated or otherwise determined to be correct.
+                      Note that no semantics of `too old' can be implied
+                      except through knowledge of the routing protocol
+                      by which the route was learned."
+              ::= { ipRouteEntry 10 }
+
+          ipRouteMask OBJECT-TYPE
+              SYNTAX  IpAddress
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "Indicate the mask to be logical-ANDed with the
+                      destination address before being compared to the
+                      value in the ipRouteDest field.  For those systems
+                      that do not support arbitrary subnet masks, an
+                      agent constructs the value of the ipRouteMask by
+                      determining whether the value of the correspondent
+                      ipRouteDest field belong to a class-A, B, or C
+                      network, and then using one of:
+
+                           mask           network
+                           255.0.0.0      class-A
+                           255.255.0.0    class-B
+                           255.255.255.0  class-C
+
+                      If the value of the ipRouteDest is 0.0.0.0 (a
+                      default route), then the mask value is also
+                      0.0.0.0.  It should be noted that all IP routing
+                      subsystems implicitly use this mechanism."
+              ::= { ipRouteEntry 11 }
+
+          ipRouteMetric5 OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "An alternate routing metric for this route.  The
+                      semantics of this metric are determined by the
+                      routing-protocol specified in the route's
+                      ipRouteProto value.  If this metric is not used,
+                      its value should be set to -1."
+              ::= { ipRouteEntry 12 }
+
+          ipRouteInfo OBJECT-TYPE
+              SYNTAX  OBJECT IDENTIFIER
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "A reference to MIB definitions specific to the
+                      particular routing protocol which is responsible
+                      for this route, as determined by the value
+                      specified in the route's ipRouteProto value.  If
+                      this information is not present, its value should
+                      be set to the OBJECT IDENTIFIER { 0 0 }, which is
+                      a syntatically valid object identifier, and any
+                      conformant implementation of ASN.1 and BER must be
+                      able to generate and recognize this value."
+              ::= { ipRouteEntry 13 }
+
+
+          -- the EGP group
+
+          -- Implementation of the EGP group is mandatory for all
+          -- systems which implement the EGP.
+
+          egpInMsgs OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of EGP messages received without
+                      error."
+              ::= { egp 1 }
+
+          egpInErrors OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of EGP messages received that proved
+                      to be in error."
+              ::= { egp 2 }
+
+          egpOutMsgs OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The total number of locally generated EGP
+                      messages."
+              ::= { egp 3 }
+
+          egpOutErrors OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of locally generated EGP messages not
+                      sent due to resource limitations within an EGP
+                      entity."
+              ::= { egp 4 }
+
+
+          -- the EGP Neighbor table
+
+          -- The EGP neighbor table contains information about this
+          -- entity's EGP neighbors.
+
+          egpNeighTable OBJECT-TYPE
+              SYNTAX  SEQUENCE OF EgpNeighEntry
+              ACCESS  not-accessible
+              STATUS  mandatory
+              DESCRIPTION
+                      "The EGP neighbor table."
+              ::= { egp 5 }
+
+          egpNeighEntry OBJECT-TYPE
+              SYNTAX  EgpNeighEntry
+              ACCESS  not-accessible
+              STATUS  mandatory
+              DESCRIPTION
+                      "Information about this entity's relationship with
+                      a particular EGP neighbor."
+              INDEX   { egpNeighAddr }
+              ::= { egpNeighTable 1 }
+
+          EgpNeighEntry ::=
+              SEQUENCE {
+                  egpNeighState
+                      INTEGER,
+                  egpNeighAddr
+                      IpAddress,
+                  egpNeighAs
+                      INTEGER,
+                  egpNeighInMsgs
+                      Counter,
+                  egpNeighInErrs
+                      Counter,
+                  egpNeighOutMsgs
+                      Counter,
+                  egpNeighOutErrs
+                      Counter,
+
+                  egpNeighInErrMsgs
+                      Counter,
+                  egpNeighOutErrMsgs
+                      Counter,
+                  egpNeighStateUps
+                      Counter,
+                  egpNeighStateDowns
+                      Counter,
+                  egpNeighIntervalHello
+                      INTEGER,
+                  egpNeighIntervalPoll
+                      INTEGER,
+                  egpNeighMode
+                      INTEGER,
+                  egpNeighEventTrigger
+                      INTEGER
+              }
+
+          egpNeighState OBJECT-TYPE
+              SYNTAX  INTEGER {
+                          idle(1),
+                          acquisition(2),
+                          down(3),
+                          up(4),
+                          cease(5)
+                      }
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The EGP state of the local system with respect to
+                      this entry's EGP neighbor.  Each EGP state is
+                      represented by a value that is one greater than
+                      the numerical value associated with said state in
+                      RFC 904."
+              ::= { egpNeighEntry 1 }
+
+          egpNeighAddr OBJECT-TYPE
+              SYNTAX  IpAddress
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The IP address of this entry's EGP neighbor."
+              ::= { egpNeighEntry 2 }
+
+          egpNeighAs OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The autonomous system of this EGP peer.  Zero
+                      should be specified if the autonomous system
+                      number of the neighbor is not yet known."
+              ::= { egpNeighEntry 3 }
+
+          egpNeighInMsgs OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of EGP messages received without error
+                      from this EGP peer."
+              ::= { egpNeighEntry 4 }
+
+          egpNeighInErrs OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of EGP messages received from this EGP
+                      peer that proved to be in error (e.g., bad EGP
+                      checksum)."
+              ::= { egpNeighEntry 5 }
+
+          egpNeighOutMsgs OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of locally generated EGP messages to
+                      this EGP peer."
+              ::= { egpNeighEntry 6 }
+
+          egpNeighOutErrs OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of locally generated EGP messages not
+                      sent to this EGP peer due to resource limitations
+                      within an EGP entity."
+              ::= { egpNeighEntry 7 }
+
+          egpNeighInErrMsgs OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of EGP-defined error messages received
+                      from this EGP peer."
+              ::= { egpNeighEntry 8 }
+
+          egpNeighOutErrMsgs OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of EGP-defined error messages sent to
+                      this EGP peer."
+              ::= { egpNeighEntry 9 }
+
+          egpNeighStateUps OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of EGP state transitions to the UP
+                      state with this EGP peer."
+              ::= { egpNeighEntry 10 }
+
+          egpNeighStateDowns OBJECT-TYPE
+              SYNTAX  Counter
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The number of EGP state transitions from the UP
+                      state to any other state with this EGP peer."
+              ::= { egpNeighEntry 11 }
+
+          egpNeighIntervalHello OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The interval between EGP Hello command
+                      retransmissions (in hundredths of a second).  This
+                      represents the t1 timer as defined in RFC 904."
+              ::= { egpNeighEntry 12 }
+
+          egpNeighIntervalPoll OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The interval between EGP poll command
+                      retransmissions (in hundredths of a second).  This
+                      represents the t3 timer as defined in RFC 904."
+              ::= { egpNeighEntry 13 }
+
+          egpNeighMode OBJECT-TYPE
+              SYNTAX  INTEGER { active(1), passive(2) }
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The polling mode of this EGP entity, either
+                      passive or active."
+              ::= { egpNeighEntry 14 }
+
+          egpNeighEventTrigger OBJECT-TYPE
+              SYNTAX  INTEGER { start(1), stop(2) }
+              ACCESS  read-write
+              STATUS  mandatory
+              DESCRIPTION
+                      "A control variable used to trigger operator-
+                      initiated Start and Stop events.  When read, this
+                      variable always returns the most recent value that
+                      egpNeighEventTrigger was set to.  If it has not
+                      been set since the last initialization of the
+                      network management subsystem on the node, it
+                      returns a value of `stop'.
+
+                      When set, this variable causes a Start or Stop
+                      event on the specified neighbor, as specified on
+                      pages 8-10 of RFC 904.  Briefly, a Start event
+                      causes an Idle peer to begin neighbor acquisition
+                      and a non-Idle peer to reinitiate neighbor
+                      acquisition.  A stop event causes a non-Idle peer
+                      to return to the Idle state until a Start event
+                      occurs, either via egpNeighEventTrigger or
+                      otherwise."
+              ::= { egpNeighEntry 15 }
+
+
+          -- additional EGP objects
+
+          egpAs OBJECT-TYPE
+              SYNTAX  INTEGER
+              ACCESS  read-only
+              STATUS  mandatory
+              DESCRIPTION
+                      "The autonomous system number of this EGP entity."
+              ::= { egp 6 }
+	
+          
+          END
