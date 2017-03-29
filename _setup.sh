@@ -41,9 +41,13 @@ if [$(which yum) != '']; then
 	yum -y install mtr traceroute tcpdump bind-utils jwhois net-snmp-utils curl wget net-tools iputils diffutils openssh-server
 	yum -y install nmap
 	
-	echo Installing Apache, MySQL, PHP, and Python
+	echo Installing Apache, MySQL, and PHP7.1
 	yum -y install httpd httpd-devel mysql mysql-server mysql-devel mod_ssl openssl
-	yum -y install php php-mysql php-common php-gd php-mbstring php-mcrypt php-devel php-xml
+	#yum -y install php php-mysql php-common php-gd php-mbstring php-mcrypt php-devel php-xml
+	rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+    rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
+    rpm -Uvh http://repo.mysql.com/mysql-community-release-el6-5.noarch.rpm
+	yum -y install php71w php71w-mysql php71w-gd php71w-mcrypt php71w-mbstring php71w-json php71w-pear
 
 	# ---------- Start Services and Set Autorun -----------
 	echo Starting Services. 
@@ -283,9 +287,10 @@ echo updating _functions.php to use the right MySQL connection information
 cd $INSTALL_DIR/www
 sed -i -e 's/$dbname = .*/$dbname = '$DBNAME';/g' -e 's/$dbuser = .*/$dbuser = '$DBUSER';/g' -e 's/$dbpass = .*/$dbpass = '$DBPASS';/g' _functions.php
 #update the _functions.php file to include a generated encryption key and iv
-ENCKEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9@$!.*()_+@-' | fold -w 24 | head -n 1)
-ENCIV=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9@$!.*()_+@-' | fold -w 16 | head -n 1)
-sed -i -e 's/$secret_iv = .*/$secret_iv = '$ENCIV';/g' -e 's/$secret_key = .*/$secret_key = '$ENCKEY';/g' _functions.php
+#This is done in the scripts
+#ENCKEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9@$!.*()_+@-' | fold -w 24 | head -n 1)
+#ENCIV=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9@$!.*()_+@-' | fold -w 16 | head -n 1)
+#sed -i -e 's/$secret_iv = .*/$secret_iv = '$ENCIV';/g' -e 's/$secret_key = .*/$secret_key = '$ENCKEY';/g' _functions.php
 #ENCIV=$(openssl rand -base64 16)
 
 

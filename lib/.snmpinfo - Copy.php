@@ -1,4 +1,4 @@
-<?php //.snmpinfo.php
+<?php //snmp.php
 
 //MORE INFORMATION ON SNMP
 //	http://kaivanov.blogspot.com/2012/02/linux-snmp-oids-for-cpumemory-and-disk.html
@@ -6,7 +6,7 @@
 
 
 include "_functions.php";
-include "_functions_snmp.php";
+include "_snmp.php";
 
 
 //get variables being passed

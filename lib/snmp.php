@@ -1,4 +1,4 @@
-<?php //.snmpinfo.php
+<?php //snmp.php
 
 //MORE INFORMATION ON SNMP
 //	http://kaivanov.blogspot.com/2012/02/linux-snmp-oids-for-cpumemory-and-disk.html
@@ -6,19 +6,19 @@
 
 
 include "_functions.php";
-include "_functions_snmp.php";
+include "_snmp.php";
 
 
 
 //get variables being passed
-$refresh = (isset($_GET['refresh']))?cleanSqlString(trim($_GET['refresh'])):""; //file data to add
-if ($refresh=="") $refresh = (isset($_POST['refresh']))?cleanSqlString(trim($_POST['refresh'])):""; //file data to add
+$refresh = (isset($_GET['refresh']))?sanitizeString($_GET['refresh']):""; //file data to add
+if ($refresh=="") $refresh = (isset($_POST['refresh']))?sanitizeString($_POST['refresh']):""; //file data to add
 
-$device = (isset($_GET['device']))?cleanSqlString(trim($_GET['device'])):""; //file data to add
-if ($device=="") $device = (isset($_POST['device']))?cleanSqlString(trim($_POST['device'])):"all"; //file data to add
+$device = (isset($_GET['device']))?sanitizeString($_GET['device']):""; //file data to add
+if ($device=="") $device = (isset($_POST['device']))?sanitizeString($_POST['device']):"all"; //file data to add
 
-$type = (isset($_GET['type']))?cleanSqlString(trim($_GET['type'])):""; //file data to add
-if ($type=="") $type = (isset($_POST['type']))?cleanSqlString(trim($_POST['type'])):"all"; //file data to add
+$type = (isset($_GET['type']))?sanitizeString($_GET['type']):""; //file data to add
+if ($type=="") $type = (isset($_POST['type']))?sanitizeString($_POST['type']):"all"; //file data to add
 //type = sys, net, all
 
 /* To get certain snmp information:
@@ -30,10 +30,10 @@ if ($type=="") $type = (isset($_POST['type']))?cleanSqlString(trim($_POST['type'
 
 //get command line arguments, for internal processing
 //	-d: The device name or IP, -t: Type, -r: Refresh
-//	Usage: php .snmpinfo.php -d "10.10.10.10" -t "full" -r
+//	Usage: php snmp.php -d "10.10.10.10" -t "full" -r
 $o = getopt("d:t:r:"); // 1 : is required, 2 :: is optional
-if (array_key_exists("d",$o)) $device = $o["d"];
-if (array_key_exists("t",$o)) $type = $o["t"];
+if (array_key_exists("d",$o)) $device = sanitizeString($o["d"]);
+if (array_key_exists("t",$o)) $type = sanitizeString($o["t"]);
 if (array_key_exists("r",$o)) $refresh = true;
 print_r($o);
 //done getting arguments
@@ -62,7 +62,7 @@ if ($device=="all") {
 	if ($type=="updatecommunities") {
 		foreach($arrSnmp as $row) {		
 			if (substr($row['snmpcommunity'],0,12)!="snmpbulkwalk") {
-				$cmd = "php .snmpinfo.php -d".$row['ip']." -t".$type." > /dev/null &";
+				$cmd = "php snmp.php -d".$row['ip']." -t".$type." > /dev/null &";
 				echo str_pad($row["ip"],15," ",STR_PAD_LEFT).": Updating community string, ran $cmd: ".trim(shell_exec($cmd))."\n";
 			} else {
 				echo str_pad($row["ip"],15," ",STR_PAD_LEFT).": Community string is already valid.\n";
@@ -76,10 +76,10 @@ if ($device=="all") {
 	foreach($arrSnmp as $row) {		
 		if (substr($row['snmpcommunity'],0,12)=="snmpbulkwalk") {
 			//we have an snmpwalk command, lets get the data
-			//$cmd = 'wget -o "'.getcwd().'$dataFolder/logs/snmpinfo_'.$type."_".$row["ip"].'" "'.$baseUrl.'/.snmpinfo.php?device='.$row['ip'].'&type='.$type.'"';
-			//$cmd = "wget -b ".escapeshellarg($baseUrl.'/.snmpinfo.php?device='.$row['ip'].'&type='.$type);
-			//$cmd = "php .snmpinfo.php -d '".$row['ip']."' -t '$type' > '$dataFolder/logs/snmpinfo_".$type."_".$row["ip"]."' &";
-			$cmd = "php .snmpinfo.php -d".$row['ip']." -t".$type." > /dev/null &";
+			//$cmd = 'wget -o "'.getcwd().'$gFolderData/logs/snmpinfo_'.$type."_".$row["ip"].'" "'.$baseUrl.'/snmp.php?device='.$row['ip'].'&type='.$type.'"';
+			//$cmd = "wget -b ".escapeshellarg($baseUrl.'/snmp.php?device='.$row['ip'].'&type='.$type);
+			//$cmd = "php snmp.php -d '".$row['ip']."' -t '$type' > '$gFolderData/logs/snmpinfo_".$type."_".$row["ip"]."' &";
+			$cmd = "php snmp.php -d".$row['ip']." -t".$type." > /dev/null &";
 			//echo "\t".trim(shell_exec($cmd))."\n";
 			echo str_pad($row["ip"],15," ",STR_PAD_LEFT).": Found snmpwalk command, ran $cmd: ".trim(shell_exec($cmd))."\n";
 		
@@ -98,7 +98,7 @@ if ($device=="all") {
 //set up variables
 $snmpStr = getSqlValue("SELECT snmpcommunity FROM devicelist WHERE ip='$device' limit 1;");
 $snmpMonitor = getSqlValue("SELECT monitorsnmp FROM devicelist WHERE ip='$device' limit 1;");
-$snmpFile = "$dataFolder/device_scan_data/snmp_".$device."_";
+$snmpFile = "$gFolderData/device_scan_data/snmp_".$device."_";
 $snmpFileTmp = "";
 $cmd = $snmpStr . " -M $mibLocation $device";
 $curScanTs = getSqlValue("SELECT NOW()");
@@ -857,7 +857,7 @@ writeLogFile($logFileName, "Retrieval complete.");
 
 //check to see if the file we downloaded contains snmp info
 //only check these because they are the only ones with a valid file.
-$cntFile = "$dataFolder/device_scan_data/snmpinfo_failures_".$device;
+$cntFile = "$gFolderData/device_scan_data/snmpinfo_failures_".$device;
 if ($type!="hwstats" && $type!="testing") {
 	if (!isValidSnmpString($snmpFileTmp)) {
 		//lets wait x failures before making the change

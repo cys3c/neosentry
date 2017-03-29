@@ -4,7 +4,7 @@
         "Org Group": "Networking",
         "Site": "Boca Raton, FL, USA",
         "Device Type": "Server",
-        "Device Name": "QNMS / Sentry NMS",
+        "Device Name": "NeoSentry NMS",
         "Monitoring": {
             "Ping": "yes",
             "SNMP": "yes",
@@ -16,6 +16,7 @@
         "Date Added": "May 16, 2016",
         "Org Group": "Networking",
         "Site": "",
+        "Region": "",
         "Device Type": "Router",
         "Device Name": "core-rt1",
         "Monitoring": {

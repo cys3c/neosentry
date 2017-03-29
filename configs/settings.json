@@ -12,18 +12,24 @@
         "Security": "tls/ssl",
         "Port": 587
     },
+    "Account Profiles": {
+        "Description": "List of Username/Password combos to get into the system. Leave username blank if it only requires a password. Elevated is the 2nd level password which is called in certain scripts. (ex. Cisco Enable, Check Point Expert",
+        "Array": [
+            {"Username": "admin","Password": "admin","Elevated": ""}
+        ]
+    },
     "Ping Traceroute": {
-        "Ping Interval": "5 min",
-        "Traceroute Interval": "1 day",
+        "Ping Interval": 300,
+        "Traceroute Interval": 86400,
         "Data History": 365,
         "Change History": 365,
         "Alert History": 365
     },
     "SNMP": {
-        "System Interval": "1 day",
-        "HW Interval": "15 min",
-        "Network Interval": "5 min",
-        "Routing Interval": "1 hour",
+        "System Interval": 86400,
+        "HW Interval": 900,
+        "Network Interval": 300,
+        "Routing Interval": 3600,
         "Data History": 365,
         "Change History": 365,
         "Alert History": 365,
@@ -33,8 +39,12 @@
             {"value": "-v2c -c \"Tyc0-safety-pr0d\""}
         ]
     },
+    "SSH":{
+        "Description": "Info related to making an ssh connection",
+
+    },
     "Service":{
-        "Description": "Uses nmap/wget/etc to collect and monitor if ports are open and service information."
+        "Description": "Uses nmap/wget/etc to collect and monitor if ports are open and the service information."
     },
     "Netflow":{
         "Description": "Collects netflow stats and runs reports"
@@ -59,11 +69,19 @@
         {   "Name": "Boca Raton, FL, USA",
             "Address": "",
             "Notes": "",
-            "Contacts": [{"Email": "johndoe@company.com, additional info matched from the contacts section"}]
+            "Contacts": ["email1@test.com","email2@test.com"]
         }
             
     ],
-    
+
+    "Region Information":[
+        {   "Name": "Americas",
+            "Notes": "",
+            "Contacts": ["email1@test.com","email2@test.com"]
+        }
+
+    ],
+
     "Contacts":{   
         "johndoe@company.com": {
             "Name": "John Doe", 

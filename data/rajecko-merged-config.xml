@@ -1,0 +1,2716 @@
+<?xml version="1.0"?>
+<config version="7.0.0" urldb="paloaltonetworks">
+  <devices>
+    <entry name="localhost.localdomain">
+      <deviceconfig>
+        <system>
+          <update-server>updates.paloaltonetworks.com</update-server>
+          <update-schedule>
+            <threats>
+              <recurring>
+                <weekly>
+                  <day-of-week>wednesday</day-of-week>
+                  <at>01:02</at>
+                  <action>download-only</action>
+                </weekly>
+              </recurring>
+            </threats>
+          </update-schedule>
+          <timezone>Etc/GMT+2</timezone>
+          <service>
+            <disable-telnet>yes</disable-telnet>
+            <disable-http>yes</disable-http>
+          </service>
+          <dns-setting>
+            <servers>
+              <primary>10.66.0.198</primary>
+            </servers>
+          </dns-setting>
+          <panorama-server>10.38.46.160</panorama-server>
+          <ip-address>10.33.120.5</ip-address>
+          <netmask>255.255.255.0</netmask>
+          <hostname>Rajecko-FW1</hostname>
+          <default-gateway>10.33.120.254</default-gateway>
+        </system>
+        <setting>
+          <config>
+            <rematch>yes</rematch>
+          </config>
+          <management>
+            <hostname-type-in-syslog>FQDN</hostname-type-in-syslog>
+          </management>
+        </setting>
+      </deviceconfig>
+      <network>
+        <interface>
+          <ethernet>
+            <entry name="ethernet1/1">
+              <layer3>
+                <ipv6>
+                  <neighbor-discovery>
+                    <router-advertisement>
+                      <enable>no</enable>
+                    </router-advertisement>
+                  </neighbor-discovery>
+                </ipv6>
+                <ndp-proxy>
+                  <enabled>no</enabled>
+                </ndp-proxy>
+                <lldp>
+                  <enable>no</enable>
+                </lldp>
+                <units>
+                  <entry name="ethernet1/1.66">
+                    <ipv6>
+                      <neighbor-discovery>
+                        <router-advertisement>
+                          <enable>no</enable>
+                        </router-advertisement>
+                      </neighbor-discovery>
+                    </ipv6>
+                    <ndp-proxy>
+                      <enabled>no</enabled>
+                    </ndp-proxy>
+                    <ip>
+                      <entry name="10.51.67.254/23"/>
+                    </ip>
+                    <tag>66</tag>
+                  </entry>
+                  <entry name="ethernet1/1.67">
+                    <ipv6>
+                      <neighbor-discovery>
+                        <router-advertisement>
+                          <enable>no</enable>
+                        </router-advertisement>
+                      </neighbor-discovery>
+                    </ipv6>
+                    <ndp-proxy>
+                      <enabled>no</enabled>
+                    </ndp-proxy>
+                    <ip>
+                      <entry name="10.51.71.254/23"/>
+                    </ip>
+                    <tag>67</tag>
+                  </entry>
+                  <entry name="ethernet1/1.681">
+                    <ipv6>
+                      <neighbor-discovery>
+                        <router-advertisement>
+                          <enable>no</enable>
+                        </router-advertisement>
+                      </neighbor-discovery>
+                    </ipv6>
+                    <ndp-proxy>
+                      <enabled>no</enabled>
+                    </ndp-proxy>
+                    <ip>
+                      <entry name="10.51.68.254/24"/>
+                    </ip>
+                    <tag>681</tag>
+                  </entry>
+                </units>
+              </layer3>
+              <comment>Old Internal - Rajecko Internal Networks</comment>
+            </entry>
+            <entry name="ethernet1/2">
+              <layer3>
+                <ipv6>
+                  <neighbor-discovery>
+                    <router-advertisement>
+                      <enable>no</enable>
+                    </router-advertisement>
+                  </neighbor-discovery>
+                </ipv6>
+                <ndp-proxy>
+                  <enabled>no</enabled>
+                </ndp-proxy>
+                <lldp>
+                  <enable>no</enable>
+                </lldp>
+                <ip>
+                  <entry name="10.51.49.182/30"/>
+                </ip>
+              </layer3>
+              <comment>Old Lan1 - To Tycos WAN</comment>
+            </entry>
+            <entry name="ethernet1/8">
+              <layer3>
+                <ipv6>
+                  <neighbor-discovery>
+                    <router-advertisement>
+                      <enable>no</enable>
+                    </router-advertisement>
+                  </neighbor-discovery>
+                </ipv6>
+                <ndp-proxy>
+                  <enabled>no</enabled>
+                </ndp-proxy>
+                <lldp>
+                  <enable>no</enable>
+                </lldp>
+                <ip>
+                  <entry name="90.182.150.58/29"/>
+                </ip>
+              </layer3>
+              <comment>External</comment>
+            </entry>
+          </ethernet>
+          <loopback>
+            <units/>
+          </loopback>
+          <vlan>
+            <units/>
+          </vlan>
+          <tunnel>
+            <units/>
+          </tunnel>
+        </interface>
+        <vlan/>
+        <virtual-wire/>
+        <profiles>
+          <monitor-profile>
+            <entry name="default">
+              <interval>3</interval>
+              <threshold>5</threshold>
+              <action>wait-recover</action>
+            </entry>
+          </monitor-profile>
+        </profiles>
+        <ike>
+          <crypto-profiles>
+            <ike-crypto-profiles>
+              <entry name="default">
+                <encryption>
+                  <member>aes-128-cbc</member>
+                  <member>3des</member>
+                </encryption>
+                <hash>
+                  <member>sha1</member>
+                </hash>
+                <dh-group>
+                  <member>group2</member>
+                </dh-group>
+                <lifetime>
+                  <hours>8</hours>
+                </lifetime>
+              </entry>
+              <entry name="Suite-B-GCM-128">
+                <encryption>
+                  <member>aes-128-cbc</member>
+                </encryption>
+                <hash>
+                  <member>sha256</member>
+                </hash>
+                <dh-group>
+                  <member>group19</member>
+                </dh-group>
+                <lifetime>
+                  <hours>8</hours>
+                </lifetime>
+              </entry>
+              <entry name="Suite-B-GCM-256">
+                <encryption>
+                  <member>aes-256-cbc</member>
+                </encryption>
+                <hash>
+                  <member>sha384</member>
+                </hash>
+                <dh-group>
+                  <member>group20</member>
+                </dh-group>
+                <lifetime>
+                  <hours>8</hours>
+                </lifetime>
+              </entry>
+            </ike-crypto-profiles>
+            <ipsec-crypto-profiles>
+              <entry name="default">
+                <esp>
+                  <encryption>
+                    <member>aes-128-cbc</member>
+                    <member>3des</member>
+                  </encryption>
+                  <authentication>
+                    <member>sha1</member>
+                  </authentication>
+                </esp>
+                <dh-group>group2</dh-group>
+                <lifetime>
+                  <hours>1</hours>
+                </lifetime>
+              </entry>
+              <entry name="Suite-B-GCM-128">
+                <esp>
+                  <encryption>
+                    <member>aes-128-gcm</member>
+                  </encryption>
+                  <authentication>
+                    <member>none</member>
+                  </authentication>
+                </esp>
+                <dh-group>group19</dh-group>
+                <lifetime>
+                  <hours>1</hours>
+                </lifetime>
+              </entry>
+              <entry name="Suite-B-GCM-256">
+                <esp>
+                  <encryption>
+                    <member>aes-256-gcm</member>
+                  </encryption>
+                  <authentication>
+                    <member>none</member>
+                  </authentication>
+                </esp>
+                <dh-group>group20</dh-group>
+                <lifetime>
+                  <hours>1</hours>
+                </lifetime>
+              </entry>
+            </ipsec-crypto-profiles>
+            <global-protect-app-crypto-profiles>
+              <entry name="default">
+                <encryption>
+                  <member>aes-128-cbc</member>
+                </encryption>
+                <authentication>
+                  <member>sha1</member>
+                </authentication>
+              </entry>
+            </global-protect-app-crypto-profiles>
+          </crypto-profiles>
+        </ike>
+        <qos>
+          <profile>
+            <entry name="default">
+              <class>
+                <entry name="class1">
+                  <priority>real-time</priority>
+                </entry>
+                <entry name="class2">
+                  <priority>high</priority>
+                </entry>
+                <entry name="class3">
+                  <priority>high</priority>
+                </entry>
+                <entry name="class4">
+                  <priority>medium</priority>
+                </entry>
+                <entry name="class5">
+                  <priority>medium</priority>
+                </entry>
+                <entry name="class6">
+                  <priority>low</priority>
+                </entry>
+                <entry name="class7">
+                  <priority>low</priority>
+                </entry>
+                <entry name="class8">
+                  <priority>low</priority>
+                </entry>
+              </class>
+            </entry>
+          </profile>
+        </qos>
+        <virtual-router>
+          <entry name="default">
+            <protocol>
+              <bgp>
+                <enable>no</enable>
+                <dampening-profile>
+                  <entry name="default">
+                    <cutoff>1.25</cutoff>
+                    <reuse>0.5</reuse>
+                    <max-hold-time>900</max-hold-time>
+                    <decay-half-life-reachable>300</decay-half-life-reachable>
+                    <decay-half-life-unreachable>900</decay-half-life-unreachable>
+                    <enable>yes</enable>
+                  </entry>
+                </dampening-profile>
+                <routing-options>
+                  <graceful-restart>
+                    <enable>yes</enable>
+                  </graceful-restart>
+                  <as-format>2-byte</as-format>
+                </routing-options>
+              </bgp>
+            </protocol>
+            <interface>
+              <member>ethernet1/1</member>
+              <member>ethernet1/1.66</member>
+              <member>ethernet1/1.67</member>
+              <member>ethernet1/1.681</member>
+              <member>ethernet1/2</member>
+              <member>ethernet1/8</member>
+            </interface>
+            <ecmp>
+              <algorithm>
+                <ip-modulo/>
+              </algorithm>
+            </ecmp>
+            <routing-table>
+              <ip>
+                <static-route>
+                  <entry name="10.0.0.0">
+                    <nexthop>
+                      <ip-address>10.51.49.181</ip-address>
+                    </nexthop>
+                    <interface>ethernet1/2</interface>
+                    <metric>10</metric>
+                    <destination>10.0.0.0/8</destination>
+                  </entry>
+                  <entry name="default">
+                    <nexthop>
+                      <ip-address>90.182.150.56</ip-address>
+                    </nexthop>
+                    <interface>ethernet1/8</interface>
+                    <metric>10</metric>
+                    <destination>0.0.0.0/0</destination>
+                  </entry>
+                </static-route>
+              </ip>
+            </routing-table>
+          </entry>
+        </virtual-router>
+        <dhcp>
+          <interface>
+            <entry name="ethernet1/1.67">
+              <relay>
+                <ip>
+                  <server>
+                    <member>10.51.67.250</member>
+                    <member>10.51.67.238</member>
+                    <member>10.51.67.243</member>
+                  </server>
+                  <enabled>yes</enabled>
+                </ip>
+                <ipv6>
+                  <enabled>no</enabled>
+                </ipv6>
+              </relay>
+            </entry>
+          </interface>
+        </dhcp>
+      </network>
+      <vsys>
+        <entry name="vsys1" dg-ctxt="17|26">
+          <zone>
+            <entry name="trust">
+              <network>
+                <virtual-wire/>
+              </network>
+            </entry>
+            <entry name="untrust">
+              <network>
+                <virtual-wire/>
+              </network>
+            </entry>
+            <entry name="Internal">
+              <network>
+                <layer3>
+                  <member>ethernet1/1</member>
+                  <member>ethernet1/1.66</member>
+                  <member>ethernet1/1.67</member>
+                  <member>ethernet1/1.681</member>
+                </layer3>
+              </network>
+            </entry>
+            <entry name="External">
+              <network>
+                <layer3>
+                  <member>ethernet1/8</member>
+                </layer3>
+              </network>
+            </entry>
+            <entry name="WAN">
+              <network>
+                <layer3>
+                  <member>ethernet1/2</member>
+                </layer3>
+              </network>
+            </entry>
+          </zone>
+          <import>
+            <network>
+              <interface>
+                <member>ethernet1/2</member>
+                <member>ethernet1/1</member>
+                <member>ethernet1/1.66</member>
+                <member>ethernet1/1.67</member>
+                <member>ethernet1/1.681</member>
+                <member>ethernet1/8</member>
+                <member>vlan</member>
+                <member>loopback</member>
+                <member>tunnel</member>
+              </interface>
+              <vlan/>
+              <virtual-router>
+                <member>default</member>
+              </virtual-router>
+              <virtual-wire/>
+            </network>
+          </import>
+          <application/>
+          <application-group>
+            <entry name="vpn-comm">
+              <members>
+                <member>ipsec</member>
+                <member>traceroute</member>
+                <member>ping-tunnel</member>
+                <member>ping</member>
+                <member>icmp</member>
+                <member>gre</member>
+                <member>ike</member>
+                <member>ciscovpn</member>
+                <member>dtls</member>
+                <member>ssl</member>
+              </members>
+            </entry>
+            <entry name="redline-app">
+              <members>
+                <member>web-browsing</member>
+                <member>dns</member>
+                <member>ssl</member>
+                <member>ntp</member>
+                <member>ciscovpn</member>
+                <member>ipsec</member>
+                <member>dtls</member>
+                <member>webex</member>
+                <member>ping</member>
+                <member>icmp</member>
+                <member>traceroute</member>
+              </members>
+            </entry>
+          </application-group>
+          <service>
+            <entry name="tcp-9443">
+              <protocol>
+                <tcp>
+                  <port>9443</port>
+                </tcp>
+              </protocol>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+            </entry>
+            <entry name="tcp-9400">
+              <protocol>
+                <tcp>
+                  <port>9400</port>
+                </tcp>
+              </protocol>
+            </entry>
+            <entry name="Custom_TCP_10000">
+              <protocol>
+                <tcp>
+                  <port>10000</port>
+                </tcp>
+              </protocol>
+            </entry>
+            <entry name="Custom_TCP_8080">
+              <protocol>
+                <tcp>
+                  <port>8080</port>
+                </tcp>
+              </protocol>
+            </entry>
+            <entry name="Remote_Desktop_Protocol">
+              <protocol>
+                <tcp>
+                  <port>3389</port>
+                </tcp>
+              </protocol>
+              <description>Microsoft RDP</description>
+            </entry>
+            <entry name="ssh">
+              <protocol>
+                <tcp>
+                  <port>22</port>
+                </tcp>
+              </protocol>
+              <description>secure shell, encrypted and authenticated rsh</description>
+            </entry>
+            <entry name="ssh_version_2">
+              <protocol>
+                <tcp>
+                  <port>22</port>
+                </tcp>
+              </protocol>
+              <description>Secure Shell, version 1.x block</description>
+            </entry>
+            <entry name="tcp-10020">
+              <protocol>
+                <tcp>
+                  <port>10020</port>
+                </tcp>
+              </protocol>
+            </entry>
+            <entry name="tcp-10000-11000">
+              <protocol>
+                <tcp>
+                  <port>10000-11000</port>
+                </tcp>
+              </protocol>
+              <description>ZScaler DPP Port Range</description>
+            </entry>
+            <entry name="Custom_SAPRouter_3299">
+              <protocol>
+                <tcp>
+                  <port>3299</port>
+                </tcp>
+              </protocol>
+            </entry>
+            <entry name="Custom_TCP_6992">
+              <protocol>
+                <tcp>
+                  <port>6992</port>
+                </tcp>
+              </protocol>
+            </entry>
+            <entry name="Custom_UDP_6992">
+              <protocol>
+                <udp>
+                  <port>6992</port>
+                </udp>
+              </protocol>
+            </entry>
+          </service>
+          <service-group>
+            <entry name="Custom_SSH_All">
+              <members>
+                <member>ssh</member>
+                <member>ssh_version_2</member>
+              </members>
+            </entry>
+          </service-group>
+          <schedule/>
+          <rulebase>
+            <security>
+              <rules>
+                <entry name="Blacklist Deny Out">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>Global_Blacklist</member>
+                    <member>GLOBAL_Blacklist_DBL</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>any</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>Blacklist</member>
+                  </tag>
+                  <action>deny</action>
+                  <description>Blacklist</description>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Blacklist Deny IN">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>GLOBAL_Blacklist_DBL</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>any</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>Blacklist</member>
+                  </tag>
+                  <action>deny</action>
+                  <description>Blacklist</description>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="zScaler PAC File Retrieval">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>ZSCALER_PAC_IP_Addresses</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>service-http</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>zScaler</member>
+                  </tag>
+                </entry>
+                <entry name="zScaler Proxy">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>ZSCALER-AMERICAS_CloudEnforcementNodes-Proxies</member>
+                    <member>ZSCALER-ASIA_EnforcementNodes-Proxies</member>
+                    <member>ZSCALER-EMEA_EnforcementNodes-Proxies</member>
+                    <member>ZSCALER-WORLD-NewDCs_EnforcementNodes-Proxies</member>
+                    <member>ZSCALER_Cloud_Enforcement_Nodes</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>Custom_TCP_8080</member>
+                    <member>service-http</member>
+                    <member>service-https</member>
+                    <member>tcp-9400</member>
+                    <member>tcp-9443</member>
+                    <member>tcp-10000-11000</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>zScaler</member>
+                  </tag>
+                </entry>
+                <entry name="zScaler Whitelist">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>ZScaler_Whitelist</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>service-http</member>
+                    <member>service-https</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>zScaler</member>
+                  </tag>
+                  <action>allow</action>
+                  <description>Public IP's that have filtering and need to go out the local connection. These are added to the zscaler PAC file.</description>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Proofpoint Email Digest">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>host_67.231.148.202</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>Custom_TCP_10000</member>
+                    <member>tcp-10020</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>zScaler</member>
+                  </tag>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Global NetSec Admins">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>Global_NetSecAdmins</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>any</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>Admin Rules</member>
+                  </tag>
+                </entry>
+                <entry name="rule1">
+                  <from>
+                    <member>trust</member>
+                  </from>
+                  <to>
+                    <member>untrust</member>
+                  </to>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <service>
+                    <member>any</member>
+                  </service>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <action>allow</action>
+                  <log-end>yes</log-end>
+                  <disabled>yes</disabled>
+                </entry>
+                <entry name="Allow All">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Allow DHCP Relay">
+                  <to>
+                    <member>Internal</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>dhcp</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>DHCP</member>
+                  </tag>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Allow DHCP">
+                  <to>
+                    <member>multicast</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>dhcp</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>DHCP</member>
+                  </tag>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Vendor Trask SSL VPN via Cork">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>EMEA_cork_VPN_DHCP_Networks</member>
+                  </source>
+                  <destination>
+                    <member>host_10.51.67.249</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>icmp</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>Vendor Access</member>
+                  </tag>
+                </entry>
+                <entry name="Vendor Trask SSL VPN to Sabris">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>EMEA_cork_VPN_Vendor3rdParty_TraskSabris_IPs</member>
+                  </source>
+                  <destination>
+                    <member>host_10.51.66.123</member>
+                    <member>host_10.51.66.126</member>
+                    <member>host_10.51.67.245</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>Custom_SAPRouter_3299</member>
+                    <member>Remote_Desktop_Protocol</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>Vendor Access</member>
+                  </tag>
+                </entry>
+                <entry name="Vendor Apriso Access">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>host_10.51.160.48</member>
+                    <member>host_10.51.160.176</member>
+                  </source>
+                  <destination>
+                    <member>host_10.51.67.28</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>Remote_Desktop_Protocol</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>Vendor Access</member>
+                  </tag>
+                </entry>
+                <entry name="Vendor 2NTelecomms Access">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>host_10.51.160.88</member>
+                    <member>host_10.51.160.216</member>
+                  </source>
+                  <destination>
+                    <member>host_10.51.67.206</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>Custom_SSH_All</member>
+                    <member>Custom_TCP_6992</member>
+                    <member>Custom_UDP_6992</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>Vendor Access</member>
+                  </tag>
+                </entry>
+                <entry name="Rajecko - Cork Juniper">
+                  <to>
+                    <member>Internal</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                  </from>
+                  <source>
+                    <member>net_10.51.198.0_Cidr23</member>
+                  </source>
+                  <destination>
+                    <member>net_10.51.66.0_Cidr23</member>
+                    <member>net_10.51.70.0_Cidr23</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>any</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>VPN Rules</member>
+                  </tag>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="S2S Rajecko - Cork">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>host_10.51.49.181</member>
+                    <member>host_10.51.150.129</member>
+                    <member>host_77.107.226.222</member>
+                    <member>host_90.182.150.59</member>
+                  </source>
+                  <destination>
+                    <member>host_10.51.49.181</member>
+                    <member>host_10.51.150.129</member>
+                    <member>host_77.107.226.222</member>
+                    <member>host_90.182.150.59</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>vpn-comm</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>VPN Rules</member>
+                  </tag>
+                </entry>
+                <entry name="Cisco Router Access">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>host_77.107.226.222</member>
+                    <member>host_90.182.150.59</member>
+                  </source>
+                  <destination>
+                    <member>host_77.107.226.222</member>
+                    <member>host_90.182.150.59</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>ssh</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                  <tag>
+                    <member>VPN Rules</member>
+                  </tag>
+                </entry>
+                <entry name="Rajecko to Tyco">
+                  <to>
+                    <member>Internal</member>
+                    <member>WAN</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                    <member>WAN</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>Internal Com</member>
+                  </tag>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Microsoft DC - To">
+                  <to>
+                    <member>External</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>EMEA_rajecko_Microsoft_DC</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>Internal Outbound</member>
+                  </tag>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Microsoft DC - From">
+                  <to>
+                    <member>Internal</member>
+                  </to>
+                  <from>
+                    <member>External</member>
+                  </from>
+                  <source>
+                    <member>EMEA_rajecko_Microsoft_DC</member>
+                  </source>
+                  <destination>
+                    <member>EMEA_rajecko_Internal_Networks</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <tag>
+                    <member>Internal Outbound</member>
+                  </tag>
+                  <action>allow</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Inet Access">
+                  <to>
+                    <member>External</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                    <member>WAN</member>
+                  </from>
+                  <source>
+                    <member>EMEA_rajecko_Internal_Networks</member>
+                    <member>net_10.50.0.0</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>application-default</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>allow</action>
+                  <tag>
+                    <member>Internal Outbound</member>
+                  </tag>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+                <entry name="Cleanup">
+                  <to>
+                    <member>any</member>
+                  </to>
+                  <from>
+                    <member>any</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <source-user>
+                    <member>any</member>
+                  </source-user>
+                  <category>
+                    <member>any</member>
+                  </category>
+                  <application>
+                    <member>any</member>
+                  </application>
+                  <service>
+                    <member>any</member>
+                  </service>
+                  <hip-profiles>
+                    <member>any</member>
+                  </hip-profiles>
+                  <action>deny</action>
+                  <log-setting>Panorama_logging</log-setting>
+                </entry>
+              </rules>
+            </security>
+            <default-security-rules>
+              <rules/>
+            </default-security-rules>
+            <application-override>
+              <rules/>
+            </application-override>
+            <decryption>
+              <rules/>
+            </decryption>
+            <captive-portal>
+              <rules/>
+            </captive-portal>
+            <nat>
+              <rules>
+                <entry name="MPLS Router">
+                  <source-translation>
+                    <static-ip>
+                      <bi-directional>yes</bi-directional>
+                      <translated-address>host_90.182.150.59</translated-address>
+                    </static-ip>
+                  </source-translation>
+                  <to>
+                    <member>External</member>
+                  </to>
+                  <from>
+                    <member>WAN</member>
+                  </from>
+                  <source>
+                    <member>host_10.51.49.181</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <service>any</service>
+                  <tag>
+                    <member>Static NAT</member>
+                  </tag>
+                </entry>
+                <entry name="No NAT Microsoft DC">
+                  <to>
+                    <member>External</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>EMEA_rajecko_Microsoft_DC</member>
+                  </destination>
+                  <service>any</service>
+                  <tag>
+                    <member>No NAT</member>
+                  </tag>
+                </entry>
+                <entry name="No Nat External">
+                  <to>
+                    <member>External</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                    <member>WAN</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>Tyco_NO_NAT_EXTERNAL_Addresses</member>
+                  </destination>
+                  <service>any</service>
+                  <tag>
+                    <member>No NAT</member>
+                  </tag>
+                </entry>
+                <entry name="Outbound Hide-NAT">
+                  <source-translation>
+                    <dynamic-ip-and-port>
+                      <interface-address>
+                        <ip>90.182.150.58/29</ip>
+                        <interface>ethernet1/8</interface>
+                      </interface-address>
+                    </dynamic-ip-and-port>
+                  </source-translation>
+                  <to>
+                    <member>External</member>
+                  </to>
+                  <from>
+                    <member>Internal</member>
+                    <member>WAN</member>
+                  </from>
+                  <source>
+                    <member>any</member>
+                  </source>
+                  <destination>
+                    <member>any</member>
+                  </destination>
+                  <tag>
+                    <member>Hide NAT</member>
+                  </tag>
+                  <service>any</service>
+                </entry>
+              </rules>
+            </nat>
+            <qos>
+              <rules/>
+            </qos>
+            <pbf>
+              <rules/>
+            </pbf>
+            <dos>
+              <rules/>
+            </dos>
+          </rulebase>
+          <ssl-tls-service-profile/>
+          <address>
+            <entry name="xhost_105.112.10.232">
+              <ip-netmask>105.112.10.232</ip-netmask>
+            </entry>
+            <entry name="host_199.168.148.17">
+              <ip-netmask>199.168.148.17/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_199.168.150.17">
+              <ip-netmask>199.168.150.17/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_199.168.151.17">
+              <ip-netmask>199.168.151.17/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_199.168.149.17">
+              <ip-netmask>199.168.149.17/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_72.52.96.4">
+              <ip-netmask>72.52.96.4/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_208.100.40.44">
+              <ip-netmask>208.100.40.44/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_104.129.196.228">
+              <ip-netmask>104.129.196.228/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_72.52.96.57">
+              <ip-netmask>72.52.96.57/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_199.168.148.20">
+              <ip-netmask>199.168.148.20/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_199.168.150.20">
+              <ip-netmask>199.168.150.20/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_199.168.151.20">
+              <ip-netmask>199.168.151.20/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="host_199.168.149.20">
+              <ip-netmask>199.168.149.20/32</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zScaler-PAC_IP_Address - To pull PAC File on port 80</description>
+            </entry>
+            <entry name="net_10.38.27.32_cidr27">
+              <ip-netmask>10.38.27.32/27</ip-netmask>
+              <description>Americas Boca Security VLAN</description>
+            </entry>
+            <entry name="net_10.50.27.32_cidr27">
+              <ip-netmask>10.50.27.32/27</ip-netmask>
+              <description>Americas Brossard Security VLAN</description>
+            </entry>
+            <entry name="net_10.38.27.0_cidr27">
+              <ip-netmask>10.38.27.0/27</ip-netmask>
+              <description>Americas Boca Network Admins</description>
+            </entry>
+            <entry name="host_10.38.58.35">
+              <ip-netmask>10.38.58.35/32</ip-netmask>
+              <description>AMERICAS_NetAdmin_boca-6600_NetMon_10.38.58.35</description>
+            </entry>
+            <entry name="host_192.203.160.249">
+              <ip-netmask>192.203.160.249/32</ip-netmask>
+              <description>AMERICAS_NetAdmin_ext_boca-6600_NOKIA-CORE_192.203.160.249</description>
+            </entry>
+            <entry name="host_74.51.240.242">
+              <ip-netmask>74.51.240.242/32</ip-netmask>
+              <description>AMERICAS_Brossard_NetAdmins_External</description>
+            </entry>
+            <entry name="host_10.50.58.35">
+              <ip-netmask>10.50.58.35/32</ip-netmask>
+              <description>AMERICAS_Brossard_Netmon</description>
+            </entry>
+            <entry name="net_10.50.27.0_cidr27">
+              <ip-netmask>10.50.27.0/27</ip-netmask>
+              <description>Americas Brossard Network Admins</description>
+            </entry>
+            <entry name="net_10.38.27.224_cidr28">
+              <ip-netmask>10.38.27.224/28</ip-netmask>
+              <description>Americas Boca VPN Network Admins</description>
+            </entry>
+            <entry name="net_10.50.27.224_cidr28">
+              <ip-netmask>10.50.27.224/28</ip-netmask>
+              <description>Americas Brossard VPN Network Admins</description>
+            </entry>
+            <entry name="host_10.51.150.129">
+              <ip-netmask>10.51.150.129/32</ip-netmask>
+              <description>EMEA_cork-mpls-rt1_vlan150_10.51.150.129</description>
+            </entry>
+            <entry name="host_12.46.27.81">
+              <ip-netmask>12.46.27.81/32</ip-netmask>
+              <description>whitelist_tyco_Vendor_tyco_sdwftp.tyco.com_12.46.27.81</description>
+            </entry>
+            <entry name="host_122.54.235.130">
+              <ip-netmask>122.54.235.130/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_122.54.235.130_Philippines</description>
+            </entry>
+            <entry name="host_122.54.235.140">
+              <ip-netmask>122.54.235.140/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_122.54.235.140_Philippines</description>
+            </entry>
+            <entry name="host_128.136.97.17">
+              <ip-netmask>128.136.97.17/32</ip-netmask>
+              <description>DBADirect_VPN_NAT_128.136.97.17</description>
+            </entry>
+            <entry name="host_170.146.39.167">
+              <ip-netmask>170.146.39.167/32</ip-netmask>
+              <description>ADP-170.146.39.167</description>
+            </entry>
+            <entry name="host_170.146.39.22">
+              <ip-netmask>170.146.39.22/32</ip-netmask>
+              <description>ADP-170.146.39.22</description>
+            </entry>
+            <entry name="host_203.116.198.67">
+              <ip-netmask>203.116.198.67/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_203.116.198.67_Singapore</description>
+            </entry>
+            <entry name="host_203.116.198.69">
+              <ip-netmask>203.116.198.69/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_203.116.198.69_Singapore</description>
+            </entry>
+            <entry name="host_203.116.198.71">
+              <ip-netmask>203.116.198.71/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_203.116.198.71_Singapore</description>
+            </entry>
+            <entry name="host_203.116.198.72">
+              <ip-netmask>203.116.198.72/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_203.116.198.72_Singapore</description>
+            </entry>
+            <entry name="host_203.122.244.217">
+              <ip-netmask>203.122.244.217/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_203.122.244.217_Adelaide</description>
+            </entry>
+            <entry name="host_206.90.10.128">
+              <ip-netmask>206.90.10.128/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.10.128_FTP</description>
+            </entry>
+            <entry name="host_206.90.10.128_1">
+              <ip-netmask>206.90.10.128/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.10.128_FTP</description>
+            </entry>
+            <entry name="host_206.90.10.63">
+              <ip-netmask>206.90.10.63/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.10.63_SSL_Web</description>
+            </entry>
+            <entry name="host_206.90.10.63_1">
+              <ip-netmask>206.90.10.63/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.10.63_SSL_Web</description>
+            </entry>
+            <entry name="host_206.90.20.122">
+              <ip-netmask>206.90.20.122/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.20.122</description>
+            </entry>
+            <entry name="host_206.90.20.122_1">
+              <ip-netmask>206.90.20.122/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.20.122</description>
+            </entry>
+            <entry name="host_206.90.20.90">
+              <ip-netmask>206.90.20.90/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.20.90_SSL_Web_Prod</description>
+            </entry>
+            <entry name="host_206.90.20.90_1">
+              <ip-netmask>206.90.20.90/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.20.90_SSL_Web_Prod</description>
+            </entry>
+            <entry name="host_206.90.20.93">
+              <ip-netmask>206.90.20.93/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.20.93_SSL_Web_Prod</description>
+            </entry>
+            <entry name="host_206.90.20.93_1">
+              <ip-netmask>206.90.20.93/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.20.93_SSL_Web_Prod</description>
+            </entry>
+            <entry name="host_206.90.21.122">
+              <ip-netmask>206.90.21.122/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.21.122_Citrix</description>
+            </entry>
+            <entry name="host_206.90.21.122_1">
+              <ip-netmask>206.90.21.122/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.21.122_Citrix</description>
+            </entry>
+            <entry name="host_206.90.21.92">
+              <ip-netmask>206.90.21.92/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.21.92_SSL_Web_Citrix</description>
+            </entry>
+            <entry name="host_206.90.21.92_1">
+              <ip-netmask>206.90.21.92/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.21.92_SSL_Web_Citrix</description>
+            </entry>
+            <entry name="host_206.90.21.95">
+              <ip-netmask>206.90.21.95/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.21.95_Port_8888</description>
+            </entry>
+            <entry name="host_206.90.21.95_1">
+              <ip-netmask>206.90.21.95/32</ip-netmask>
+              <description>Vendor_ext_ADP_206.90.21.95_Port_8888</description>
+            </entry>
+            <entry name="host_206.91.36.11">
+              <ip-netmask>206.91.36.11/32</ip-netmask>
+              <description>ADP-206.91.36.11</description>
+            </entry>
+            <entry name="host_206.91.36.14">
+              <ip-netmask>206.91.36.14/32</ip-netmask>
+              <description>ADP-206.91.36.14</description>
+            </entry>
+            <entry name="host_211.13.205.131">
+              <ip-netmask>211.13.205.131/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_211.13.205.131_Tokyo</description>
+            </entry>
+            <entry name="host_211.13.205.134">
+              <ip-netmask>211.13.205.134/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_211.13.205.134_Tokyo</description>
+            </entry>
+            <entry name="host_211.13.205.135">
+              <ip-netmask>211.13.205.135/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_211.13.205.135_Tokyo</description>
+            </entry>
+            <entry name="host_211.13.205.136">
+              <ip-netmask>211.13.205.136/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_211.13.205.136_Tokyo</description>
+            </entry>
+            <entry name="host_221.135.132.139">
+              <ip-netmask>221.135.132.139/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_221.135.132.139_Mumbai</description>
+            </entry>
+            <entry name="host_221.135.132.142">
+              <ip-netmask>221.135.132.142/32</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_221.135.132.142_Mumbai</description>
+            </entry>
+            <entry name="host_66.161.226.176">
+              <ip-netmask>66.161.226.176/32</ip-netmask>
+              <description>Vendor_ext_DBADirect_VPN_NAT_66.161.226.176</description>
+            </entry>
+            <entry name="host_67.231.148.202">
+              <ip-netmask>67.231.148.202/32</ip-netmask>
+              <description>ext_Proofpoint-Security-Gateway_mx0a-00174401.pphosted.com__securemail.tyco.com</description>
+            </entry>
+            <entry name="host_74.218.177.90">
+              <ip-netmask>74.218.177.90/32</ip-netmask>
+              <description>ADP-74.218.177.90</description>
+            </entry>
+            <entry name="host_77.107.226.222">
+              <ip-netmask>77.107.226.222/32</ip-netmask>
+              <description>EMEA_ext_cork_CORE-UTM_cork-mpls-rt1_77.107.226.222</description>
+            </entry>
+            <entry name="net_10.50.0.0">
+              <ip-netmask>10.50.0.0/16</ip-netmask>
+              <description>EMEA_10.50.0.0_CIDR16</description>
+            </entry>
+            <entry name="net_10.51.157.0">
+              <ip-netmask>10.51.157.0/24</ip-netmask>
+              <description>EMEA_cork_DHCP_VPNUsers_UTM-FW1_10.51.157.0_CIDR24</description>
+            </entry>
+            <entry name="net_10.51.158.0">
+              <ip-netmask>10.51.158.0/24</ip-netmask>
+              <description>EMEA_cork_DHCP_VPNUsers_UTM-FW2_10.51.158.0_CIDR24</description>
+            </entry>
+            <entry name="net_10.51.66.0">
+              <ip-netmask>10.51.66.0/23</ip-netmask>
+              <description>EMEA_rajecko_10.51.66.0_CIDR23</description>
+            </entry>
+            <entry name="net_10.51.68.0">
+              <ip-netmask>10.51.68.0/24</ip-netmask>
+              <description>EMEA_rajecko_10.51.68.0_CIDR24</description>
+            </entry>
+            <entry name="net_104.129.192.0">
+              <ip-netmask>104.129.192.0/24</ip-netmask>
+              <description>ZScaler-Santa_Clara-1_EnforcementNode-104.129.192.0-24</description>
+            </entry>
+            <entry name="net_104.129.192.0_CIDR20">
+              <ip-netmask>104.129.192.0/20</ip-netmask>
+              <description>ZScaler Cloud Enforcement - DC II</description>
+            </entry>
+            <entry name="net_104.129.194.0">
+              <ip-netmask>104.129.194.0/24</ip-netmask>
+              <description>ZScaler-Washington_DC-3_EnforcementNode-104.129.194.0-24</description>
+            </entry>
+            <entry name="net_104.129.196.0">
+              <ip-netmask>104.129.196.0/24</ip-netmask>
+              <description>ZScaler-Chicago-3-EnforcementNode_104.129.196.0-24</description>
+            </entry>
+            <entry name="net_104.129.198.0">
+              <ip-netmask>104.129.198.0/24</ip-netmask>
+              <description>ZScaler-Los_Angles-2-EnforcementNode-104.129.198.0-24</description>
+            </entry>
+            <entry name="net_104.129.204.0_CIDR23">
+              <ip-netmask>104.129.204.0/23</ip-netmask>
+              <description>ZScaler-Atlanta-2-EnforcementNode-_104.129.204.0</description>
+            </entry>
+            <entry name="net_128.177.125.0">
+              <ip-netmask>128.177.125.0/24</ip-netmask>
+              <description>ZScaler-Chicago-3-EnforcementNode_128.177.125.0-24</description>
+            </entry>
+            <entry name="net_128.177.129.0">
+              <ip-netmask>128.177.129.0/24</ip-netmask>
+              <description>ZScaler-Santa_Clara-1_EnforcementNode-128.177.129.0-24</description>
+            </entry>
+            <entry name="net_128.177.135.0">
+              <ip-netmask>128.177.135.0/24</ip-netmask>
+              <description>ZScaler-Los_Angles-2-EnforcementNode-128.177.135.0-24</description>
+            </entry>
+            <entry name="net_128.177.136.0">
+              <ip-netmask>128.177.136.0/24</ip-netmask>
+              <description>ZScaler-Washington_DC-3_EnforcementNode-128.177.136.0-24</description>
+            </entry>
+            <entry name="net_146.132.0.0">
+              <ip-netmask>146.132.0.0/16</ip-netmask>
+              <description>Customer_Walmart_146.132.0.0_CIDR16</description>
+            </entry>
+            <entry name="net_152.101.187.4">
+              <ip-netmask>152.101.187.4/30</ip-netmask>
+              <description>Vendor_ext_ZScaler-ASIA_EnforcementNode-Proxy_152.101.187.4_CIDR30_HongKong</description>
+            </entry>
+            <entry name="net_161.166.254.0">
+              <ip-netmask>161.166.254.0/24</ip-netmask>
+              <description>Walmart Sprint VPN routed range. 161.166.254.57 is the main ip used</description>
+            </entry>
+            <entry name="net_161.170.156.0">
+              <ip-netmask>161.170.156.0/24</ip-netmask>
+              <description>Customer_Walmart_161.170.156.0_CIDR24</description>
+            </entry>
+            <entry name="net_161.173.0.0">
+              <ip-netmask>161.173.0.0/16</ip-netmask>
+              <description>Customer_Walmart_161.173.0.0_CIDR16</description>
+            </entry>
+            <entry name="net_162.225.192.0_CIDR18">
+              <ip-netmask>162.225.192.0/18</ip-netmask>
+              <description>ZScaler Cloud Enforcement DC IV</description>
+            </entry>
+            <entry name="net_165.225.0.0_CIDR17">
+              <ip-netmask>165.225.0.0/17</ip-netmask>
+              <description>ZScaler Cloud Enforcement DC III</description>
+            </entry>
+            <entry name="net_172.27.19.0">
+              <ip-netmask>172.27.19.0/24</ip-netmask>
+              <description>Walmart Sprint VPN routed range. 172.27.19.57 is the main ip used</description>
+            </entry>
+            <entry name="net_185.46.212.0_CIDR22">
+              <ip-netmask>185.46.212.0/22</ip-netmask>
+              <description>zScaler Cloud Enforcement - DC I</description>
+            </entry>
+            <entry name="net_185.46.212.0_CIDR24">
+              <ip-netmask>185.46.212.0/24</ip-netmask>
+              <description>zScaler-EMEA Cloud Enforcement Range - Amsterdam</description>
+            </entry>
+            <entry name="net_193.28.99.0">
+              <ip-netmask>193.28.99.0/24</ip-netmask>
+              <description>EMEA_neckarsulm_SAP_Germany_193.28.99.0_CIDR24</description>
+            </entry>
+            <entry name="net_199.168.148.0">
+              <ip-netmask>199.168.148.0/24</ip-netmask>
+              <description>ZScaler-San_Francisco-2_EnforcementNode-199.168.148.0</description>
+            </entry>
+            <entry name="net_199.168.149.0">
+              <ip-netmask>199.168.149.0/24</ip-netmask>
+              <description>ZScaler-Atlanta-2-EnforcementNode_199.168.149.0-24</description>
+            </entry>
+            <entry name="net_199.168.151.0">
+              <ip-netmask>199.168.151.0/24</ip-netmask>
+              <description>ZScaler-New_York-2_EnforcementNode-199.168.151.0-24</description>
+            </entry>
+            <entry name="net_208.100.40.32">
+              <ip-netmask>208.100.40.32/27</ip-netmask>
+              <description>ZScaler-Chicago-1-EnforcementNode_208.100.40.32-27</description>
+            </entry>
+            <entry name="net_209.51.184.0">
+              <ip-netmask>209.51.184.0/26</ip-netmask>
+              <description>ZScaler-New_York_EnforcementNode-209.51.184.0</description>
+            </entry>
+            <entry name="net_212.118.224.148">
+              <ip-netmask>212.118.224.148/30</ip-netmask>
+              <description>Vendor_ext_ZScaler-EMEA_EnforcementNode-Proxy_212.118.224.148_CIDR30_London</description>
+            </entry>
+            <entry name="net_216.177.204.0">
+              <ip-netmask>216.177.204.0/24</ip-netmask>
+              <description>ZScaler-Miami-EnforcementNode-216.177.204.0-24</description>
+            </entry>
+            <entry name="net_216.218.133.192">
+              <ip-netmask>216.218.133.192/26</ip-netmask>
+              <description>ZScaler-San_Francisco-1_EnforcementNode-216.218.133.192</description>
+            </entry>
+            <entry name="net_216.52.207.64">
+              <ip-netmask>216.52.207.64/26</ip-netmask>
+              <description>ZScaler-Atlanta-1-EnforcementNode-_216.52.207.64-26</description>
+            </entry>
+            <entry name="net_216.66.5.0">
+              <ip-netmask>216.66.5.0/24</ip-netmask>
+              <description>ZScaler-New_York_EnforcementNode-216.66.5.0-24</description>
+            </entry>
+            <entry name="net_31.186.238.0_CIDR24">
+              <ip-netmask>31.186.238.0/24</ip-netmask>
+              <description>zScaler-EMEA Cloud Enforcement Range - Paris</description>
+            </entry>
+            <entry name="net_64.62.169.0">
+              <ip-netmask>64.62.169.0/24</ip-netmask>
+              <description>ZScaler-San_Francisco-1_EnforcementNode-64.62.169.0-24</description>
+            </entry>
+            <entry name="net_65.54.11.0">
+              <ip-netmask>65.54.11.0/25</ip-netmask>
+              <description>EMEA_rajecko_microsoft_dc_65.54.11.0_CIDR25</description>
+            </entry>
+            <entry name="net_65.54.8.0">
+              <ip-netmask>65.54.8.0/24</ip-netmask>
+              <description>EMEA_rajecko_microsoft_dc_65.54.8.0_CIDR24</description>
+            </entry>
+            <entry name="net_66.151.103.0">
+              <ip-netmask>66.151.103.0/26</ip-netmask>
+              <description>ZScaler-Washington_DC-1_EnforcementNode-66.151.103.8</description>
+            </entry>
+            <entry name="net_67.202.75.0">
+              <ip-netmask>67.202.75.0/24</ip-netmask>
+              <description>ZScaler-Chicago-1-EnforcementNode_67.202.75.0-24</description>
+            </entry>
+            <entry name="net_70.39.153.0">
+              <ip-netmask>70.39.153.0/24</ip-netmask>
+              <description>ZScaler-Chicago-3-EnforcementNode_70.39.153.0-24</description>
+            </entry>
+            <entry name="net_70.39.159.0">
+              <ip-netmask>70.39.159.0/24</ip-netmask>
+              <description>ZScaler-Santa_Clara-1_EnforcementNode-70.39.159.0-24</description>
+            </entry>
+            <entry name="net_70.42.29.0">
+              <ip-netmask>70.42.29.0/27</ip-netmask>
+              <description>ZScaler-Toronto_EnforcementNode-70.42.29.0</description>
+            </entry>
+            <entry name="net_72.5.190.0">
+              <ip-netmask>72.5.190.0/24</ip-netmask>
+              <description>ZScaler-Dallas-EnforcementNode-72.5.190.0-24</description>
+            </entry>
+            <entry name="net_72.52.96.0">
+              <ip-netmask>72.52.96.0/26</ip-netmask>
+              <description>ZScaler-San_Francisco-1_EnforcementNode-72.52.96.0</description>
+            </entry>
+            <entry name="net_77.242.201.48_CIDR28">
+              <ip-netmask>77.242.201.48/29</ip-netmask>
+              <description>zScaler-EMEA Cloud Enforcement Range - Paris</description>
+            </entry>
+            <entry name="net_77.242.202.224_CIDR27">
+              <ip-netmask>77.242.202.224/27</ip-netmask>
+              <description>zScaler-EMEA Cloud Enforcement Range - Paris</description>
+            </entry>
+            <entry name="net_8.19.13.0">
+              <ip-netmask>8.19.13.0/24</ip-netmask>
+              <description>ZScaler-Los_Angles-EnforcementNode-8.19.13.0</description>
+            </entry>
+            <entry name="net_8.25.203.0">
+              <ip-netmask>8.25.203.0/24</ip-netmask>
+              <description>ZScaler-San_Francisco-2_EnforcementNode-8.25.203.0</description>
+            </entry>
+            <entry name="net_8.28.150.0">
+              <ip-netmask>8.28.150.0/24</ip-netmask>
+              <description>ZScaler-Denver_EnforcementNode-8.28.150.0-24</description>
+            </entry>
+            <entry name="net_8.28.177.0">
+              <ip-netmask>8.28.177.0/24</ip-netmask>
+              <description>ZScaler-Chicago-2-EnforcementNode_8.28.177.0</description>
+            </entry>
+            <entry name="net_8.28.19.0">
+              <ip-netmask>8.28.19.0/24</ip-netmask>
+              <description>ZScaler-Washington_DC-2_EnforcementNode-8.28.19.0</description>
+            </entry>
+            <entry name="net_82.220.1.196">
+              <ip-netmask>82.220.1.196/30</ip-netmask>
+              <description>Vendor_ext_ZScaler-EMEA_EnforcementNode-Proxy_82.220.1.196_CIDR30_Bern</description>
+            </entry>
+            <entry name="net_95.172.68.148">
+              <ip-netmask>95.172.68.148/30</ip-netmask>
+              <description>Vendor_ext_ZScaler-EMEA_EnforcementNode-Proxy_95.172.68.148_CIDR30_Frankfurt</description>
+            </entry>
+            <entry name="net_95.172.74.0_CIDR24">
+              <ip-netmask>95.172.74.0/24</ip-netmask>
+              <description>zScaler-EMEA Cloud Enforcement Range - London II</description>
+            </entry>
+            <entry name="host_199.168.151.24">
+              <ip-netmask>199.168.151.24</ip-netmask>
+              <description>pac.zscalertwo.net</description>
+            </entry>
+            <entry name="host_199.168.148.24">
+              <ip-netmask>199.168.148.24</ip-netmask>
+              <description>pac.zscalertwo.net </description>
+            </entry>
+            <entry name="net_199.168.150.0">
+              <ip-netmask>199.168.150.0/24</ip-netmask>
+              <tag>
+                <member>zScaler</member>
+              </tag>
+              <description>zscaler range</description>
+            </entry>
+            <entry name="net_104.129.193.0">
+              <ip-netmask>104.129.193.0/24</ip-netmask>
+              <description>ZScaler-PAC File Retrieval Range</description>
+            </entry>
+            <entry name="net_104.129.195.0">
+              <ip-netmask>104.129.195.0/24</ip-netmask>
+              <description>ZScaler-PAC File Retrieval Range</description>
+            </entry>
+            <entry name="net_104.129.197.0">
+              <ip-netmask>104.129.197.0/24</ip-netmask>
+              <description>ZScaler-PAC File Retrieval Range</description>
+            </entry>
+            <entry name="net_10.51.198.0_Cidr23">
+              <ip-netmask>10.51.198.0/23</ip-netmask>
+              <description>EMEA Cork VPN User Range</description>
+            </entry>
+            <entry name="net_10.51.66.0_Cidr23">
+              <ip-netmask>10.51.66.0/23</ip-netmask>
+              <description>Rajecko User VLAN 66</description>
+            </entry>
+            <entry name="net_10.51.70.0_Cidr23">
+              <ip-netmask>10.51.70.0/23</ip-netmask>
+              <description>Rajecko Internal VLAN 67</description>
+            </entry>
+            <entry name="host_10.51.160.214">
+              <description>EMEA_cork_VPN_Vendor3rdParty_Trask_CORE-FW2_10.51.160.214</description>
+              <ip-netmask>10.51.160.214/32</ip-netmask>
+            </entry>
+            <entry name="host_10.51.66.123">
+              <description>EMEA_rajecko_RAJ1WKP008_10.51.66.123</description>
+              <ip-netmask>10.51.66.123/32</ip-netmask>
+            </entry>
+            <entry name="host_10.51.67.245">
+              <ip-netmask>10.51.67.245/32</ip-netmask>
+              <description>EMEA_rajecko_RAJTSM02_10.51.67.245</description>
+            </entry>
+            <entry name="host_10.51.160.176">
+              <ip-netmask>10.51.160.176/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Apriso_CORE-FW2_10.51.160.176</description>
+            </entry>
+            <entry name="host_10.51.160.213">
+              <ip-netmask>10.51.160.213/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Trask_CORE-FW2_10.51.160.213</description>
+            </entry>
+            <entry name="host_10.51.160.216">
+              <ip-netmask>10.51.160.216/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_2NTelecomms_CORE-FW1_10.51.160.216</description>
+            </entry>
+            <entry name="host_10.51.160.217">
+              <ip-netmask>10.51.160.217/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW2_10.51.160.217</description>
+            </entry>
+            <entry name="host_10.51.160.218">
+              <ip-netmask>10.51.160.218/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW2_10.51.160.218</description>
+            </entry>
+            <entry name="host_10.51.160.219">
+              <ip-netmask>10.51.160.219/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW2_10.51.160.219</description>
+            </entry>
+            <entry name="host_10.51.160.220">
+              <ip-netmask>10.51.160.220/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW2_10.51.160.220</description>
+            </entry>
+            <entry name="host_10.51.160.221">
+              <ip-netmask>10.51.160.221/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW2_10.51.160.221</description>
+            </entry>
+            <entry name="host_10.51.160.222">
+              <ip-netmask>10.51.160.222/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Trask_CORE-FW2_10.51.160.222</description>
+            </entry>
+            <entry name="host_10.51.160.224">
+              <ip-netmask>10.51.160.224/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW2_10.51.160.224</description>
+            </entry>
+            <entry name="host_10.51.160.48">
+              <ip-netmask>10.51.160.48/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Apriso_CORE-FW1_10.51.160.48</description>
+            </entry>
+            <entry name="host_10.51.160.85">
+              <ip-netmask>10.51.160.85/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Trask_CORE-FW1_10.51.160.85</description>
+            </entry>
+            <entry name="host_10.51.160.86">
+              <ip-netmask>10.51.160.86/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Trask_CORE-FW1_10.51.160.86</description>
+            </entry>
+            <entry name="host_10.51.160.88">
+              <ip-netmask>10.51.160.88/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_2NTelecomms_CORE-FW1_10.51.160.88</description>
+            </entry>
+            <entry name="host_10.51.160.89">
+              <ip-netmask>10.51.160.89/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW1_10.51.160.89</description>
+            </entry>
+            <entry name="host_10.51.160.90">
+              <ip-netmask>10.51.160.90/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW1_10.51.160.90</description>
+            </entry>
+            <entry name="host_10.51.160.91">
+              <ip-netmask>10.51.160.91/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW1_10.51.160.91</description>
+            </entry>
+            <entry name="host_10.51.160.92">
+              <ip-netmask>10.51.160.92/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW1_10.51.160.92</description>
+            </entry>
+            <entry name="host_10.51.160.93">
+              <ip-netmask>10.51.160.93/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW1_10.51.160.93</description>
+            </entry>
+            <entry name="host_10.51.160.94">
+              <ip-netmask>10.51.160.94/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Trask_CORE-FW1_10.51.160.94</description>
+            </entry>
+            <entry name="host_10.51.160.96">
+              <ip-netmask>10.51.160.96/32</ip-netmask>
+              <description>EMEA_cork_VPN_Vendor3rdParty_Sabris_CORE-FW1_10.51.160.96</description>
+            </entry>
+            <entry name="host_10.51.49.181">
+              <ip-netmask>10.51.49.181/32</ip-netmask>
+              <description>EMEA_Rajecko_mpls.rt1_10.51.49.181</description>
+            </entry>
+            <entry name="host_10.51.66.126">
+              <ip-netmask>10.51.66.126/32</ip-netmask>
+              <description>EMEA_rajecko_RAJ1WKP007_10.51.66.126</description>
+            </entry>
+            <entry name="host_10.51.67.206">
+              <ip-netmask>10.51.67.206/32</ip-netmask>
+              <description>EMEA_rajecko_IP-PBX_10.51.67.206</description>
+            </entry>
+            <entry name="host_10.51.67.249">
+              <ip-netmask>10.51.67.249/32</ip-netmask>
+              <description>EMEA_rajecko_RAJFLS01_10.51.67.249</description>
+            </entry>
+            <entry name="host_10.51.67.28">
+              <ip-netmask>10.51.67.28/32</ip-netmask>
+              <description>EMEA_rajecko_RAJ1FXN01_10.51.67.28</description>
+            </entry>
+            <entry name="host_90.182.150.59">
+              <ip-netmask>90.182.150.59/32</ip-netmask>
+              <description>EMEA_ext_rajecko.fw1_mpls-rt1_NAT_90.182.150.59</description>
+            </entry>
+            <entry name="net_10.51.198.0">
+              <ip-netmask>10.51.198.0/24</ip-netmask>
+              <description>EMEA_cork_DHCP_Juniper_VPNUsers_10.51.198.0_CIDR24</description>
+            </entry>
+            <entry name="net_10.51.199.0">
+              <ip-netmask>10.51.199.0/24</ip-netmask>
+              <description>EMEA_cork_DHCP_Juniper_VPNUsers_10.51.199.0_CIDR24</description>
+            </entry>
+            <entry name="net_10.51.49.180">
+              <ip-netmask>10.51.49.180/30</ip-netmask>
+              <description>EMEA_rajecko_10.51.49.180_CIDR30</description>
+            </entry>
+            <entry name="net_10.51.70.0">
+              <ip-netmask>10.51.70.0/23</ip-netmask>
+              <description>EMEA_rajecko_10.51.70.0_CIDR23</description>
+            </entry>
+            <entry name="net_172.30.20.0">
+              <ip-netmask>172.30.20.0/24</ip-netmask>
+              <description>Customer_S2S-VPN_AvivaStadium_172.30.20.0_CIDR24</description>
+            </entry>
+            <entry name="net_172.30.29.0">
+              <ip-netmask>172.30.29.0/24</ip-netmask>
+              <description>Customer_S2S-VPN_AvivaStadium_172.30.29.0_CIDR24</description>
+            </entry>
+            <entry name="net_172.30.31.0">
+              <ip-netmask>172.30.31.0/24</ip-netmask>
+              <description>Customer_S2S-VPN_AvivaStadium_172.30.31.0_CIDR24</description>
+            </entry>
+            <entry name="net_193.28.103.0">
+              <ip-netmask>193.28.103.0/24</ip-netmask>
+              <description>EMEA_neckarsulm_SAP_Germany_193.28.103.0_CIDR24</description>
+            </entry>
+            <entry name="net_65.54.17.0">
+              <ip-netmask>65.54.17.0/24</ip-netmask>
+              <description>EMEA_rajecko_microsoft_dc_65.54.17.0_CIDR24</description>
+            </entry>
+          </address>
+          <address-group>
+            <entry name="Global_Blacklist">
+              <static>
+                <member>xhost_105.112.10.232</member>
+              </static>
+              <description>Blacklisted IP Group</description>
+            </entry>
+            <entry name="Global_NetSecAdmins">
+              <static>
+                <member>host_10.38.58.35</member>
+                <member>host_10.50.58.35</member>
+                <member>host_74.51.240.242</member>
+                <member>host_192.203.160.249</member>
+                <member>net_10.38.27.0_cidr27</member>
+                <member>net_10.38.27.32_cidr27</member>
+                <member>net_10.38.27.224_cidr28</member>
+                <member>net_10.50.27.0_cidr27</member>
+                <member>net_10.50.27.32_cidr27</member>
+                <member>net_10.50.27.224_cidr28</member>
+              </static>
+            </entry>
+            <entry name="ZSCALER_PAC_IP_Addresses">
+              <static>
+                <member>host_72.52.96.4</member>
+                <member>host_72.52.96.57</member>
+                <member>host_104.129.196.228</member>
+                <member>host_199.168.148.17</member>
+                <member>host_199.168.148.20</member>
+                <member>host_199.168.148.24</member>
+                <member>host_199.168.149.17</member>
+                <member>host_199.168.149.20</member>
+                <member>host_199.168.150.17</member>
+                <member>host_199.168.150.20</member>
+                <member>host_199.168.151.17</member>
+                <member>host_199.168.151.20</member>
+                <member>host_199.168.151.24</member>
+                <member>host_208.100.40.44</member>
+                <member>net_104.129.193.0</member>
+                <member>net_104.129.195.0</member>
+                <member>net_104.129.197.0</member>
+                <member>net_199.168.148.0</member>
+                <member>net_199.168.149.0</member>
+                <member>net_199.168.150.0</member>
+                <member>net_199.168.151.0</member>
+              </static>
+              <description>Used to pull the PAC file down over port 80</description>
+            </entry>
+            <entry name="Customer_Walmart_VPN_Ranges">
+              <static>
+                <member>net_146.132.0.0</member>
+                <member>net_161.170.156.0</member>
+                <member>net_161.173.0.0</member>
+                <member>net_161.166.254.0</member>
+                <member>net_172.27.19.0</member>
+              </static>
+            </entry>
+            <entry name="Vendor_ADP_etime">
+              <static>
+                <member>host_170.146.39.167</member>
+                <member>host_170.146.39.22</member>
+                <member>host_206.91.36.11</member>
+                <member>host_206.91.36.14</member>
+                <member>host_74.218.177.90</member>
+                <member>host_206.90.10.128_1</member>
+                <member>host_206.90.10.63_1</member>
+                <member>host_206.90.20.122_1</member>
+                <member>host_206.90.20.90_1</member>
+                <member>host_206.90.20.93_1</member>
+                <member>host_206.90.21.122_1</member>
+                <member>host_206.90.21.92_1</member>
+                <member>host_206.90.21.95_1</member>
+                <member>host_206.90.10.128</member>
+                <member>host_206.90.10.63</member>
+                <member>host_206.90.20.122</member>
+                <member>host_206.90.20.90</member>
+                <member>host_206.90.20.93</member>
+                <member>host_206.90.21.122</member>
+                <member>host_206.90.21.92</member>
+                <member>host_206.90.21.95</member>
+              </static>
+            </entry>
+            <entry name="ZSCALER-AMERICAS_CloudEnforcementNodes-Proxies">
+              <static>
+                <member>net_8.19.13.0</member>
+                <member>net_8.25.203.0</member>
+                <member>net_8.28.19.0</member>
+                <member>net_8.28.150.0</member>
+                <member>net_8.28.177.0</member>
+                <member>net_64.62.169.0</member>
+                <member>net_66.151.103.0</member>
+                <member>net_67.202.75.0</member>
+                <member>net_70.39.153.0</member>
+                <member>net_70.39.159.0</member>
+                <member>net_70.42.29.0</member>
+                <member>net_72.5.190.0</member>
+                <member>net_72.52.96.0</member>
+                <member>net_104.129.192.0</member>
+                <member>net_104.129.192.0_CIDR20</member>
+                <member>net_104.129.194.0</member>
+                <member>net_104.129.196.0</member>
+                <member>net_104.129.198.0</member>
+                <member>net_104.129.204.0_CIDR23</member>
+                <member>net_128.177.125.0</member>
+                <member>net_128.177.129.0</member>
+                <member>net_128.177.135.0</member>
+                <member>net_128.177.136.0</member>
+                <member>net_162.225.192.0_CIDR18</member>
+                <member>net_165.225.0.0_CIDR17</member>
+                <member>net_185.46.212.0_CIDR22</member>
+                <member>net_199.168.148.0</member>
+                <member>net_199.168.149.0</member>
+                <member>net_199.168.151.0</member>
+                <member>net_208.100.40.32</member>
+                <member>net_209.51.184.0</member>
+                <member>net_216.52.207.64</member>
+                <member>net_216.66.5.0</member>
+                <member>net_216.177.204.0</member>
+                <member>net_216.218.133.192</member>
+              </static>
+            </entry>
+            <entry name="ZSCALER-ASIA_EnforcementNodes-Proxies">
+              <static>
+                <member>host_122.54.235.130</member>
+                <member>host_122.54.235.140</member>
+                <member>host_203.116.198.67</member>
+                <member>host_203.116.198.69</member>
+                <member>host_203.116.198.71</member>
+                <member>host_203.116.198.72</member>
+                <member>host_203.122.244.217</member>
+                <member>host_211.13.205.131</member>
+                <member>host_211.13.205.134</member>
+                <member>host_211.13.205.135</member>
+                <member>host_211.13.205.136</member>
+                <member>host_221.135.132.139</member>
+                <member>host_221.135.132.142</member>
+                <member>net_152.101.187.4</member>
+              </static>
+            </entry>
+            <entry name="ZSCALER-EMEA_EnforcementNodes-Proxies">
+              <static>
+                <member>net_212.118.224.148</member>
+                <member>net_82.220.1.196</member>
+                <member>net_95.172.68.148</member>
+                <member>net_95.172.74.0_CIDR24</member>
+                <member>net_185.46.212.0_CIDR24</member>
+                <member>net_77.242.202.224_CIDR27</member>
+                <member>net_31.186.238.0_CIDR24</member>
+                <member>net_77.242.201.48_CIDR28</member>
+              </static>
+            </entry>
+            <entry name="Tyco_NO_NAT_EXTERNAL_Addresses">
+              <static>
+                <member>Customer_Walmart_VPN_Ranges</member>
+                <member>Vendor_ADP_etime</member>
+                <member>host_128.136.97.17</member>
+                <member>host_12.46.27.81</member>
+                <member>host_66.161.226.176</member>
+                <member>net_193.28.99.0</member>
+                <member>net_193.28.103.0</member>
+                <member>Customer_AvivaStadium_VPN_Domain</member>
+              </static>
+            </entry>
+            <entry name="ZSCALER-WORLD-NewDCs_EnforcementNodes-Proxies">
+              <static>
+                <member>net_104.129.192.0_CIDR20</member>
+                <member>net_162.225.192.0_CIDR18</member>
+                <member>net_165.225.0.0_CIDR17</member>
+                <member>net_185.46.212.0_CIDR22</member>
+              </static>
+              <description>The New DC's that are being rolled out. Covers all regions on all instances.</description>
+            </entry>
+            <entry name="Customer_AvivaStadium_VPN_Domain">
+              <static>
+                <member>net_172.30.20.0</member>
+                <member>net_172.30.29.0</member>
+                <member>net_172.30.31.0</member>
+              </static>
+            </entry>
+            <entry name="EMEA_cork_VPN_DHCP_Networks">
+              <static>
+                <member>net_10.51.198.0</member>
+                <member>net_10.51.199.0</member>
+                <member>net_10.51.157.0</member>
+                <member>net_10.51.158.0</member>
+              </static>
+            </entry>
+            <entry name="EMEA_cork_VPN_Vendor3rdParty_TraskSabris_IPs">
+              <static>
+                <member>host_10.51.160.217</member>
+                <member>host_10.51.160.218</member>
+                <member>host_10.51.160.219</member>
+                <member>host_10.51.160.220</member>
+                <member>host_10.51.160.221</member>
+                <member>host_10.51.160.224</member>
+                <member>host_10.51.160.85</member>
+                <member>host_10.51.160.86</member>
+                <member>host_10.51.160.94</member>
+                <member>host_10.51.160.213</member>
+                <member>host_10.51.160.214</member>
+                <member>host_10.51.160.222</member>
+                <member>host_10.51.160.96</member>
+                <member>host_10.51.160.93</member>
+                <member>host_10.51.160.92</member>
+                <member>host_10.51.160.91</member>
+                <member>host_10.51.160.90</member>
+                <member>host_10.51.160.89</member>
+              </static>
+            </entry>
+            <entry name="EMEA_rajecko_Internal_Networks">
+              <static>
+                <member>net_10.51.49.180</member>
+                <member>net_10.51.66.0</member>
+                <member>net_10.51.68.0</member>
+                <member>net_10.51.70.0</member>
+              </static>
+            </entry>
+            <entry name="EMEA_rajecko_Microsoft_DC">
+              <static>
+                <member>net_65.54.11.0</member>
+                <member>net_65.54.17.0</member>
+                <member>net_65.54.8.0</member>
+              </static>
+            </entry>
+          </address-group>
+          <external-list>
+            <entry name="GLOBAL_Blacklist_DBL">
+              <recurring>
+                <daily>
+                  <at>01:00</at>
+                </daily>
+              </recurring>
+              <url>http://10.38.58.35/lists/blacklist.txt</url>
+              <type>ip</type>
+              <description>on netmon under /var/www/html/lists/blacklist.txt</description>
+            </entry>
+            <entry name="GLOBAL_Whitelist_DBL">
+              <recurring>
+                <daily>
+                  <at>01:00</at>
+                </daily>
+              </recurring>
+              <url>http://10.38.58.35/lists/blacklist.txt</url>
+              <type>ip</type>
+              <description>on netmon under /var/www/html/lists/blacklist.txt - bypassed sites in zscaler pac files</description>
+            </entry>
+          </external-list>
+          <region>
+            <entry name="ZSCALER_Cloud_Enforcement_Nodes">
+              <address>
+                <member>42.99.164.0/24</member>
+                <member>49.236.207.160/27</member>
+                <member>64.215.22.0/24</member>
+                <member>70.42.29.0/27</member>
+                <member>72.5.190.0/24</member>
+                <member>72.37.140.0/24</member>
+                <member>89.167.129.0/24</member>
+                <member>89.191.7.16/28</member>
+                <member>94.188.248.64/26</member>
+                <member>95.172.74.0/24</member>
+                <member>103.27.171.0/24</member>
+                <member>104.129.192.0/20</member>
+                <member>122.54.235.128/27</member>
+                <member>128.177.125.0/24</member>
+                <member>128.177.129.0/24</member>
+                <member>128.177.135.0/24</member>
+                <member>128.177.136.0/24</member>
+                <member>139.220.195.0/24</member>
+                <member>165.225.0.0/17</member>
+                <member>165.225.192.0/18</member>
+                <member>175.45.116.0/24</member>
+                <member>185.46.212.0/22</member>
+                <member>188.116.35.32/28</member>
+                <member>196.23.147.96/27</member>
+                <member>196.23.147.192/27</member>
+                <member>196.23.154.64/27</member>
+                <member>196.23.154.96/27</member>
+                <member>197.156.241.224/27</member>
+                <member>197.156.245.192/27</member>
+                <member>199.168.149.0/24</member>
+                <member>199.168.150.0/24</member>
+                <member>199.168.151.0/24</member>
+                <member>213.152.228.0/24</member>
+                <member>216.52.207.64/26</member>
+                <member>216.177.204.0/24</member>
+              </address>
+            </entry>
+            <entry name="ZScaler_Whitelist">
+              <address>
+                <member>148.112.144.19</member>
+                <member>148.112.144.48</member>
+                <member>161.166.254.0/24</member>
+                <member>164.235.74.211</member>
+                <member>164.235.138.44</member>
+                <member>209.191.134.134</member>
+              </address>
+            </entry>
+          </region>
+          <application-filter>
+            <entry name="social-media">
+              <subcategory>
+                <member>social-networking</member>
+              </subcategory>
+            </entry>
+          </application-filter>
+          <profile-group/>
+          <tag>
+            <entry name="Blacklist">
+              <color>color14</color>
+            </entry>
+            <entry name="zScaler">
+              <color>color11</color>
+            </entry>
+            <entry name="Admin Rules">
+              <color>color15</color>
+            </entry>
+            <entry name="Redline">
+              <color>color1</color>
+            </entry>
+            <entry name="Internal Outbound">
+              <color>color3</color>
+            </entry>
+            <entry name="DMZ">
+              <color>color6</color>
+            </entry>
+            <entry name="Shanghai"/>
+            <entry name="ANY">
+              <color>color4</color>
+            </entry>
+            <entry name="No NAT">
+              <color>color6</color>
+            </entry>
+            <entry name="Static NAT">
+              <color>color2</color>
+            </entry>
+            <entry name="Hide NAT">
+              <color>color3</color>
+            </entry>
+            <entry name="DHCP">
+              <color>color4</color>
+            </entry>
+            <entry name="VPN Rules">
+              <color>color2</color>
+            </entry>
+            <entry name="Internal Com">
+              <color>color2</color>
+            </entry>
+            <entry name="Vendor Access">
+              <color>color8</color>
+            </entry>
+          </tag>
+          <application-status/>
+          <threats>
+            <vulnerability/>
+            <spyware/>
+          </threats>
+          <profiles>
+            <virus/>
+            <spyware/>
+            <vulnerability/>
+            <url-filtering/>
+            <custom-url-category>
+              <entry name="zscaler bypass urls">
+                <list>
+                  <member>google.com</member>
+                  <member>*.google.com</member>
+                </list>
+              </entry>
+            </custom-url-category>
+            <file-blocking/>
+            <data-filtering/>
+            <data-objects/>
+            <hip-objects/>
+            <hip-profiles/>
+            <dos-protection/>
+            <decryption/>
+            <wildfire-analysis/>
+          </profiles>
+        </entry>
+      </vsys>
+    </entry>
+  </devices>
+  <mgt-config>
+    <users>
+      <entry name="admin">
+        <phash>$1$vbgahpgj$Dr4DJpzqdO0V5lP/jjMJb.</phash>
+        <permissions>
+          <role-based>
+            <superuser>yes</superuser>
+          </role-based>
+        </permissions>
+      </entry>
+    </users>
+  </mgt-config>
+  <shared>
+    <ssl-tls-service-profile/>
+    <content-preview>
+      <application/>
+      <application-type>
+        <category/>
+        <technology/>
+      </application-type>
+    </content-preview>
+    <application/>
+    <application-group/>
+    <service/>
+    <service-group/>
+    <botnet>
+      <configuration>
+        <http>
+          <dynamic-dns>
+            <enabled>yes</enabled>
+            <threshold>5</threshold>
+          </dynamic-dns>
+          <malware-sites>
+            <enabled>yes</enabled>
+            <threshold>5</threshold>
+          </malware-sites>
+          <recent-domains>
+            <enabled>yes</enabled>
+            <threshold>5</threshold>
+          </recent-domains>
+          <ip-domains>
+            <enabled>yes</enabled>
+            <threshold>10</threshold>
+          </ip-domains>
+          <executables-from-unknown-sites>
+            <enabled>yes</enabled>
+            <threshold>5</threshold>
+          </executables-from-unknown-sites>
+        </http>
+        <other-applications>
+          <irc>yes</irc>
+        </other-applications>
+        <unknown-applications>
+          <unknown-tcp>
+            <destinations-per-hour>10</destinations-per-hour>
+            <sessions-per-hour>10</sessions-per-hour>
+            <session-length>
+              <maximum-bytes>100</maximum-bytes>
+              <minimum-bytes>50</minimum-bytes>
+            </session-length>
+          </unknown-tcp>
+          <unknown-udp>
+            <destinations-per-hour>10</destinations-per-hour>
+            <sessions-per-hour>10</sessions-per-hour>
+            <session-length>
+              <maximum-bytes>100</maximum-bytes>
+              <minimum-bytes>50</minimum-bytes>
+            </session-length>
+          </unknown-udp>
+        </unknown-applications>
+      </configuration>
+      <report>
+        <topn>100</topn>
+        <scheduled>yes</scheduled>
+      </report>
+    </botnet>
+    <log-settings>
+      <profiles>
+        <entry name="Panorama_logging">
+          <traffic>
+            <any>
+              <send-to-panorama>yes</send-to-panorama>
+            </any>
+          </traffic>
+          <alarm>
+            <informational>
+              <send-to-panorama>yes</send-to-panorama>
+            </informational>
+            <low>
+              <send-to-panorama>yes</send-to-panorama>
+            </low>
+            <medium>
+              <send-to-panorama>yes</send-to-panorama>
+            </medium>
+            <high>
+              <send-to-panorama>yes</send-to-panorama>
+            </high>
+            <critical>
+              <send-to-panorama>yes</send-to-panorama>
+            </critical>
+          </alarm>
+          <wildfire>
+            <benign>
+              <send-to-panorama>yes</send-to-panorama>
+            </benign>
+            <malicious>
+              <send-to-panorama>yes</send-to-panorama>
+            </malicious>
+            <grayware>
+              <send-to-panorama>yes</send-to-panorama>
+            </grayware>
+          </wildfire>
+        </entry>
+      </profiles>
+    </log-settings>
+  </shared>
+</config>

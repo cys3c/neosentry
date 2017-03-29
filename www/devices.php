@@ -1,7 +1,7 @@
 <?php //index.php
 
 include 'header.html';
-include '_functions_snmp.php';
+include '_snmp.php';
 
 $retSuccess = $retError = "";
 

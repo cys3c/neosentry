@@ -1,8 +1,8 @@
-<?php //_functions_snmp.php - snmp monitoring, parsing, and displaying functions
+<?php //_snmp.php - snmp monitoring, parsing, and displaying functions
 
 //Some Global Vars
 include_once '_functions.php';
-//$dataFolder = "../data";
+//$gFolderData = "../data";
 
 //Sorts a multidimentional array by the common column name. aka Database Sort
 //usage: array_orderby(ARRAY_VAR, COL_NAME, SORT_DESC/ASC [,COL_NAME2, SORT_ORDER [,...]])
@@ -216,7 +216,7 @@ function showSnmpFile($snmpFile) { //use to show a full snmp scan
 
 function showSnmpTable($device, $snmpFile, $infoType) {
 	//some variables
-        global $dataFolder;
+        global $gFolderData;
 	$table = ""; $collectedDate = "Never"; $rowCount = 0;
 	
 	//display the section header
@@ -379,7 +379,7 @@ function showSnmpTable($device, $snmpFile, $infoType) {
 			
 		case "CPU":
 			//get the table
-			//$table = getSnmpTableArr("$dataFolder/device_scan_data/snmp_".$device."_cpu");
+			//$table = getSnmpTableArr("$gFolderData/device_scan_data/snmp_".$device."_cpu");
 			$table = getSqlArray("SELECT * FROM device_cpu WHERE device='$device'");
 			//print_r($table);
 			if (!is_array($table) || count($table)==0) { $collectedDate = "No Data Collected. Update the SNMP community String or SNMPMAP file."; break; }
@@ -400,7 +400,7 @@ function showSnmpTable($device, $snmpFile, $infoType) {
 			break;
 			
 		case "Memory":
-			//$table = getSnmpTableArr("$dataFolder/device_scan_data/snmp_".$device."_mem");
+			//$table = getSnmpTableArr("$gFolderData/device_scan_data/snmp_".$device."_mem");
 			$table = getSqlArray("SELECT * FROM device_mem WHERE device='$device'");
 			//print_r($table);
 			if (!is_array($table) || count($table)==0) { $collectedDate = "No Data Collected. Update the SNMP community String or SNMPMAP file."; break; }
@@ -431,7 +431,7 @@ function showSnmpTable($device, $snmpFile, $infoType) {
 			break;
 			
 		case "HDD":
-			$table = getSnmpTableArr("$dataFolder/device_scan_data/snmp_".$device."_hdd");
+			$table = getSnmpTableArr("$gFolderData/device_scan_data/snmp_".$device."_hdd");
 			if (!is_array($table)) { $collectedDate = $table; break; }
 			
 			//display the table
@@ -463,7 +463,7 @@ function showSnmpTable($device, $snmpFile, $infoType) {
 			
 		case "OTHER":
 			
-			$table = getSnmpTableArr("$dataFolder/device_scan_data/snmp_".$device."_other");
+			$table = getSnmpTableArr("$gFolderData/device_scan_data/snmp_".$device."_other");
 			if (!is_array($table)) { $collectedDate = $table; break; }
 			
 			//echo "<pre>";
@@ -471,7 +471,7 @@ function showSnmpTable($device, $snmpFile, $infoType) {
 			//echo "</pre>";
 			
 			//load the array ******************************************COMPLETE WORK ON THIS ******************************
-			$data = file_get_contents("$dataFolder/device_scan_data/snmp_".$device."_other");
+			$data = file_get_contents("$gFolderData/device_scan_data/snmp_".$device."_other");
 			$dlines = explode("\n",$data);
 			
 			//load contents into the array
@@ -598,7 +598,7 @@ function updateSnmpCommunity($device) {
 		if (substr($snmpStr,0,12)!="snmpbulkwalk") {
 			writeLog("SNMP",$device,"Device SNMP Retrieval changed state to UP.");
 			echo "Gather SNMP System information.\n";
-			shell_exec("php .snmpinfo.php -d".$device." -tsys > /dev/null &");
+			shell_exec("php snmp.php -d".$device." -tsys > /dev/null &");
 		}
 	}
 	
@@ -643,8 +643,8 @@ function splitSnmpString($snmpString) {
 
 function displaySnmp($device, $snmpInfoType) {
     //puts the snmp info into a table and displays it
-    global $dataFolder;
-    $snmpFile = "$dataFolder/device_scan_data/snmp_".$device."_".$snmpInfoType;
+    global $gFolderData;
+    $snmpFile = "$gFolderData/device_scan_data/snmp_".$device."_".$snmpInfoType;
 
     if (file_exists($snmpFile)) {
             $pullDate = date("F d Y H:i:s.",filemtime($snmpFile));
@@ -658,8 +658,8 @@ function displaySnmp($device, $snmpInfoType) {
 
 function updateSnmpInfo($device,$snmpInfoType) {
     //imports information into the db
-    global $dataFolder;
-    $snmpFile = $dataFolder."/device_scan_data/snmp_".$device."_".$snmpInfoType;
+    global $gFolderData;
+    $snmpFile = $gFolderData."/device_scan_data/snmp_".$device."_".$snmpInfoType;
     echo $snmpFile;
         
 }

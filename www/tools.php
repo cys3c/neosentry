@@ -1,7 +1,7 @@
 <?php //tools.php
 
 include '_functions.php';
-include '_functions_snmp.php';
+include '_snmp.php';
 
 //get the variables
 $device = (isset($_GET['device']))?cleanSqlString(trim($_GET['device'])):""; //file data to add

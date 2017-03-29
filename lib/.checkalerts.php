@@ -4,7 +4,7 @@
 $device = $type = "";
 //get command line arguments, for internal processing
 //	-d: The device name or IP, -t: Type, -r: Refresh
-//	Usage: php .snmpinfo.php -d "10.10.10.10" -t "full" -r
+//	Usage: php snmp.php -d "10.10.10.10" -t "full" -r
 $o = getopt("d:t:r:"); // 1 : is required, 2 :: is optional
 if (array_key_exists("d",$o)) $device = $o["d"];
 if (array_key_exists("t",$o)) $type = $o["t"];

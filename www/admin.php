@@ -17,11 +17,11 @@ function getCrontabInterval($stringToGrep, $defaultCronTime) {
 //get crontab intervals for each script
 $pingInterval = getCrontabInterval(".fping.php", "*/5 * * * *");	//every 5 minutes
 $trInterval = getCrontabInterval(".traceroute.php", "0 0 * * *"); //every day at midnight
-$snmpHWStatsInterval = getCrontabInterval(".snmpinfo.php?type=hwstats", "*/15 * * * *");	//every 15 minutes;
-$snmpSysInterval = getCrontabInterval(".snmpinfo.php?type=sys", "0 1 * * *");	//every day at 1am;
-$snmpNetInterval = getCrontabInterval(".snmpinfo.php?type=net", "*/10 * * * *");	//every 10 minutes;
-$snmpUpdateInterval = getCrontabInterval(".snmpinfo.php?type=updatecommunities", "0 */12 * * *");	//every 12 hours;
-$snmpRoutingInterval = getCrontabInterval(".snmpinfo.php?type=routing", "0 */1 * * *");	//every 1 hour;
+$snmpHWStatsInterval = getCrontabInterval("snmp.php?type=hwstats", "*/15 * * * *");	//every 15 minutes;
+$snmpSysInterval = getCrontabInterval("snmp.php?type=sys", "0 1 * * *");	//every day at 1am;
+$snmpNetInterval = getCrontabInterval("snmp.php?type=net", "*/10 * * * *");	//every 10 minutes;
+$snmpUpdateInterval = getCrontabInterval("snmp.php?type=updatecommunities", "0 */12 * * *");	//every 12 hours;
+$snmpRoutingInterval = getCrontabInterval("snmp.php?type=routing", "0 */1 * * *");	//every 1 hour;
 
 //get crontab variables being passed
 $updateVars = (isset($_POST['update']))?cleanSqlString(trim($_POST['update'])):"";
@@ -45,16 +45,16 @@ if ($updateVars=="all" || !file_exists($cron_file)) { //we update the settings
 	$curURL = 'http://localhost'.dirname($_SERVER['PHP_SELF']);
 	
 	//	$contents = "SHELL=/bin/sh\nPATH=/sbin:/bin:/usr/sbin:/usr/bin\nMAILTO=root\nHOME=$curPath/\n\n";
-	//$contents .= $snmpUpdateInterval." $wgetBin -o $curPath/data/.snmpinfo_update.log $curURL/.snmpinfo.php?type=updatecommunities&device=all\n";
+	//$contents .= $snmpUpdateInterval." $wgetBin -o $curPath/data/.snmpinfo_update.log $curURL/snmp.php?type=updatecommunities&device=all\n";
 	$contents = "HOME=$curPath/\n\n";
 	$contents .= "0 2 * * * $phpBin $curPath/.cleanup.php > $curPath/data/.cleanup.log\n"; //run cleanup at 2am every day
 	$contents .= $pingInterval." $phpBin $curPath/.fping.php > $curPath/data/.fping.log\n";
 	$contents .= $trInterval." $phpBin $curPath/.traceroute.php > $curPath/data/.traceroute.log\n";
-	$contents .= $snmpUpdateInterval." $phpBin $curPath/.snmpinfo.php -dall -tupdatecommunities > $curPath/data/.snmpinfo_update.log \n";
-	$contents .= $snmpSysInterval." $phpBin $curPath/.snmpinfo.php -dall -tsys > $curPath/data/.snmpinfo_sys.log\n";
-	$contents .= $snmpHWStatsInterval." $phpBin $curPath/.snmpinfo.php -dall -thwstats > $curPath/data/.snmpinfo_hwstats.log\n";
-	$contents .= $snmpNetInterval." $phpBin $curPath/.snmpinfo.php -dall -tnet > $curPath/data/.snmpinfo_net.log\n";
-	$contents .= $snmpRoutingInterval." $phpBin $curPath/.snmpinfo.php -dall -trouting > $curPath/data/.snmpinfo_routing.log\n";
+	$contents .= $snmpUpdateInterval." $phpBin $curPath/snmp.php -dall -tupdatecommunities > $curPath/data/.snmpinfo_update.log \n";
+	$contents .= $snmpSysInterval." $phpBin $curPath/snmp.php -dall -tsys > $curPath/data/.snmpinfo_sys.log\n";
+	$contents .= $snmpHWStatsInterval." $phpBin $curPath/snmp.php -dall -thwstats > $curPath/data/.snmpinfo_hwstats.log\n";
+	$contents .= $snmpNetInterval." $phpBin $curPath/snmp.php -dall -tnet > $curPath/data/.snmpinfo_net.log\n";
+	$contents .= $snmpRoutingInterval." $phpBin $curPath/snmp.php -dall -trouting > $curPath/data/.snmpinfo_routing.log\n";
 	
 	//write the information to the temp file and run crontab to import it
 	file_put_contents($cron_file, $contents);
@@ -192,7 +192,7 @@ if ($retError!="") 	echo '<div class="error">'.str_replace("\n","<br>",trim($ret
 
 if (isset($_POST['formsubmitbtn_snmp'])) {
 	//scan for snmp communities.
-	shell_exec("wget -b -q $curURL/.snmpinfo.php?type=updatecommunities &");
+	shell_exec("wget -b -q $curURL/snmp.php?type=updatecommunities &");
 	echo '<div class="info">Kicked off the process to find a valid SNMP Community String. This typically takes 20 seconds per snmpwalk command you have configured.</div>';
 }
 

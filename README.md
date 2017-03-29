@@ -14,6 +14,16 @@ Custom responsive, mobile friendly, and intuitive front-end design.
 Front end for local tacacs+, and local DNS if you decide to set this up. 
 
 
+Structure
+---------
+
+/configs - stores configs and settings
+/data    - stores variable data collected, and for data collection
+/lib     - core functions and scripts
+/www     - front end web interface.
+/www/api - backend REST api for communicating with the stored data and /lib/
+
+
 Features
 --------
 
@@ -37,8 +47,8 @@ Installs all prerequisite packages and copies files to /usr/share/neosentry.
 Changes
 -------
 
-#### v1.0
-  - Initial release
+#### v.01
+  - Initial release, still under development
 
 
 What to work on
@@ -62,5 +72,10 @@ TICKETING / FIREWALL REQUESTS [ServiceNow, Remedy]
 	- Check to see if firewall/router/switch/etc changes occurred during the change window
 	
 	
+License
+-------
+
+NeoSentry is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
 
 [rootSecure](https://www.rootsecure.io/)

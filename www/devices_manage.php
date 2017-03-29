@@ -13,9 +13,9 @@ echo '
 
 
 //some variables
-$device_list_cur = "$dataFolder/backups/device_list_changes/device_list";
+$device_list_cur = "$gFolderData/backups/device_list_changes/device_list";
 $device_list_backup = $device_list_cur."_".date("Y-m-d_H.i.s"); //date like 2001-03-31_12.55.00
-$device_ip_file = "$dataFolder/device_ip_list";
+$device_ip_file = "$gFolderData/device_ip_list";
 $device_ip_list = "";
 
 $retRem = $retAdd = "";
@@ -36,7 +36,7 @@ $devicelist = (isset($_POST['devicelist']))?$_POST['devicelist']:""; //file data
 //echo "\nDEVICE LIST:\n$devicelist\n!";
 if ($devicelist != "") {
 	//create the directory structure
-	if (!file_exists("$dataFolder/backups/device_list_changes")) mkdir("$dataFolder/backups/device_list_changes", 0777, true);
+	if (!file_exists("$gFolderData/backups/device_list_changes")) mkdir("$gFolderData/backups/device_list_changes", 0777, true);
 	
 	//erase the IP list so we can update it using append
 	file_put_contents($device_ip_file, "");
@@ -82,7 +82,7 @@ if ($devicelist != "") {
 		if (!file_exists($cron_file)) 	shell_exec("php admin.php &");
 		
 		//Find the SNMP Community Strings
-		shell_exec("wget -b -q http://localhost/quicknms/.snmpinfo.php?type=updatecommunities &");
+		shell_exec("wget -b -q http://localhost/quicknms/snmp.php?type=updatecommunities &");
 		echo '<div class="info">Kicked off the process to find a valid SNMP Community String. This typically takes 20 seconds per snmpwalk command you have configured.</div>';
 		
 	}

@@ -1,0 +1,9 @@
+{
+  "admin":{
+    "password":"hash_of_pw",
+    "auth_type":"app",
+    "role":"admin",
+    "name":"Default Admin",
+    "email":""
+  }
+}

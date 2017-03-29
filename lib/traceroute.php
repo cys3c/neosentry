@@ -1,48 +1,63 @@
-<?php //.traceroute.php
+<?php
+/*
+  * All this script does is run 'doTraceroute' from the _traceroute.php file
+  * for each device we are request a traceroute. [Either 'all' or a single device]
+ */
 include "_functions.php";
-include "_functions_traceroute.php";
+include "_traceroute.php";
+include_once "_db_flatfiles.php";
 
-//get variables being passed
-$device = (isset($_GET['device']))?cleanSqlString(trim($_GET['device'])):""; //file data to add
-if ($device=="") $device = (isset($_POST['device']))?cleanSqlString(trim($_POST['device'])):"all"; //file data to add
+$maxThreads = 10;
+$wait = 100; // wait time in milliseconds
 
-$scanDir = "../data/scandata";
-$device_ip_file = "$scanDir/iplist";
-if (!file_exists($scanDir)) mkdir($scanDir, 0777, true);
+// Get variables being passed
+$device = (isset($_GET['device']))?sanitizeString($_GET['device']):""; //file data to add
+if ($device=="") $device = (isset($_POST['device']))?sanitizeString($_POST['device']):"all"; //file data to add
 
-//get command line arguments, for internal processing
+// Get command line arguments, for internal processing
 //	-d: The device name or IP
 //	Usage: php .traceroute.php -d "10.10.10.10"
 $o = getopt("d:"); // 1 : is required, 2 :: is optional
-if (array_key_exists("d",$o)) $device = $o["d"];
-file_put_contents("traceroute.txt", "command line device = $device");
-
-//done getting arguments
+if (array_key_exists("d",$o)) $device = sanitizeString($o["d"]);
 
 
-//$file_trSuccess = "./data/device_scan_data/traceroute_{$deviceIp}_success";
-//$file_trSuccess_Backup = "./data/device_scan_data/traceroute_{$deviceIp}_".date("Y-m-d_H.i.s")."_success";
-//$file_trFail = "./data/device_scan_data/traceroute_{$deviceIp}_fail";
-//$file_trFail_Backup = "./data/device_scan_data/traceroute_{$deviceIp}_".date("Y-m-d_H.i.s")."_fail";
-
-//$res = shell_exec("sudo fping -e -f data/device_ip_list");
-//echo $res;
 
 if ($device=="all") { //defaults to all
-	//put the devices into an array for easier parsing
-	$rows = explode("\n", file_get_contents($device_ip_file));
+    echo "Running traceroute on ALL devices.";
 
-	//do the traceroute for each device in the list
-	foreach($rows as $row) {
-		$sIp = trim($row);
-		if ($sIp!="") doTraceroute($sIp);
+	// Load the devices allowing ping which also allows traceroute
+    $arrDevices = json_decode(file_get_contents($pingOutFile), true);
+
+	// Loop through each device and run traceroute
+    $count = 0;
+	foreach($arrDevices as $device=>$val) {
+		if ($device!="") {
+		    //doTraceroute($device, "$gFolderScanData/$device/$tracerouteFilename");
+
+            // start a thread for each trace
+            $worker[$device] = new traceThread($device, "$gFolderScanData/$device/$tracerouteFilename");
+
+            // lazily just wait x milliseconds every y threads.
+            $count++;
+            if ($count%$maxThreads==0) usleep($wait);
+        }
 	}
-} elseif ($device != "") {
-	//only do the traceroute for the 1 device
-	doTraceroute($device);
+} elseif ($device != "") {	//only do the traceroute for the 1 device
+    echo "Running traceroute on a single device: $device";
+	doTraceroute($device, "$gFolderScanData/$device/$tracerouteFilename");
 	
 }
 
-//alerts should be called here so if a device goes down and then back up, we can determine that it came back up.
-//alerts_check_ping();
-?>
+
+/**
+ * Class traceThread Will start a thread to run a traceroute on a device
+ */
+class traceThread extends Thread {
+    public function __construct($device, $outputFile) {
+        $this->device=$device;
+        $this->outputFile=$outputFile;
+    }
+    public function run() {
+        doTraceroute($this->device, $this->outputFile);
+    }
+}
