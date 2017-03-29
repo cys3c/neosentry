@@ -97,7 +97,7 @@ mkdir -p $INSTALL_DIR
 mv www $INSTALL_DIR/
 mv data $INSTALL_DIR/
 mv lib $INSTALL_DIR/
-mkdir -p $INSTALL_DIR/data/mibs $INSTALL_DIR/data/backups/device_list_changes $INSTALL_DIR/data/device_scan_data
+mkdir -p $INSTALL_DIR/data/devices
 chmod -R g+w $INSTALL_DIR/data
 #chmod g+w settings.conf
 

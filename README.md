@@ -17,7 +17,7 @@ Front end for local tacacs+, and local DNS if you decide to set this up.
 Structure
 ---------
 
-/configs - stores configs and settings
+/config  - stores configs and settings
 /data    - stores variable data collected, and for data collection
 /lib     - core functions and scripts
 /www     - front end web interface.

@@ -40,7 +40,7 @@
         ]
     },
     "SSH":{
-        "Description": "Info related to making an ssh connection",
+        "Description": "Info related to making an ssh connection"
 
     },
     "Service":{

@@ -13,13 +13,14 @@ $globalErrorVar = '';
 $gFolderData = realpath("../data");
 $gFolderLogs = realpath("$gFolderData/logs");   //stores logs for the app and system. device logs stored in db or device folder
 $gFolderScanData = realpath("$gFolderData/devices");
-$gFolderMibs = realpath("$gFolderData/mibs");
 $gFolderBackups = realpath("$gFolderData/backups");
 
-$gFileSettings = realpath("../configs/settings.json");
-$gFileSNMPMap = realpath("../configs/snmpmap.json");
-$gFileDevices = realpath("../configs/devices.json");
-$gFileSecurity = realpath("../configs/security.json");
+$gFolderConfigs = realpath("../config");
+$gFolderMibs = realpath("$gFolderConfigs/mibs");
+$gFileSettings = realpath("$gFolderConfigs/settings.json");
+$gFileSNMPMap = realpath("$gFolderConfigs/snmpmap.json");
+$gFileDevices = realpath("$gFolderConfigs/devices.json");
+$gFileSecurity = realpath("$gFolderConfigs/security.json");
 
 // Global variables for Ping and Traceroute
 $ipListFile = "$gFolderScanData/ping.iplist"; //list of ip's that are allowing Ping monitoring.
@@ -80,7 +81,7 @@ function get_string_between($string, $start, $end){
 
 
 
-// FUNCTIONS FOR READING/WRITING CONFIGS //
+// FUNCTIONS FOR READING/WRITING CONFIGS AND SETTINGS //
 
 function getDevicesArray() {
     global $gFileDevices;
@@ -172,7 +173,7 @@ function hashString($string){
      *  password_verify('mypass', $hash); will verify a password hashes match, using the same algorithm
      * 
      */
-    return password_hash($string);
+    return password_hash($string,PASSWORD_DEFAULT);
 }
 
 

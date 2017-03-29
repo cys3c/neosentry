@@ -1,6 +1,6 @@
 <?php //admin.php
 
-include "_functions.php";
+include "../lib/_functions.php";
 
 $ret = $retSuccess = $retError = "";
 
@@ -77,7 +77,7 @@ if (isset($_POST['snmpCommands'])) file_put_contents($snmpCommandsFile,trim($_PO
 $snmpCommands = file_exists($snmpCommandsFile)?file_get_contents($snmpCommandsFile):"snmpbulkwalk -v2c -c public";
 
 //if (isset($_POST['snmpMibLocation'])) writeSettingValue("snmp_miblocation", cleanSqlString(trim($_POST['snmpMibLocation'])));
-//$mibLocation = getSettingValue("snmp_commands"); if ($mibLocation=="") $mibLocation = "/usr/share/snmp/mibs"; // or ./data/mibs
+//$mibLocation = getSettingValue("snmp_commands"); if ($mibLocation=="") $mibLocation = "/usr/share/snmp/mibs"; // or ./config/mibs
 //method 2 that doesn't work
 //$ml=explode(":",trim(shell_exec("net-snmp-config --default-mibdirs")).":");
 //$mibLocation = trim($ml[1]);
@@ -95,7 +95,7 @@ if (isset($_POST['mibsubmitbtn']) && isset($_FILES['mibfile'])) {
 }
 
 //get and write history storage setting variables
-if (isset($_POST['pingHistory'])) writeSettingValue("history_ping", intval(trim($_POST['pingHistory'])));
+if (isset($_POST['pingHistory'])) writeSettingValue("Ping Traceroute","history_ping", intval(trim($_POST['pingHistory'])));
 if (isset($_POST['trHistory'])) writeSettingValue("history_traceroute", intval(trim($_POST['trHistory'])));
 if (isset($_POST['pingAlertHistory'])) writeSettingValue("history_pingalerts", intval(trim($_POST['pingAlertHistory'])));
 if (isset($_POST['snmpHistory'])) writeSettingValue("history_snmp", intval(trim($_POST['snmpHistory'])));
