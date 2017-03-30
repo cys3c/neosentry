@@ -1,1 +1,6 @@
 .idea
+/data
+/config/devices.json
+/config/security.json
+/config/settings.json
+/config/users.json
