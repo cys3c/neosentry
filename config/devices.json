@@ -1,29 +1,21 @@
 {
     "localhost": {
-        "Date Added": "May 16, 2016",
-        "Org Group": "Networking",
-        "Site": "Boca Raton, FL, USA",
-        "Device Type": "Server",
-        "Device Name": "NeoSentry NMS",
-        "Monitoring": {
-            "Ping": "yes",
-            "SNMP": "yes",
-            "Services": "22,80",
-            "Netflow Port": ""
-        }
-    },
-    "192.168.1.1": {
-        "Date Added": "May 16, 2016",
-        "Org Group": "Networking",
-        "Site": "",
-        "Region": "",
-        "Device Type": "Router",
-        "Device Name": "core-rt1",
-        "Monitoring": {
-            "Ping": "yes",
-            "SNMP": "yes",
-            "Services": "22",
-            "Netflow Port": ""
+        "added": "May 16, 2016",
+        "group": "Networking",
+        "site": "Boca Raton, FL, USA",
+        "type": "Server",
+        "name": "NeoSentry NMS",
+        "vendor": "",
+        "collectors": {
+            "ping": "yes",
+            "snmp": "yes",
+            "snmp-profile":"public",
+            "configuration":"yes",
+            "configuration-profile": "fw",
+            "services": "yes",
+            "service-ports": "22,80",
+            "netflow":"no",
+            "netflow-port": ""
         }
     }
     

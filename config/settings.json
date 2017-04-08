@@ -1,6 +1,9 @@
 {
-    "Server Settings":{
-        "Timezone": "America/New_York"
+    "Additional features that I may want to add":{
+        "Server Management": "Allow modification of system level settings like DNS from the web UI.",
+        "Service Moniroting": "Uses nmap/wget/etc to collect and monitor if ports are open and the service information.",
+        "Netflow Collection": "Collects netflow stats and runs reports",
+        "TACACS Management": "TACACS+ Server Configuration"
     },
     "Mail Settings":{
         "Host": "smtp.google.com",
@@ -12,46 +15,36 @@
         "Security": "tls/ssl",
         "Port": 587
     },
-    "Account Profiles": {
-        "Description": "List of Username/Password combos to get into the system. Leave username blank if it only requires a password. Elevated is the 2nd level password which is called in certain scripts. (ex. Cisco Enable, Check Point Expert",
-        "Array": [
-            {"Username": "admin","Password": "admin","Elevated": ""}
-        ]
+    "Task Scheduler":{
+        "Ping": { "Enabled": true, "Interval": 300, "Description": "Pings all devices that have this collector enabled. If ping fails a traceroute will be performed to see if there was a network interruption." },
+        "Traceroute": { "Enabled": true, "Interval": 86400, "Description": "Performs a typical traceroute and fails over to an intelligent tcp traceroute if the standard method fails." },
+        "SNMP System": { "Enabled": true, "Interval": 86400, "Description": "Collects basic SYSTEM info via SNMP." },
+        "SNMP HW": { "Enabled": true, "Interval": 900, "Description": "Collects basic Hardware info via SNMP." },
+        "SNMP Network": { "Enabled": true, "Interval": 300, "Description": "Collects Network interfaces and throughput stats via SNMP." },
+        "SNMP Routing": { "Enabled": true, "Interval": 3600, "Description": "Collects the Routing table via SNMP." },
+        "SNMP Custom": { "Enabled": true, "Interval": 3600, "Description": "Collects vendor specific SNMP information that's defined in the snmpmap file located in the conf directory." },
+        "Configuration": { "Enabled": true, "Interval": 86400, "Description": "Runs custom scripts to collect vendor specific configuration info." }
     },
-    "Ping Traceroute": {
-        "Ping Interval": 300,
-        "Traceroute Interval": 86400,
+    "Data Retention": {
         "Data History": 365,
         "Change History": 365,
         "Alert History": 365
     },
-    "SNMP": {
-        "System Interval": 86400,
-        "HW Interval": 900,
-        "Network Interval": 300,
-        "Routing Interval": 3600,
-        "Data History": 365,
-        "Change History": 365,
-        "Alert History": 365,
-        "SNMP Strings": [
-            {"value": "-v2c -c \"public\""},
-            {"value": "-v2c -c \"H0m3<ommunityMon\""},
-            {"value": "-v2c -c \"Tyc0-safety-pr0d\""}
-        ]
-    },
-    "SSH":{
-        "Description": "Info related to making an ssh connection"
+    "Account Profiles": {
+        "Description": "List of remote Username/Password combos to get into the system. Elevated is the 2nd level password which is called in certain scripts. (ex. Cisco Enable",
+        "fw": { "Username": "admin", "Password": "admin", "Elevated": "" }
 
     },
-    "Service":{
-        "Description": "Uses nmap/wget/etc to collect and monitor if ports are open and the service information."
+    "SNMP Communities": {
+        "public": { "version":"2c", "string":"public", "username":"","password":"" },
+        "routers1": { "version":"2c", "string":"H0m3<ommunityMon", "username":"","password":"" },
+        "sec-devices1": { "version":"2c", "string":"Tyc0-safety-pr0d", "username":"","password":"" }
+
     },
-    "Netflow":{
-        "Description": "Collects netflow stats and runs reports"
+    "Configuration Management":{
+        "Description": "Settings for connecting to devices to collect its configuration."
     },
-    "TACACS":{
-        "Description": "TACACS+ Server Configuration"
-    },
+
     "Alerts":{
         "Description": "Alert settings, only email alerts for now",
         "Email": "send-all-alerts-to-here@company.com",

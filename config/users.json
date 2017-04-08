@@ -4,6 +4,9 @@
     "auth_type":"app",
     "role":"admin",
     "name":"Default Admin",
-    "email":""
+    "email":"",
+    "documents":{
+      "doc-name": "encrypted contents"
+    }
   }
 }
