@@ -95,20 +95,20 @@ if (isset($_POST['mibsubmitbtn']) && isset($_FILES['mibfile'])) {
 }
 
 //get and write history storage setting variables
-if (isset($_POST['pingHistory'])) writeSettingValue("Ping Traceroute","history_ping", intval(trim($_POST['pingHistory'])));
-if (isset($_POST['trHistory'])) writeSettingValue("history_traceroute", intval(trim($_POST['trHistory'])));
-if (isset($_POST['pingAlertHistory'])) writeSettingValue("history_pingalerts", intval(trim($_POST['pingAlertHistory'])));
-if (isset($_POST['snmpHistory'])) writeSettingValue("history_snmp", intval(trim($_POST['snmpHistory'])));
-if (isset($_POST['snmpChangeHistory'])) writeSettingValue("history_snmpchange", intval(trim($_POST['snmpChangeHistory'])));
-if (isset($_POST['snmpAlertHistory'])) writeSettingValue("history_snmpalerts", intval(trim($_POST['snmpAlertHistory'])));
+if (isset($_POST['pingHistory'])) writeSettingsValue("Ping Traceroute","history_ping", intval(trim($_POST['pingHistory'])));
+if (isset($_POST['trHistory'])) writeSettingsValue("history_traceroute", intval(trim($_POST['trHistory'])));
+if (isset($_POST['pingAlertHistory'])) writeSettingsValue("history_pingalerts", intval(trim($_POST['pingAlertHistory'])));
+if (isset($_POST['snmpHistory'])) writeSettingsValue("history_snmp", intval(trim($_POST['snmpHistory'])));
+if (isset($_POST['snmpChangeHistory'])) writeSettingsValue("history_snmpchange", intval(trim($_POST['snmpChangeHistory'])));
+if (isset($_POST['snmpAlertHistory'])) writeSettingsValue("history_snmpalerts", intval(trim($_POST['snmpAlertHistory'])));
 
 //get values for history storage
-$pingHistory = getSettingValue("history_ping"); if ($pingHistory=="") $pingHistory=365;
-$trHistory = getSettingValue("history_traceroute"); if ($trHistory=="") $trHistory=365;
-$pingAlertHistory = getSettingValue("history_pingalerts"); if ($pingAlertHistory=="") $pingAlertHistory=365;
-$snmpHistory = getSettingValue("history_snmp"); if ($snmpHistory=="") $snmpHistory=365;
-$snmpChangeHistory = getSettingValue("history_snmpchange"); if ($snmpChangeHistory=="") $snmpChangeHistory=365;
-$snmpAlertHistory = getSettingValue("history_snmpalerts"); if ($snmpAlertHistory=="") $snmpAlertHistory=365;
+$pingHistory = getSettingsValue("history_ping"); if ($pingHistory=="") $pingHistory=365;
+$trHistory = getSettingsValue("history_traceroute"); if ($trHistory=="") $trHistory=365;
+$pingAlertHistory = getSettingsValue("history_pingalerts"); if ($pingAlertHistory=="") $pingAlertHistory=365;
+$snmpHistory = getSettingsValue("history_snmp"); if ($snmpHistory=="") $snmpHistory=365;
+$snmpChangeHistory = getSettingsValue("history_snmpchange"); if ($snmpChangeHistory=="") $snmpChangeHistory=365;
+$snmpAlertHistory = getSettingsValue("history_snmpalerts"); if ($snmpAlertHistory=="") $snmpAlertHistory=365;
 
 
 //DNS Settings
@@ -140,22 +140,22 @@ foreach ($dnsSettings as $row) {
 
 //Mail server settings
 if (isset($_POST['emailfrom'])) {
-	writeSettingValue("email_server", $_POST['emailserver']);
-	writeSettingValue("email_from", $_POST['emailfrom']);
+	writeSettingsValue("email_server", $_POST['emailserver']);
+	writeSettingsValue("email_from", $_POST['emailfrom']);
 	//writeSettingValue("email_user", $_POST['emailuser']);
 	//writeSettingValue("email_pass", $_POST['emailpass']);
-	writeSettingValue("email_to", $_POST['emailto']);
+	writeSettingsValue("email_to", $_POST['emailto']);
 	
 	//write the information to the ini file. do this before sending mail.
 	//ini_set("SMTP", $emailServer);
 	//ini_set("smtp_port", 25);
 	//ini_set("sendmail_from", $emailFrom);
 }
-$emailServer = getSettingValue("email_server");
-$emailFrom = getSettingValue("email_from");
-$emailUser = getSettingValue("email_user");
-$emailPass = getSettingValue("email_pass");
-$emailTo = getSettingValue("email_to");
+$emailServer = getSettingsValue("email_server");
+$emailFrom = getSettingsValue("email_from");
+$emailUser = getSettingsValue("email_user");
+$emailPass = getSettingsValue("email_pass");
+$emailTo = getSettingsValue("email_to");
 if ($emailFrom == "") $emailFrom = "qNMS-Notifications@your-email-domain.com";
 
 if (isset($_POST['emailTest'])) {

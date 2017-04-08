@@ -6,66 +6,133 @@
 
 include "_functions.php";
 include "_db_flatfiles.php"; //to load the device data
+//include "iptools.php";
 
-/* Get command line arguments, for internal processing
- *	-d: The device name or IP
- *  -t: Type of device so we know what script to run to collect the data
- *	Usage: php [this file] -d "10.10.10.10" -t "Check Point"
- */
-$o = getopt("d:t:"); // 1 : is required, 2 :: is optional
+set_include_path('./phpseclib');
+include('Net/SSH2.php');
+include('Net/SCP.php');
+
+/* Get command line arguments, for internal processing */
+$help = <<<EOT
+  -d: [Required] The device name or IP
+  -t: [Optional] Type of device so we know what script to run to collect the data
+  -c: [Optional] Get a console connectoin to test commands. 
+Example: php [this file] -d "10.10.10.10" -t "Check Point"
+EOT;
+$o = getopt("d:t:c"); // 1 : is required, 2 :: is optional
 $device = array_key_exists("d",$o) ? sanitizeString($o["d"]) : "";
 $type = array_key_exists("t",$o) ? $o["t"] : "";
+$console = array_key_exists("c",$o);
 
 
 if ($device=="" || $device=="all") {
     //load all devices, loop through each, and run the configuration management script that matches to each one
+    echo "Device is required. Use \"-d [device]\"\n";
+    echo $help . "\n";
     exit;
 }
 
-//we have a single device, lets match and collect
-$var["devicefolder"] = $gFolderScanData."/".$device;
-$var["username"] = "loaded-username";
-$var["password"] = "loaded-decrypted-pass";
-$var["password2"] = "loaded-decrypted-pass";
+// Set up some variables
+$devSettings = getDeviceSettings($device);
+$account = getSettingsValue("Account Profiles",$devSettings["Collectors"]["Account Profile"]);
+$saveToFolder = $gFolderScanData."/".$device;
+$saveToFile = "configuration.json";
+$username = "fwadmin";
+$password = "1<3@n0v3mb3rm00n#";
+$password2 = "1<3@n0v3mb3rm00n#";
 
 
-//$deviceFolder = $gFolderScanData."/".$device."/";
-
-$connection = ssh2_connect($device, 22);
-ssh2_auth_password($connection, $var["username"], $var["password"]);
-ssh2_exec($connection,"whoami");
-ssh2_shell();
-
-//SCP Exampt to get
-ssh2_scp_recv($connection, '/remote/filename', '/local/filename');
-
-//SFTP Example
-$sftp = ssh2_sftp($connection);
-$stream = fopen("ssh2.sftp://$sftp/path/to/file", 'r');
-
-/*
-Firewall Files: R77 Mgmt
-$FWDIR/database/objects.C
-$FWDIR/database/rules.C
-
-Older Backup files:
-$FWDIR/conf/objects_5_0.C
-$FWDIR/conf/objects.C_41
-$FWDIR/conf/objects.C
-$FWDIR/conf/rulebases_5_0.fws
 
 
-$FWDIR/log/
-fw log -l -n -p -z -s "March 20, 2017 10:50:00" fw.log | grep "; rule: "
-
-fw log -l -p -n -z -o -b "March 20, 2017 10:50:00" "March 23, 2017 10:52:00" fw.log
-fw log -l -p -n -z -o -s "March 20, 2017 10:50:00" fw.log
-
-22Mar2017 13:42:02 accept 10.59.31.10 >Internal inzone: Internal; outzone: External; service_id: http; src: 10.59.0.58; dst: 165.225.32.40; proto: tcp; xlatesrc: 38.131.4.154; NAT_rulenum: 5; NAT_addtnl_rulenum: 1; rule: 13; product: VPN-1 & FireWall-1; service: 80; s_port: 56985; xlatesport: 12825; product_family: Network;
-=> 22Mar2017 13:42:02 accept 10.59.31.10 >Internal inzone: Internal; outzone: External; service_id: http; src: 10.59.0.58; dst: 165.225.32.40; proto: tcp; xlatesrc: 38.131.4.154; NAT_rulenum: 5; NAT_addtnl_rulenum: 1; rule: 13; product: VPN-1 & FireWall-1; service: 80; s_port: 56985; xlatesport: 12825; product_family: Network;
-
-22Mar2017 13:42:02 monitor 10.59.31.10 >Internal src: 10.59.17.104; dst: 165.225.32.41; proto: tcp; message_info: Address spoofing; product: VPN-1 & FireWall-1; service: 80; s_port: 60163; product_family: Network;
-=> 22Mar2017 13:42:02 monitor 10.59.31.10 >Internal src: 10.59.17.104; dst: 165.225.32.41; proto: tcp; message_info: Address spoofing; product: VPN-1 & FireWall-1; service: 80; s_port: 60163; product_family: Network;
+// For testing
+if ($console) {
+    showConsoleConnection($device,$username,$password,$saveToFolder);
+    exit;
+}
 
 
- */
+//create the device directory if its not
+if (!is_dir($saveToFolder)) mkdir($saveToFolder, 0777, true);
+
+
+// CHECK POINT SCRIPT
+include "../config/scripts/checkpoint.php";
+$ret = runCollector($device,$saveToFolder,$saveToFile, $username,$password, $password2);
+writeLog("Configuration", $device, $ret);
+// END CHECK POINT SCRIPT
+
+
+
+
+
+
+
+
+
+function showConsoleConnection($device, $username, $password, $saveToFolder = ".") {
+    //Set up the SSH and SCP constructors
+    echo "connecting to $device\n";
+    $ssh = new Net_SSH2($device);
+    if (!$ssh->login($username, $password)) {
+        exit('Login Failed'."\n");
+    }
+    $scp = new Net_SCP($ssh);
+    //$ssh->_initShell();
+    echo $ssh->getBannerMessage();
+
+    //$ssh->write("?");
+    //$ssh->enablePTY();
+
+    // Give console access
+    echo "\nConnected to " . $device . "\n";
+    echo "To get a file run command '\$fileget [remote_file] [local_file]'\n";
+    echo "To get a file run command '\$fileput [remote_file] [local_file]'**\n";
+    echo "** Files will be copied to " . $saveToFolder . "\n\n";
+
+    $ret = "";
+    $readTo = "$username@";
+    $read = $ssh->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    echo $read;
+    //get the console prompt so we know when to stop reading text
+    if ($ssh->isTimeout()) $readTo = substr($read, strrpos($read,"\n"));
+
+    while($ssh->isConnected()) {
+        $cmd = rtrim(readline());
+
+        if ($cmd=="quit") break;
+        if (strstr($cmd,'$fileget')) { //$fileget [remote file] [local file]
+            $a = explode(" ",$cmd);
+            if (!$scp->get($a[1], $saveToFolder."/".$a[2])) {
+                echo "Failed Download. Syntax is \$fileget [remote_file] [local_file]\n";
+                throw new Exception("Failed to get file");
+            }
+
+        } elseif (strstr($cmd,'$fileput')) { //$fileput [remote file] [local file]
+            $a = explode(" ",$cmd);
+            if (!$scp->put($a[1], $saveToFolder."/".$a[2], NET_SCP_LOCAL_FILE)) {
+                echo "Failed Upload. Syntax is \$fileput [remote_file] [local_file]\n";
+                throw new Exception("Failed to send file");
+            }
+        } else {
+
+            //$ret = $ssh->exec(str_replace('$ret', $ret, $cmd));
+            //echo $ret;
+
+            $ssh->write(str_replace('$ret', $ret, $cmd)."\n");
+            //$read = $ssh->read('_@.*[$#>]_', NET_SSH2_READ_REGEX);
+            $read = $ssh->read($readTo);
+            echo $read;
+            //if we reached a timeout then we have a new console prompt, lets get it so we know where to read till
+            if ($ssh->isTimeout()) $readTo = trim(substr($read, strrpos($read,"\n")));
+
+        }
+
+
+
+    }
+
+    //disconnect
+    $ssh->disconnect();
+
+    echo "\nConnection Closed\n";
+}

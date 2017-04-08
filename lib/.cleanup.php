@@ -3,12 +3,12 @@
 include "_functions.php";
 
 //get values for history storage
-$pingHistory = getSettingValue("history_ping"); if ($pingHistory=="") $pingHistory=365;
-$trHistory = getSettingValue("history_traceroute"); if ($trHistory=="") $trHistory=365;
-$pingAlertHistory = getSettingValue("history_pingalerts"); if ($pingAlertHistory=="") $pingAlertHistory=365;
-$snmpHistory = getSettingValue("history_snmp"); if ($snmpHistory=="") $snmpHistory=365;
-$snmpChangeHistory = getSettingValue("history_snmpchange"); if ($snmpChangeHistory=="") $snmpChangeHistory=365;
-$snmpAlertHistory = getSettingValue("history_snmpalerts"); if ($snmpAlertHistory=="") $snmpAlertHistory=365;
+$pingHistory = getSettingsValue("history_ping"); if ($pingHistory=="") $pingHistory=365;
+$trHistory = getSettingsValue("history_traceroute"); if ($trHistory=="") $trHistory=365;
+$pingAlertHistory = getSettingsValue("history_pingalerts"); if ($pingAlertHistory=="") $pingAlertHistory=365;
+$snmpHistory = getSettingsValue("history_snmp"); if ($snmpHistory=="") $snmpHistory=365;
+$snmpChangeHistory = getSettingsValue("history_snmpchange"); if ($snmpChangeHistory=="") $snmpChangeHistory=365;
+$snmpAlertHistory = getSettingsValue("history_snmpalerts"); if ($snmpAlertHistory=="") $snmpAlertHistory=365;
 
 echo "<pre>\n";
 //cleanup system logs (to be added later) stored in ./data/logs with file name = to the date

@@ -3,7 +3,7 @@
 /**
     Some useful functions for parsing, converting, and testing IPs
 **/
-class iptools
+class IPTools
 {
     //find out if an IP or Subnet is inside a larger subnet
     function addressInNetwork($ip, $range)
@@ -50,6 +50,8 @@ class iptools
     // e.g. 255.255.255.128 = 25
     public function netmask2cidr($netmask)
     {
+        if (!strpos($netmask,".")) return $netmask; //this is not a valid netmask
+
         $bits = 0;
         $netmask = explode(".", $netmask);
 

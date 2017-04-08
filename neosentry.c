@@ -37,8 +37,8 @@ int main(int argc, char *argv[]) {
     
     /* Ensure we have the right number of arguments */
     if (argc < 2) {
-        printf("Usage: %s cmd [arguments]\n\nReal UID: %d Effective UID: %d\n", argv[0], ruid, euid);
-        return 1;
+        //printf("Usage: %s cmd [arguments]\n\nReal UID: %d Effective UID: %d\n", argv[0], ruid, euid);
+        //return 1;
     }
     
     /* only allow certain arguments - I'm letting the subscript handle this so I don't really care about this right now*/
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
         int pid = fork();
         if(pid == 0){ /* the forked process will do this */
-            printf("Child's PID is %d. Parent's PID is %d\n", getpid(), getppid());
+            //printf("Child's PID is %d. Parent's PID is %d\n", getpid(), getppid());
             execv(newargs[0], newargs);
         } else { /* the main process will wait */
             wait(NULL);

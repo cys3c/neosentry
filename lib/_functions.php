@@ -5,22 +5,23 @@ error_reporting(E_ALL);
 
 date_default_timezone_set('America/New_York');
 
-//$appname = 'qNMS';
+//$appname = 'NeoSentry NMS';
 $globalErrorVar = '';
 
 
 // Global variables
 $gFolderData = realpath("../data");
-$gFolderLogs = realpath("$gFolderData/logs");   //stores logs for the app and system. device logs stored in db or device folder
-$gFolderScanData = realpath("$gFolderData/devices");
-$gFolderBackups = realpath("$gFolderData/backups");
+$gFolderLogs = "$gFolderData/logs";   //stores logs for the app and system. device logs stored in db or device folder
+$gFolderScanData = "$gFolderData/devices";
+$gFolderBackups = "$gFolderData/backups";
 
 $gFolderConfigs = realpath("../config");
-$gFolderMibs = realpath("$gFolderConfigs/mibs");
-$gFileSettings = realpath("$gFolderConfigs/settings.json");
-$gFileSNMPMap = realpath("$gFolderConfigs/snmpmap.json");
-$gFileDevices = realpath("$gFolderConfigs/devices.json");
-$gFileSecurity = realpath("$gFolderConfigs/security.json");
+$gFolderMibs = "$gFolderConfigs/mibs";
+$gFileSNMPMap = "$gFolderConfigs/snmpmap.json";
+$gFileDevices = "$gFolderConfigs/devices.json";
+$gFileSettings = "$gFolderConfigs/settings.json";
+$gFileSecurity = "$gFolderConfigs/security.json";
+$gFileUsers = "$gFolderConfigs/users.json";
 
 // Global variables for Ping and Traceroute
 $ipListFile = "$gFolderScanData/ping.iplist"; //list of ip's that are allowing Ping monitoring.
@@ -87,21 +88,31 @@ function getDevicesArray() {
     global $gFileDevices;
     return json_decode(file_get_contents($gFileDevices),true);
 }
-function getSettingsArray() {
-    global $gFileSettings;
-    return json_decode(file_get_contents($gFileSettings));
+function getDeviceSettings($device){
+    $arr = getDevicesArray();
+    if (array_key_exists($device,$arr)) return $arr[$device];
+    return false;
 }
-function getSettingValue($section, $settingName) {
+function getSettingsArray($section = "") {
+    global $gFileSettings;
+    $s = json_decode(file_get_contents($gFileSettings), true);
+    if ($section != "") $s = array_key_exists($section,$s)?$s[$section]:false; // get the settings section if required
+
+    return $s;
+}
+function getSettingsValue($section, $settingName) {
     //JSON
     global $gFileSettings;
-    $arrSettings = json_decode(file_get_contents($gFileSettings));
+    $arrSettings = json_decode(file_get_contents($gFileSettings),true);
+    if (!array_key_exists($section,$arrSettings)) return false;
+    if (!array_key_exists($section,$arrSettings[$section])) return false;
     return $arrSettings[$section][$settingName];
 
 }
-function writeSettingValue($section, $settingName, $settingValue) {
+function writeSettingsValue($section, $settingName, $settingValue) {
     //JSON
     global $gFileSettings;
-    $arrSettings = json_decode(file_get_contents($gFileSettings));
+    $arrSettings = json_decode(file_get_contents($gFileSettings), true);
     $arrSettings[$section][$settingName] = $settingValue;
     return file_put_contents($gFileSettings, json_encode($arrSettings));
 }
@@ -134,7 +145,7 @@ function encryptString($string) {
 
     //load the encryption variables
     global $gFileSecurity;
-    $gSecurity = json_decode(file_get_contents($gFileSecurity));
+    $gSecurity = json_decode(file_get_contents($gFileSecurity), true);
     if ($gSecurity["secret_key"] == "" || $gSecurity["secret_iv"]) {
         $gSecurity["secret_key"] = bin2hex(openssl_random_pseudo_bytes(48));
         $gSecurity["secret_iv"] = bin2hex(openssl_random_pseudo_bytes(16));
@@ -148,9 +159,9 @@ function encryptString($string) {
     $output = base64_encode(openssl_encrypt($string, "AES-256-CBC", hash('sha256', $gSecurity["secret_key"]), 0, $iv));
     return $output;
 }
-function decryptString($string) use(&$gFileSecurity) {
+function decryptString($string){
     global $gFileSecurity;
-    $gSecurity = json_decode(file_get_contents($gFileSecurity));
+    $gSecurity = json_decode(file_get_contents($gFileSecurity), true);
 
    // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
     $iv = substr(hash('sha256', $gSecurity["secret_iv"]), 0, 16);
@@ -177,56 +188,5 @@ function hashString($string){
 }
 
 
-// ALERTING AND EMAILING //
 
-function sendMail($to, $subject, $body) {
-    require_once 'phpmailer/PHPMailerAutoload.php';
-    
-    $strTo = "";
-    $arrSettings = getSettingsArray();
-    $mail = new PHPMailer;
-
-    //$mail->SMTPDebug = 3;                                 // Enable verbose debug output
-
-    $mail->isSMTP();                                        // Set mailer to use SMTP
-    $mail->Host = $arrSettings["Mail Settings"]["Host"];    // Specify main and backup SMTP servers
-    $mail->SMTPAuth = $arrSettings["Mail Settings"]["SMTPAuth"];    // Enable SMTP authentication
-    $mail->Username = $arrSettings["Mail Settings"]["Username"];    // SMTP username
-    $mail->Password = $arrSettings["Mail Settings"]["Password"];    // SMTP password
-    $mail->SMTPSecure = $arrSettings["Mail Settings"]["Security"];  // Enable 'tls' or 'ssl'
-    $mail->Port = $arrSettings["Mail Settings"]["Port"];    // TCP port to connect to
-
-    $mail->setFrom($arrSettings["Mail Settings"]["From"]);
-    
-    if (is_array($to)) {                                    // Add a recipient
-        foreach ($to as $value) {
-            $mail->addAddress($value);
-            $strTo .= $value.";";
-        }
-    } else {
-        $mail->addAddress($to);
-        $strTo = $to.";";
-    }
-    //$mail->addReplyTo('info@example.com', 'Information');
-    //$mail->addCC('cc@example.com');
-    //$mail->addBCC('bcc@example.com');
-
-    //$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
-    //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
-    $mail->isHTML(true);                                    // Set email format to HTML
-
-    $mail->Subject = $subject;
-    $mail->Body    = $body;
-    $mail->AltBody = strip_tags($body);                     //non-html alternative for non-html mail clients
-    
-    $msg = 'Message has been sent to '.$strTo." Subject: $subject";
-    if(!$mail->send()) {
-        $msg = 'Error: Message could not be sent. ' . $mail->ErrorInfo;
-    }
-    
-    echo $msg;
-    writeLogFile('email.log',$msg);
-    return $msg;
-    
-}
 

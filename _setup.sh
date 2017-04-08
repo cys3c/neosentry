@@ -47,7 +47,7 @@ if [$(which yum) != '']; then
 	rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
     rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
     rpm -Uvh http://repo.mysql.com/mysql-community-release-el6-5.noarch.rpm
-	yum -y install php71w php71w-mysql php71w-gd php71w-mcrypt php71w-mbstring php71w-json php71w-pear
+	yum -y install php71w php71w-mysql php71w-gd php71w-mcrypt php71w-mbstring php71w-json php71w-pear php71-php-pecl-ssh2 php71w-pecl-mongodb.
 
 	# ---------- Start Services and Set Autorun -----------
 	echo Starting Services. 

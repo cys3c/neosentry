@@ -9,17 +9,18 @@ echo '
 				<div class="row">';
 
 //============================= do processing and output success / failure here ===========================
+/*
 $alertScript = (isset($_POST['alertscript']))?$_POST['alertscript']:""; //file data to add
 if ($devicelist != "") { //update the alert check script if needed
-	$ret = file_put_contents(".checkalerts.php", $alertScript);
+	$ret = file_put_contents("_alerting.php", $alertScript);
 	if ($ret===FALSE) {
-		echo '<div class="error">ERROR: Could not write to the .checkalerts.php file.</div><br>';
+		echo '<div class="error">ERROR: Could not write to the _alerting.php file.</div><br>';
 	} else {
 		echo '<div class="success">SUCCESS: $ret bytes were written to the alert check script.</div><br>';
 	}
 }
-$alertScript = file_get_contents(".checkalerts.php");
-
+$alertScript = file_get_contents("_alerting.php");
+*/
 
 
 

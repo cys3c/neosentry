@@ -136,7 +136,7 @@ function writeLog($category, $device, $data) {
     //Insert into SQL
     $retval = queryMysql("INSERT INTO log (type, device, value) VALUES('$category','$device','$data');");
 
-    //check for alerts (from .checkalerts.php)
+    //check for alerts (from _alerting.php)
     //checkAlerts($device, $category, $data);
 
     //for testing
