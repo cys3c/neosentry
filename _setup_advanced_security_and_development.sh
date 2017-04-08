@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # NeoSentry SETUP SCRIPT for other packages used in development
+# Additional packages for future development
 
 
 if [$(which yum) != '']; then 
