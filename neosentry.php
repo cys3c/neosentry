@@ -11,7 +11,7 @@ firstRunConfig(); // creates the settings files if they need to be created.
 
 $argMap = [];
 //add our command line arguments
-addArg("add", true, 1, "", "Add an element to the database");
+addArg("add", true, 0, "", "Add an element to the database");
 addArg("add account-profile", true, 1, "", "Add an account profile used to remotely log into a device to gather configs");
 addArg("add device", true, 1, "", "[hostname/IP] - The devices IP or hostname");
 addArg("add snmp-profile", true, 1, "", "Add SNMP connection info");
