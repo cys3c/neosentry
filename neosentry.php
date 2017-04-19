@@ -11,7 +11,7 @@ firstRunConfig(); // creates the settings files if they need to be created.
 
 $argMap = [];
 //add our command line arguments
-addArg("add", true, 1, "", "Add an element to the database");
+addArg("add", false, false, "", "Add an element to the database");
 addArg("add account-profile", true, 1, "", "Add an account profile used to remotely log into a device to gather configs");
 addArg("add device", true, 1, "", "[hostname/IP] - The devices IP or hostname");
 addArg("add snmp-profile", true, 1, "", "Add SNMP connection info");
@@ -38,130 +38,202 @@ if (PHP_SAPI == "cli") {
         exit;
     }
 
-    //process the arguments
-    $cmd = strtolower(array_shift($argv));
-    switch ($cmd) {
-        case "add":
-            processAdd($argv);
-            break;
-
-        case "delete":
-            processDelete($argv);
-            break;
-
-        case "show":
-            processShow($argv);
-            break;
-
-        case "set":
-            processSet($argv);
+    $arr = processArgs($argv);
+    $path = $arr["path"];
+    $vals = $arr["args"];
+    switch ($path) {
+        case "add device":
+            //add the device to the devices list
+            echo "$path:\n";
+            print_r($vals);
             break;
 
         default:
-            showHelp();
+            echo "No logic added for command '$path'\n";
+            print_r($vals);
             exit;
     }
 
-}
-
-function processAdd(&$argv) {
-    $help = '
-    account-profile  Add an account profile thats used for certain connection operations, like gathering device configs
-    alert            Add an alert rule
-    app-user         Add a user that can log into the Web UI
-    device           Add a device
-    snmp-community   Add SNMP connection info
-    ';
-    // show help if no arguments are passed
-    if (sizeof($argv) <=0 ) {
-        echo $help;
-        exit;
-    }
-
-    $descriptions["add"] = "Add something";
-    $command["add"]["device"] = "Add something";
-
-
-
-
-    //process the arguments
-    $cmd = strtolower(array_shift($argv));
-    switch ($cmd) {
-        case "device":
-            $device = array_shift($argv);
-            $map = argsToMap($argv, ["name", "type", "site", "group", "vendor",]);
-            processAdd($argv);
-            break;
-
-        case "app-user":
-            processDelete($argv);
-            break;
-
-
-        default:
-            echo $help;
-            exit;
-    }
-}
-function processDelete(&$argv) {
-
-}
-function processShow(&$argv) {
-
-}
-function processSet(&$argv) {
+    exit;
 
 }
 
 
-/**
- * @param $argv = the argument array
- * @param $map = an array of values to collect
+function addArg($path, $required = false, $takesInput = false, $regexConstraint = "", $description = ""){
+    //ex: addArg("add device host", true, 1, "[hostname/IP] Required. Takes 1 parameter, the devices IP or hostname");
+    //Allow option chaining if there's no more sub-options. ie chaining under "add device" since host
+    global $argMap;
+    $argMap[trim($path)] = array("required"=> $required, "input" => $takesInput, "constraint" => $regexConstraint, "description" => $description);
+}
+
+
+/** processes the command line arguments based on $argMap and either:
+ *      1. shows the help if theres an invalid command
+ *      2. returns an array with the filled arguments and command path
+ *
+ *  neosentry add device 10.1.1.1
  */
-function argsToMap(&$argv, $map) {
-    //for ()
+function processArgs(&$argv) {
+    global $argMap;
+    $path = "";
+    $vals = [];
+    $pathComplete = false;
+
+    //account for an empty argument path
+    if (sizeof($argv) <= 0) showHelp($path);
+
+    //loop through and get input
+    while (sizeof($argv) > 0) {
+        $key = array_shift($argv);
+        if (!$pathComplete) $path = trim($path." ".$key);
+
+        //see if this command path takes an argument
+        if (array_key_exists($path, $argMap)){
+            if ($argMap[$path]["input"]) {
+                //this command path takes input so lets get the data
+                $val = (sizeof($argv)>0)?array_shift($argv):"";
+                if ($val=="") showHelp($path);
+
+                $vals[$key] = $val;
+
+                //the path is complete at the first command that takes input
+                $pathComplete = true;
+            }
+        } else {
+            //invalid command
+            showHelp($path);
+        }
+
+    }
+
+    //if no values were populated then the command isn't valid, show the help
+    if (sizeof($vals) <=0) {
+        showHelp($path, "Incomplete command");
+    } else {
+        //loop through the values and make sure no extra arguments are passed that we don't want
+        foreach ($vals as $key => $value) {
+            $subCmd = trim(substr($path, strrpos(" ".$path," ")));
+            if ($subCmd != $key && !array_key_exists($path . " " . $key, $argMap)) {
+                showHelp($path,"Invalid parameter '$key'");
+            }
+        }
+    }
+
+
+    //we now have the values in $vals[]. lets verify required data and constraints
+    foreach ($argMap as $key => $arrParams) {
+        if (substr($key,0,strlen($path)) == $path) {
+            $cmd = trim(substr($key, strrpos($key," ")));
+
+            //ensure we have the required parameters
+            if ($arrParams["required"] && $arrParams["input"]) {
+                if (!array_key_exists($cmd,$vals)) {
+                    showHelp($path,"Required parameter is not present");
+                }
+            }
+
+            //check the constraints
+            if (array_key_exists($cmd,$vals) && $arrParams["constraint"] != "") {
+                $leftover = preg_replace($arrParams["constraint"],"",$vals[$cmd]);
+                if ($leftover != "" ) { //if we have characters that don't match the regex constraint
+                    showHelp($path,"Parameter constraint for '$cmd' did not pass.");
+                }
+            }
+
+        }
+    }
+
+    $arr["path"] = $path;
+    $arr["args"] = $vals;
 
     return $arr;
 }
 
-function addArg($path, $required = false, $numValues = 0, $regexConstraint = "", $description = ""){
-    //ex: addArg("add device host", true, 1, "[hostname/IP] Required. Takes 1 parameter, the devices IP or hostname");
-    //Allow option chaining if there's no more sub-options. ie chaining under "add device" since host
-    global $argMap;
-    $argMap[trim($path)] = array("required"=> $required, "values" => $numValues, "constraint" => $regexConstraint, "description" => $description);
-}
-function showHelp($path = "") {
+function showHelp($path = "", $error = "") {
     global $argMap;
 
     //define some variables, get the level of help commands we want to display.
-    $level = substr_count(ltrim($path." ")," "); //accommodates root and sub levels
+    $validPath = trim($path);
     $longestWord = 0;
     $arrHelp = [];
 
-    //get an array of the help lines
+    //find a valid root command
+    $cnt = 0;
+    while ($validPath != "" || $cnt > 50) {
+        if (array_key_exists($validPath,$argMap)) {
+            //valid command prefix, lets break the loop
+            break;
+
+        } else {
+            //back up one level
+            $validPath = trim(substr($validPath, 0, strrpos(" ".$validPath," ")));
+            if ($error == "" && strpos($validPath, "help") > 0) $error = "Invalid command '$path'";
+        }
+        $cnt++; //just in case we get stuck in a loop, this is our way out
+    }
+
+    //we have a valid path now, get the help for each sub command
     foreach ($argMap as $key => $arrParams) {
-        if (substr($key,0,strlen($path)) == $path && substr_count($key," ") == $level) {
+        if (substr($key,0,strlen($validPath)) == $validPath && substr_count($key," ") == substr_count(ltrim($validPath." "," ")," ")) {
             $cmd = trim(substr($key, strrpos($key," ")));
-            $req = $arrParams["required"] ? "Required" : "Optional";
-            $arrHelp[$cmd] = $cmd . "\t" . "$req. Takes {$arrParams["values"]} parameters: {$arrParams["description"]}";
+            $req = $arrParams["required"] ? "" : "Optional ";
+            if (!$arrParams["input"]) $req = ""; //if it doesn't take input then we don't need to specify a requirement
+
+            //for the help output and formatting of the output
+            $arrHelp[$cmd] = "$req{$arrParams["description"]}";
+            $l = strlen($cmd);
+            if ( $l > $longestWord) $longestWord = $l;
         }
     }
 
     //format the output
     $strHelp = "";
     foreach ($arrHelp as $key => $string) {
-        $strHelp .= $key . str_repeat(" ", $longestWord - strlen($key)) . "  " . $string . "\n";
+        $strHelp .= "  " . $key . str_repeat(" ", $longestWord - strlen($key)) . "  " . $string . "\n";
+    }
+
+    //if there's no help then there's no sub-parameters available. modify the help accordingly
+    if (array_key_exists($validPath,$argMap) && $strHelp == "") {
+        if ($argMap[$validPath]["input"]) {
+            $strHelp = "  This command takes 1 value and no additional parameters\n";
+            $strHelp .="     Command Help: " . $argMap[$validPath]["description"] . "\n\n";
+        }
     }
 
     //and display
     if ($strHelp == "") {
-        echo "\nError: Invalid Syntax, no help found for this command path.\n";
-        return false;
+        echo "\nError: Invalid Syntax, no help found for this command path. '$validPath'\n";
+
+    } else {
+        if ($error != "") echo "ERROR: $error\n";
+        $s = ($validPath != "") ? " for '$validPath'" : "";
+        $out = "Available commands".$s.":\n" . $strHelp;
+        consolePrint($out,str_repeat(" ",$longestWord)."    ");
     }
-    echo "\nAvailable Commands:\n\n" . $strHelp;
+
+    //always exit after showing the help
+    exit;
 }
 
+function consolePrint($text,$wrapPrefixString) {
+    $cols = intval(exec('tput cols'));
+    if (strlen($wrapPrefixString) * 3 <= $cols) {
+        $arr = explode("\n",$text);
+        foreach ($arr as $line) {
+            //if (strlen($line) > $cols) {
+                $i = 1;
+                while ($cols * $i < strlen($line)) {
+                    $line = substr_replace($line, "\n$wrapPrefixString", $cols * $i, 0);
+                    $i++;
+                }
+            //}
+            echo $line . "\n";
 
+        }
+    } else {
+        echo $text;
+    }
+}
 
 
 function firstRunConfig() {
@@ -169,6 +241,7 @@ function firstRunConfig() {
     global $gFileSettings, $gFileUsers;
 
     if(!file_exists($gFileSettings)) {
+        echo "First Run Config: Writing Default Configuration Settings\n";
         $s = '{
     "Mail Settings":{
         "Host": "localhost",
@@ -198,7 +271,7 @@ function firstRunConfig() {
         "Description": "List of remote Username/Password combos to get into the system. Elevated is the 2nd level password which is called in certain scripts. (ex. Cisco Enable",
     },
     "SNMP Communities": {
-        "public": { "version":"2c", "string":"public", "username":"","password":"" },
+        "public": { "version":"2c", "string":"public", "username":"","password":"" }
     },
     "Configuration Management":{
         "Description": "Settings for connecting to devices to collect its configuration."
@@ -224,6 +297,7 @@ function firstRunConfig() {
     }
 
     if(!file_exists($gFileUsers)) {
+        echo "First Run Config: Adding Default User\n";
         $u["admin"]["password"] = hashString("admin"); //default password
         $u["admin"]["name"] = "Default Admin";
         $u["admin"]["auth_type"] = "app";

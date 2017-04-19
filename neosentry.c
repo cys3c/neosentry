@@ -29,6 +29,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 
 int main(int argc, char *argv[]) {
     /* Get the real and effective UID's for reporting */
@@ -38,7 +41,8 @@ int main(int argc, char *argv[]) {
     /* Ensure we have the right number of arguments */
     if (argc < 2) {
         //printf("Usage: %s cmd [arguments]\n\nReal UID: %d Effective UID: %d\n", argv[0], ruid, euid);
-        //return 1;
+        printf("Invalid Command. For a list of commands run %s help\n", argv[0]);
+        return 1;
     }
     
     /* only allow certain arguments - I'm letting the subscript handle this so I don't really care about this right now*/
