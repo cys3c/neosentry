@@ -1,5 +1,4 @@
 # NeoSentry NMS
-===============
 
 NeoSentry NMS is an open-source, linux based, network monitoring solution, 
 built with security in mind. Real-time monitoring for all types of deviceng 
