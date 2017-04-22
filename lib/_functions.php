@@ -18,10 +18,15 @@ $gFolderBackups = "$gFolderData/backups";
 $gFolderConfigs = realpath("../config");
 $gFolderMibs = "$gFolderConfigs/mibs";
 $gFileSNMPMap = "$gFolderConfigs/snmpmap.json";
+
+//THESE MAY NOT BE NEEDED
 $gFileDevices = "$gFolderConfigs/devices.json";
 $gFileSettings = "$gFolderConfigs/settings.json";
 $gFileSecurity = "$gFolderConfigs/security.json";
-$gFileUsers = "$gFolderConfigs/users.json";
+$gFileUsers = "$gFolderConfigs/auth.json";
+
+
+
 
 // Global variables for Ping and Traceroute
 $ipListFile = "$gFolderScanData/ping.iplist"; //list of ip's that are allowing Ping monitoring.
@@ -84,39 +89,73 @@ function get_string_between($string, $start, $end){
 
 // FUNCTIONS FOR READING/WRITING CONFIGS AND SETTINGS //
 
+function getDocument($docName, $section = "") {
+    //$docName = 'settings' or 'devices' or 'security' or 'auth'
+    global $gFolderConfigs;
+    $content = json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true);
+    if ($section != "") {
+        $content = array_key_exists($section,$content)?$content[$section]:"";
+    }
+    //return an array with the content
+    return $content;
+}
+function writeToDocument($docName, $section, $arrValues) {
+    global $gFolderConfigs;
+    $content = json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true);
+
+    //update the content
+    if ($section == '') {
+        $content = $arrValues;
+    } else {
+        $content[$section] = $arrValues;
+    }
+
+    //write and return
+    return file_put_contents($gFolderConfigs . "/$docName.json", json_encode($content));
+}
+function deleteFromDocument($docName, $section) {
+    global $gFolderConfigs;
+    $content = getDocument($docName);
+    unset($content[$section]);
+    return file_put_contents($gFolderConfigs . "/$docName.json", json_encode($content));
+}
+
+// FUNCTIONS FOR DEVICES //
+
 function getDevicesArray() {
-    global $gFileDevices;
-    return json_decode(file_get_contents($gFileDevices),true);
+    return getDocument('devices');
 }
 function getDeviceSettings($device){
-    $arr = getDevicesArray();
-    if (array_key_exists($device,$arr)) return $arr[$device];
-    return false;
+    return getDocument('devices',$device);
 }
-function getSettingsArray($section = "") {
-    global $gFileSettings;
-    $s = json_decode(file_get_contents($gFileSettings), true);
-    if ($section != "") $s = array_key_exists($section,$s)?$s[$section]:false; // get the settings section if required
+function writeDeviceSettings($device, $arrSettings){
+    return writeToDocument('devices', $device, $arrSettings);
+}
 
-    return $s;
+// FUNCTIONS FOR SETTINGS //
+
+function getSettingsArray($section = "") {
+    return getDocument('settings', $section);
 }
 function getSettingsValue($section, $settingName) {
-    //JSON
-    global $gFileSettings;
-    $arrSettings = json_decode(file_get_contents($gFileSettings),true);
-    if (!array_key_exists($section,$arrSettings)) return false;
-    if (!array_key_exists($section,$arrSettings[$section])) return false;
-    return $arrSettings[$section][$settingName];
-
+    $arrSettings = getDocument('settings', $section);
+    if (!array_key_exists($settingName,$arrSettings)) return "";
+    return $arrSettings[$settingName];
 }
 function writeSettingsValue($section, $settingName, $settingValue) {
-    //JSON
-    global $gFileSettings;
-    $arrSettings = json_decode(file_get_contents($gFileSettings), true);
-    $arrSettings[$section][$settingName] = $settingValue;
-    return file_put_contents($gFileSettings, json_encode($arrSettings));
+    $arrSettings = getDocument('settings',$section);
+    $arrSettings[$settingName] = $settingValue;
+    return writeToDocument('settings', $section, $arrSettings);
 }
 
+// FUNCTIONS FOR USERS //
+
+function getUser($username) {
+    return getDocument('auth', $username);
+}
+function writeUser($username, $arrValues) {
+    return writeToDocument('auth',$username, $arrValues);
+}
 
 // FUNCTIONS FOR LOGGING INFORMATION //
 
@@ -136,7 +175,6 @@ function writeLogFile($fileName, $line) {
 
 }
 
-
 // FUNCTIONS FOR SECURITY //
 
 function encryptString($string) {
@@ -144,12 +182,11 @@ function encryptString($string) {
     // https://paragonie.com/book/pecl-libsodium/read/00-intro.md#what-is-libsodium
 
     //load the encryption variables
-    global $gFileSecurity;
-    $gSecurity = json_decode(file_get_contents($gFileSecurity), true);
+    $gSecurity = getDocument('security');
     if ($gSecurity["secret_key"] == "" || $gSecurity["secret_iv"]) {
         $gSecurity["secret_key"] = bin2hex(openssl_random_pseudo_bytes(48));
         $gSecurity["secret_iv"] = bin2hex(openssl_random_pseudo_bytes(16));
-        file_put_contents($gFileSecurity,json_encode($gSecurity));
+        writeToDocument('security',"",$gSecurity);
     }
 
     // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
@@ -160,8 +197,7 @@ function encryptString($string) {
     return $output;
 }
 function decryptString($string){
-    global $gFileSecurity;
-    $gSecurity = json_decode(file_get_contents($gFileSecurity), true);
+    $gSecurity = getDocument('security');
 
    // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
     $iv = substr(hash('sha256', $gSecurity["secret_iv"]), 0, 16);

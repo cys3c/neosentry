@@ -9,7 +9,6 @@
 include_once "_functions.php";
 
 
-
 // FUNCTIONS FOR LOGGING INFORMATION //
 
 /** Writes to the devices log file at /data/devices/[device]/log.log
