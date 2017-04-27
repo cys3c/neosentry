@@ -3,4 +3,5 @@ data/*
 config/devices.json
 config/security.json
 config/settings.json
-config/users.json
+config/auth.json
+www/_OLD
