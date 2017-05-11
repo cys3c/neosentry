@@ -7,21 +7,11 @@
   <link rel="shortcut icon" href="assets/images/favicon.png">
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-  <!-- Bootstrap 3.3.6 -->
-  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
-  <!-- Fonts: FontAwesome, Google Fonts  -->
-  <link href="assets/fonts/fonts.css" rel="stylesheet">
-  
-    <!-- Font Awesome 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-    -->
-    <!-- Ionicons 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-    -->
-	
-  <!-- Theme style -->
-  <link rel="stylesheet" href="assets/app.min.css">
-  <link rel="stylesheet" href="assets/app-skin.min.css">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/fonts/fonts.css" > <!-- Fonts: FontAwesome, Google Fonts  -->
+  <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css"> <!-- Bootstrap 3.3.6 -->
+  <link rel="stylesheet" href="assets/app.min.css">  <!-- AdminLTE Theme style, skin-blue -->
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -42,14 +32,14 @@ Apply one or more of the following classes to get the desired effect
 |               | sidebar-mini                            |
 |---------------------------------------------------------|
 -->
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini" ng-app="neosentry">
 <div class="wrapper">
 
   <!-- Main Header -->
   <header class="main-header">
 
     <!-- Logo -->
-    <a href="index2.html" class="logo">
+    <a href="#" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>Neo</b>Sentry</span>
       <!-- logo for regular state and mobile devices -->
@@ -81,7 +71,7 @@ Apply one or more of the following classes to get the desired effect
                     <a href="#">
                       <div class="pull-left">
                         <!-- User Image -->
-                        <img src="img/user.jpg" class="img-circle" alt="User Image">
+                        <img src="assets/images/user.jpg" class="img-circle" alt="User Image">
                       </div>
                       <!-- Message title and timestamp -->
                       <h4>
@@ -165,14 +155,14 @@ Apply one or more of the following classes to get the desired effect
             <!-- Menu Toggle Button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <!-- The user image in the navbar-->
-              <img src="img/user.jpg" class="user-image" alt="">
+              <img src="assets/images/user.jpg" class="user-image" alt="">
               <!-- hidden-xs hides the username on small devices so only the image appears. -->
               <span class="hidden-xs">Administrator</span>
             </a>
             <ul class="dropdown-menu">
               <!-- The user image in the menu -->
               <li class="user-header">
-                <img src="img/user.jpg" class="img-circle" alt="">
+                <img src="assets/images/user.jpg" class="img-circle" alt="">
 
                 <p>
                   Administrator
@@ -221,7 +211,7 @@ Apply one or more of the following classes to get the desired effect
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel">
         <div class="pull-left image">
-          <img src="img/user.jpg" class="img-circle" alt="">
+          <img src="assets/images/user.jpg" class="img-circle" alt="">
         </div>
         <div class="pull-left info">
           <p>Administrator</p>
@@ -230,7 +220,7 @@ Apply one or more of the following classes to get the desired effect
         </div>
       </div>
 
-      <!-- search form (Optional) 
+      <!-- search form -->
       <form action="#" method="get" class="sidebar-form">
         <div class="input-group">
           <input type="text" name="q" class="form-control" placeholder="Search...">
@@ -239,7 +229,7 @@ Apply one or more of the following classes to get the desired effect
                 </button>
               </span>
         </div>
-      </form>-->
+      </form>
       <!-- /.search form -->
 
       
@@ -249,10 +239,10 @@ Apply one or more of the following classes to get the desired effect
       <ul class="sidebar-menu">
         <li class="header">NAVIGATION</li>
         <!-- Optionally, you can add icons to the links -->
-        <li id="dashboard" class="active"><a href="#/dashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
-        <li id="settings"><a href="#/settings"><i class="fa fa-sliders"></i> <span>Settings</span></a></li>
-        <li id="devices"><a href="#/devices"><i class="fa fa-laptop"></i> <span>Devices</span></a></li>
-        <li id="logs"><a href="#/logs"><i class="fa fa-book"></i> <span>Logs & Alerts</span></a></li>
+        <li id="dashboard" class="active"><a href="#"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+        <li id="settings"><a href="#settings"><i class="fa fa-sliders"></i> <span>Settings</span></a></li>
+        <li id="devices"><a href="#devices"><i class="fa fa-laptop"></i> <span>Devices</span></a></li>
+        <li id="logs"><a href="#logs"><i class="fa fa-book"></i> <span>Logs & Alerts</span></a></li>
         
         <!-- SAMPLE
         <li class="treeview">
@@ -274,7 +264,7 @@ Apply one or more of the following classes to get the desired effect
   </aside>
 
   <!-- Content Wrapper. Contains page content -->
-  <div id="app-content" class="content-wrapper">
+  <div ng-view id="app-content" class="content-wrapper">
   </div>
   <!-- /.content-wrapper -->
 
@@ -367,19 +357,14 @@ Apply one or more of the following classes to get the desired effect
 </div>
 <!-- ./wrapper -->
 
-<!-- REQUIRED JS SCRIPTS -->
+<!-- JS SCRIPTS -->
 <script src="assets/plugins/jQuery/jquery-2.2.4.min.js"></script>
-<script src="assets/bootstrap/js/bootstrap.min.js"></script>
-<script src="assets/app-framework.js"></script><!-- AdminLTE App Framework -->
+<script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+<script src="assets/app-framework.js"></script> <!-- AdminLTE App Framework, includes fastclick and slimscroll-->
 
-<!--<script src="js/backbone.min.js"></script> For # routing -->
-<script src="https://rawgit.com/flatiron/director/master/build/director.min.js"></script>
+<script src="assets/plugins/angular/angular-all.min.js"></script> <!-- Angular Core & Routing -->
+<script src="assets/app.js"></script> <!-- Custom code for this app -->
 
-<script src="assets/app.js"></script><!-- Custom code for this app -->
-
-<!-- Extras that improve the app experience -->
-<script src="assets/plugins/slimScroll/jquery.slimscroll.min.js"></script> <!-- Required for fixed layout. small scrollbar -->
-<script src="assets/plugins/fastclick/fastclick.js"></script> <!-- Disables the click delay -->
 
 
 </body>

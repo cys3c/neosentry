@@ -1,5 +1,52 @@
 /* Additional custom functions for NeSentry NMS */
 
+/* Flatiron director routing */
+var router = Router({
+    '': function(){ loadPage("#dashboard", "#app-content", "dashboard.html");},
+    '/dashboard': function(){ loadPage("#dashboard", "#app-content", "dashboard.html");},
+    '/settings': function(){ loadPage("#settings", "#app-content", "settings.html");},
+    '/logs': function(){ loadPage("#logs", "#app-content", "logs.html");},
+    '/devices': {
+        '/:id': { on: function(id){ loadPage("#devices", "#app-content", "devices.php?name=" + id ); }},
+        on: function(){ loadPage("#devices", "#app-content", "devices.php");}
+    }
+}).configure();
+/*var allCalls = function(){console.log("do something every call");};
+ router.configure({on: allCalls});*/
+
+$( document ).ready(function() {
+    if(!window.location.hash) window.location.hash = "#/dashboard"; /* set the default location */
+    router.init();
+});
+/* End Routing */
+
+
+var app = angular.module("neosentry", ["ngRoute"]);
+app.config(function($routeProvider) {
+    $routeProvider
+        .when("/", {
+            templateUrl : "dashboard.html",
+        })
+        .when("/settings", {
+            templateUrl : "london.htm",
+            controller : "londonCtrl"
+        })
+        .when("/paris", {
+            templateUrl : "paris.htm",
+            controller : "parisCtrl"
+        });
+});
+app.controller("londonCtrl", function ($scope) {
+    $scope.msg = "I love London";
+});
+app.controller("parisCtrl", function ($scope) {
+    $scope.msg = "I love Paris";
+});
+
+
+
+
+
 /* add a loader, then use jquery to dynamically load the content */
 function loadPage(linkID, containerID, link, useLoader){
     /* Set the right menu item active */
@@ -20,26 +67,7 @@ function loadPage(linkID, containerID, link, useLoader){
         if(statusTxt === "error") console.log(linkID + " Error: " + xhr.status + ": " + xhr.statusText);
     });
 }
-/* Flatiron director routing */
-var router = Router({
-    '': function(){ loadPage("#dashboard", "#app-content", "dashboard.html");},
-    '/dashboard': function(){ loadPage("#dashboard", "#app-content", "dashboard.html");},
-    '/settings': function(){ loadPage("#settings", "#app-content", "settings.html");},
-    '/logs': function(){ loadPage("#logs", "#app-content", "logs.html");},
-    '/devices': {
-        '/:id': { on: function(id){ loadPage("#devices", "#app-content", "devices.php?name=" + id ); }},
-        on: function(){ loadPage("#devices", "#app-content", "devices.php");}
-    }
-}).configure();
-/*var allCalls = function(){console.log("do something every call");};
-router.configure({on: allCalls});*/
 
-$( document ).ready(function() {
-    if(!window.location.hash) window.location.hash = "#/dashboard"; /* set the default location */
-    router.init();
-});
-
-/* End Routing */
 
 
 
