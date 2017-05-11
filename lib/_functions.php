@@ -60,7 +60,7 @@ if (!is_dir($gFolderScanData)) mkdir($gFolderScanData, 0777, true);
 
 
 
-function destroySession() {
+function sessionDestroy() {
 	$_SESSION=array();
 	
 	if (session_id() != "" || isset($COOKIE[session_name()]))
@@ -68,6 +68,31 @@ function destroySession() {
 		
 	session_destroy();
 }
+/*
+ *  starts a secure php session
+ */
+function sessionStart($regenerate_id = false) {
+    //exit if a session exists and we aren't regenerating
+    if (session_id() != "" && $regenerate_id == false) return;
+
+    $httpsOnly = $secure = ($_SERVER['HTTPS']=='')?false:true;
+    $httponly = true;   // This stops JavaScript being able to access the session id.
+
+    // Forces sessions to only use cookies.
+    if (ini_set('session.use_only_cookies', 1) === FALSE) {
+        //header("Location: /error.php?err=Could not initiate a safe session (ini_set)");
+        echo "Could not initiate a safe session (ini_set)";
+        exit();
+    }
+    // Gets current cookies params.
+    $cookieParams = session_get_cookie_params();
+    session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $httpsOnly, $httponly);
+    //session_name($GLOBALS['session_name']); // this is expensive and appears to be unnecessary
+    session_start();            // Start the PHP session
+    if ($regenerate_id==true) session_regenerate_id(true);    // regenerated the session, delete the old one.
+
+}
+
 
 function sanitizeString($var) {
 	$var = strip_tags(trim($var));

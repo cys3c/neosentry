@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="neosentry">
     <head>
         <title>NeoSentry Login</title>
-        <link rel="shortcut icon" href="img/favicon.png">
+        <link rel="shortcut icon" href="assets/images/favicon.png">
 
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,8 +10,10 @@
         <meta name="description" content="">
         <meta name="author" content="">
 
-        <link href="fonts/fonts.css" rel="stylesheet">
-        <link href="css/application.min.css" rel="stylesheet">
+        <!-- Styles -->
+        <link rel="stylesheet" href="assets/fonts/fonts.css" > <!-- Fonts: FontAwesome, Google Fonts  -->
+        <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css"> <!-- Bootstrap 3.3.6 -->
+        <link rel="stylesheet" href="assets/app.min.css">  <!-- AdminLTE Theme style, skin-blue -->
         
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -22,7 +24,7 @@
     </head>
     <body class="bgcover">
         <!-- Add a background cover photo 
-        <img src="img/login-bg.jpg" class="bg"> -->
+        <img src="assets/images/login-bg.jpg" class="bg"> -->
         <!-- End background cover photo -->
         
         <div class="single-widget-container">
@@ -68,9 +70,14 @@
             </section>
         </div>
         
-        <!-- common libraries. -->
-        <script src="js/jquery.min-2.1.4.js"></script>
-        <script src="js/bootstrap.min.js"></script>
+        <!-- JS SCRIPTS -->
+        <script src="assets/plugins/jQuery/jquery-2.2.4.min.js"></script>
+        <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+        <script src="assets/plugins/angular/angular-all.min.js"></script> <!-- Angular Core & Routing -->
+        <!-- <script src="assets/app-framework.js"></script> AdminLTE App Framework, includes fastclick and slimscroll-->
+
+        <script src="assets/app.js"></script> <!-- Custom code for this app -->
+
         
     </body>
 </html>
