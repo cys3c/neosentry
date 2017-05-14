@@ -3,7 +3,7 @@
  * Main core logic to handle elevated and centralized tasks
  */
 
-include "lib/_functions.php";
+include_once "lib/_functions.php";
 firstRunConfig(); // creates the settings files if they need to be created.
 
 //var_dump($argv);
@@ -243,16 +243,22 @@ function firstRunConfig() {
     if(!file_exists($gFileSettings)) {
         echo "First Run Config: Writing Default Configuration Settings\n";
         $s = '{
-    "Mail Settings":{
-        "Host": "localhost",
-        "From": "NMS-Notifications@company.com",
-        "Username": "authuser",
-        "Password": "encrypted-pass",
-        "SMTPAuth": true,
-        "Security": "tls/ssl",
-        "Port": 587
+    "'.SETTING_CATEGORY_SESSION.'":{
+        "login_max_failed": 5,
+        "login_lockout_time": 300,
+        "session_length_default": 3600,
+        "session_length_remember": 5184000
     },
-    "Task Scheduler":{
+    "'.SETTING_CATEGORY_MAIL.'":{
+        "host": "localhost",
+        "from": "NMS-Notifications@company.com",
+        "username": "authuser",
+        "password": "encrypted-pass",
+        "smtpauth": true,
+        "security": "tls/ssl",
+        "port": 587
+    },
+    "'.SETTING_CATEGORY_TASKS.'":{
         "Ping": { "Enabled": true, "Interval": 300, "Description": "Pings all devices that have this collector enabled. If ping fails a traceroute will be performed to see if there was a network interruption." },
         "Traceroute": { "Enabled": true, "Interval": 86400, "Description": "Performs a typical traceroute and fails over to an intelligent tcp traceroute if the standard method fails." },
         "SNMP System": { "Enabled": true, "Interval": 86400, "Description": "Collects basic SYSTEM info via SNMP." },
@@ -262,33 +268,33 @@ function firstRunConfig() {
         "SNMP Custom": { "Enabled": true, "Interval": 3600, "Description": "Collects vendor specific SNMP information that\'s defined in the snmpmap file located in the conf directory." },
         "Configuration": { "Enabled": true, "Interval": 86400, "Description": "Runs custom scripts to collect vendor specific configuration info." }
     },
-    "Data Retention": {
+    "'.SETTING_CATEGORY_RETENTION.'": {
         "Data History": 365,
         "Change History": 365,
         "Alert History": 365
     },
-    "Account Profiles": {
-        "Description": "List of remote Username/Password combos to get into the system. Elevated is the 2nd level password which is called in certain scripts. (ex. Cisco Enable",
+    "'.SETTING_CATEGORY_PROFILES.'": {
+        "Description": "List of remote Username/Password combos to get into the system. Elevated is the 2nd level password which is called in certain scripts. (ex. Cisco Enable"
     },
-    "SNMP Communities": {
+    "'.SETTING_CATEGORY_SNMP.'": {
         "public": { "version":"2c", "string":"public", "username":"","password":"" }
     },
-    "Configuration Management":{
+    "'.SETTING_CATEGORY_CONFIGMGMT.'":{
         "Description": "Settings for connecting to devices to collect its configuration."
     },
-    "Alerts":{
+    "'.SETTING_CATEGORY_ALERTS.'":{
         "Description": "Alert settings, only email alerts for now",
         "Email": "send-all-alerts-to-here@company.com",
         "Alert Site Contacts": "yes/no, this will email the contact configured for the site where the device is located",
         "Ping":{
             "Enabled": true,
             "Threshold": "5, trigger an alert after this many ping fails."
-        },
+        }
     },
     
-    "Site Information":"",
-    "Region Information":"",
-    "Contacts":""
+    "'.SETTING_CATEGORY_SITES.'":"",
+    "'.SETTING_CATEGORY_REGIONS.'":"",
+    "'.SETTING_CATEGORY_CONTACTS.'":""
     
 }';
 
@@ -299,6 +305,7 @@ function firstRunConfig() {
     if(!file_exists($gFileUsers)) {
         echo "First Run Config: Adding Default User\n";
         $u["admin"]["password"] = hashString("admin"); //default password
+        $u["admin"]["api_key"] = strtoupper(randomToken()); //default api key, can be used as a password for automated tasks
         $u["admin"]["name"] = "Default Admin";
         $u["admin"]["auth_type"] = "app";
         $u["admin"]["role"] = "admin";

@@ -8,8 +8,24 @@ date_default_timezone_set('America/New_York');
 //$appname = 'NeoSentry NMS';
 $globalErrorVar = '';
 
+//Global Constants
+const SETTING_CATEGORY_SESSION = "Session Settings";
+const SETTING_CATEGORY_MAIL = "Mail Settings";
+const SETTING_CATEGORY_TASKS = "Task Scheduler";
+const SETTING_CATEGORY_RETENTION = "Data Retention";
+const SETTING_CATEGORY_PROFILES = "Account Profiles";
+const SETTING_CATEGORY_SNMP = "SNMP Settings";
+const SETTING_CATEGORY_CONFIGMGMT = "Configuration Management";
+const SETTING_CATEGORY_ALERTS = "Alerts";
+const SETTING_CATEGORY_SITES = "Sites";
+const SETTING_CATEGORY_REGIONS = "Regions";
+const SETTING_CATEGORY_CONTACTS = "Contacts";
 
-// Global variables
+const ROLE_ADMIN = "admin"; //can write to the database and view settings
+const ROLE_READONLY = "readonly"; //can only read
+
+
+// Global File and Folder variables
 $gFolderData = realpath("../data");
 $gFolderLogs = "$gFolderData/logs";   //stores logs for the app and system. device logs stored in db or device folder
 $gFolderScanData = "$gFolderData/devices";
@@ -18,6 +34,7 @@ $gFolderBackups = "$gFolderData/backups";
 $gFolderConfigs = realpath("../config");
 $gFolderMibs = "$gFolderConfigs/mibs";
 $gFileSNMPMap = "$gFolderConfigs/snmpmap.json";
+
 
 //THESE MAY NOT BE NEEDED
 $gFileDevices = "$gFolderConfigs/devices.json";
@@ -60,45 +77,11 @@ if (!is_dir($gFolderScanData)) mkdir($gFolderScanData, 0777, true);
 
 
 
-function sessionDestroy() {
-	$_SESSION=array();
-	
-	if (session_id() != "" || isset($COOKIE[session_name()]))
-		setcookie(session_name(), '', time()-2592000, '/');
-		
-	session_destroy();
-}
-/*
- *  starts a secure php session
- */
-function sessionStart($regenerate_id = false) {
-    //exit if a session exists and we aren't regenerating
-    if (session_id() != "" && $regenerate_id == false) return;
-
-    $httpsOnly = $secure = ($_SERVER['HTTPS']=='')?false:true;
-    $httponly = true;   // This stops JavaScript being able to access the session id.
-
-    // Forces sessions to only use cookies.
-    if (ini_set('session.use_only_cookies', 1) === FALSE) {
-        //header("Location: /error.php?err=Could not initiate a safe session (ini_set)");
-        echo "Could not initiate a safe session (ini_set)";
-        exit();
-    }
-    // Gets current cookies params.
-    $cookieParams = session_get_cookie_params();
-    session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $httpsOnly, $httponly);
-    //session_name($GLOBALS['session_name']); // this is expensive and appears to be unnecessary
-    session_start();            // Start the PHP session
-    if ($regenerate_id==true) session_regenerate_id(true);    // regenerated the session, delete the old one.
-
-}
-
-
 function sanitizeString($var) {
-	$var = strip_tags(trim($var));
-	$var = htmlentities($var); //prevents XSS when displaying text in HTML
-	$var = stripslashes($var); //removes \ from the text, \\ becomes \
-	return $var; //turns returns into \r\n, and a few other character replacements
+    $var = strip_tags(trim($var));
+    $var = htmlentities($var); //prevents XSS when displaying text in HTML
+    $var = stripslashes($var); //removes \ from the text, \\ becomes \
+    return $var; //turns returns into \r\n, and a few other character replacements
 }
 
 function get_string_between($string, $start, $end){
@@ -112,11 +95,142 @@ function get_string_between($string, $start, $end){
 
 
 
+
+
+// FUNCTIONS FOR SESSION AND USER LOGIN //
+
+function isLoggedIn() {
+    if (array_key_exists('name',$_SESSION)) return true;
+    else return false;
+}
+function sessionDestroy() {
+	/* Alternative method to check the session before resetting is time
+    $_SESSION=array();
+	if (session_id() != "" || isset($COOKIE[session_name()]))
+		setcookie(session_name(), '', time()-2592000, '/');
+    //*/
+
+    session_unset();    //remove session variables
+    setcookie(session_name(),'',time()-2592000,'/');  //trigger the deletion of the cookie by expiring it
+    session_destroy();  //and finally destroy the session
+}
+/*
+ *  starts a secure php session
+ */
+function sessionStart($regenerate_id = false) {
+    /* Forces sessions to only use cookies.
+    if (ini_set('session.use_only_cookies', 1) === FALSE) {
+        //header("Location: /error.php?err=Could not initiate a safe session (ini_set)");
+        echo "Could not initiate a safe session (ini_set)";
+        exit();
+    }//*/
+    /*
+    $httpsOnly = $secure = (array_key_exists('HTTPS',$_SERVER))?false:true;
+    $httpOnly = true;   // This stops JavaScript being able to access the session id.
+
+    // Gets current cookies params.
+    $cookieParams = session_get_cookie_params();
+    session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $httpsOnly, $httpOnly);
+    //session_name($GLOBALS['session_name']); // this is expensive and appears to be unnecessary
+    //*/
+    session_start();    // Start the PHP session
+    if ($regenerate_id==true) session_regenerate_id(true);    // regenerated the session, delete the old one.
+
+    //update the users last active time
+    if (array_key_exists('id',$_SESSION) && $_SESSION["id"] != "") {
+        $u = getUser($_SESSION["id"]);
+        $u["last_active"] = time();
+        writeUser($_SESSION["id"],$u);
+    }
+
+}
+function sessionLogin($id, $pass, $remember_session = false) {
+    /*  read from the user db
+     *  email, token (aka salted/hashed/pw), last_login, last_active, last_failed, failed_count, recovery_token, recovery_time
+     *  OTHER VARIABLES:    display_name, display_image, website, [all form variables], membership_start, membership_end
+     */
+
+    //exit if the id or pass is empty
+    if (trim($id)=='') { return "Username cannot be blank."; }
+    if (trim($pass)=='') { return "Password cannot be blank."; }
+
+    //set the variables
+    $userData = getUser($id);
+    $ret = "Invalid Username or Password";   //default return value
+    $maxFailed = getSettingsValue(SETTING_CATEGORY_SESSION,"login_max_failed",5); //failed attempts before lockout
+    $lockoutTime = getSettingsValue(SETTING_CATEGORY_SESSION,"login_lockout_time",300); //time in seconds
+
+
+    if ($userData != '') {
+        //the user exists, lets check for possible brute force
+        if (array_key_exists("failed_count", $userData) && $userData["failed_count"] >= $maxFailed) {
+            //too many failed attempts, lets make sure 5 minutes (5*60) has passed
+            if ($userData["last_failed"] > (time()-$lockoutTime)) {
+                //5 minutes has NOT passed
+                $ret = "Too many failed attempts, you must wait 5 minutes to try again or you can reset your password with the form below.";
+                return $ret;
+            }
+        }
+
+        //brute force check passed, continue with Auth
+        //see if password hashes match, or password matches the api_key
+        $api = array_key_exists("api_key",$userData)?$userData["api_key"]:"";
+        if (password_verify($pass,$userData["password"]) || (strlen($api) > 16 && $api == $pass) ) {
+            //the passwords match. set session username and create a session key/token
+            //session_regenerate_id(true);
+            $_SESSION["role"] = $userData["role"];
+            //if ($api==$pass) $_SESSION["role"] = ROLE_READONLY; //to protect the database
+            $_SESSION["id"] = $id;
+            $_SESSION["name"] = $userData["name"];
+            $_SESSION["email"] = $userData["email"];
+            $_SESSION["created"] = $userData["created"];
+            $_SESSION["last_login"] = time();
+            //$_SESSION["token"] = randomToken(); //different from the token in the db
+
+            //reset the failed count and set the login time
+            $userData["failed_count"] = 0;
+            $userData["last_login"] = time();
+
+            //set session length
+            $sLen = $remember_session?getSettingsValue(SETTING_CATEGORY_SESSION,"session_length_remember",604800):getSettingsValue(SETTING_CATEGORY_SESSION,"session_length_default",3600);
+            ini_set('session.gc_maxlifetime', $sLen);
+            session_set_cookie_params($sLen);
+
+            $ret = true;
+
+        } else {
+            //failed login attempt, update some stats
+            $userData["last_failed"] = time();
+            if (!array_key_exists("failed_count", $userData)) $userData["failed_count"] = 0;
+            $userData["failed_count"] = intval($userData["failed_count"])+1;
+            $subMessage = (intval($userData["failed_count"])==$maxFailed)?
+                "Your account is locked for ".($lockoutTime/60)." minutes.":
+                "You have ".($maxFailed-intval($userData["failed_count"]))." more attempts before your account is locked.";
+
+            $ret = "Incorrect Password. $subMessage";
+        }
+
+        //now write the changed data to the user table
+        writeUser($id,$userData);
+
+    } else {
+        $ret = "Account does not exist.";
+    }
+
+    return $ret;
+}
+
+
+
 // FUNCTIONS FOR READING/WRITING CONFIGS AND SETTINGS //
 
 function getDocument($docName, $section = "") {
     //$docName = 'settings' or 'devices' or 'security' or 'auth'
     global $gFolderConfigs;
+
+    //if the document doesn't exist then lets include the main php which does a firstRun and creates the initial docs
+    if (!file_exists($gFolderConfigs . "/$docName.json")) include_once "../neosentry.php";
+
     $content = json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true);
     if ($section != "") {
         $content = array_key_exists($section,$content)?$content[$section]:"";
@@ -126,6 +240,11 @@ function getDocument($docName, $section = "") {
 }
 function writeToDocument($docName, $section, $arrValues) {
     global $gFolderConfigs;
+
+    //if the document doesn't exist then lets include the main php which does a firstRun and creates the initial docs
+    if (!file_exists($gFolderConfigs . "/$docName.json")) include_once "../neosentry.php";
+
+    //get the content
     $content = json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true);
 
     //update the content
@@ -162,9 +281,9 @@ function writeDeviceSettings($device, $arrSettings){
 function getSettingsArray($section = "") {
     return getDocument('settings', $section);
 }
-function getSettingsValue($section, $settingName) {
+function getSettingsValue($section, $settingName, $defaultReturnValue = "") {
     $arrSettings = getDocument('settings', $section);
-    if (!array_key_exists($settingName,$arrSettings)) return "";
+    if (!array_key_exists($settingName,$arrSettings)) return $defaultReturnValue;
     return $arrSettings[$settingName];
 }
 function writeSettingsValue($section, $settingName, $settingValue) {
@@ -248,6 +367,15 @@ function hashString($string){
     return password_hash($string,PASSWORD_DEFAULT);
 }
 
+function randomToken($length = 32){
+    if(!isset($length) || intval($length) <= 8 ){ $length = 32; }
+    if (function_exists('openssl_random_pseudo_bytes')) {
+        return bin2hex(openssl_random_pseudo_bytes($length));
+    }
+    if (function_exists('random_bytes')) { //PHP 7
+        return bin2hex(random_bytes($length));
+    }
 
+}
 
 

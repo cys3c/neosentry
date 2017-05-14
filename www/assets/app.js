@@ -1,6 +1,6 @@
 /* Additional custom functions for NeSentry NMS */
 
-/* Flatiron director routing */
+/* Flatiron director routing
 var router = Router({
     '': function(){ loadPage("#dashboard", "#app-content", "dashboard.html");},
     '/dashboard': function(){ loadPage("#dashboard", "#app-content", "dashboard.html");},
@@ -10,36 +10,65 @@ var router = Router({
         '/:id': { on: function(id){ loadPage("#devices", "#app-content", "devices.php?name=" + id ); }},
         on: function(){ loadPage("#devices", "#app-content", "devices.php");}
     }
-}).configure();
+}).configure();*/
 /*var allCalls = function(){console.log("do something every call");};
  router.configure({on: allCalls});*/
 
+/*
 $( document ).ready(function() {
-    if(!window.location.hash) window.location.hash = "#/dashboard"; /* set the default location */
+    if(!window.location.hash) window.location.hash = "#/dashboard"; // set the default location
     router.init();
-});
+}); */
 /* End Routing */
 
 
 var app = angular.module("neosentry", ["ngRoute"]);
-app.config(function($routeProvider) {
+app.config(function($routeProvider, $locationProvider) {
     $routeProvider
         .when("/", {
             templateUrl : "dashboard.html",
+			controller : "dashboardCtrl"
+        })
+        .when("/dashboard", {
+            templateUrl : "dashboard.html",
+            controller : "dashboardCtrl"
         })
         .when("/settings", {
-            templateUrl : "london.htm",
-            controller : "londonCtrl"
+            templateUrl : "settings.html",
+            controller : "settingsCtrl"
         })
-        .when("/paris", {
-            templateUrl : "paris.htm",
-            controller : "parisCtrl"
+        .when("/devices", {
+            templateUrl : "devices.html",
+            controller : "devicesCtrl"
+        })
+        .when("/logs", {
+            templateUrl : "logs.html",
+            controller : "logsCtrl"
         });
+
+    // use the HTML5 History API
+    $locationProvider.html5Mode(true);
 });
-app.controller("londonCtrl", function ($scope) {
+
+/* The Main controller has always viewable and accessible information like username, search function, etc */
+app.controller("mainCtrl", function ($scope, $http) {
+	/* Get the Data for the main page */
+    $http.get("/api/sessiondata")
+        .success(function (data) {
+            $scope.session = data;
+        })
+        .error(function (data, status, header, config) {
+            console.log("there was an error");
+        });
+    $scope.session = "I love London";
+});
+app.controller("dashboardCtrl", function ($scope) {
     $scope.msg = "I love London";
 });
-app.controller("parisCtrl", function ($scope) {
+app.controller("settingsCtrl", function ($scope) {
+    $scope.msg = "I love London";
+});
+app.controller("devicesCtrl", function ($scope) {
     $scope.msg = "I love Paris";
 });
 
