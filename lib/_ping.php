@@ -9,19 +9,15 @@ include "_functions.php";
 // Variables
 $ipList = "";
 
-
 // Create the device list with pingable IP's
 $arrDevices = getDevicesArray();
 foreach ($arrDevices as $field => $value) {
     //echo '\n'.$field." = ".$value['Monitoring']['Ping']."\n";
-    if ($value['Monitoring']['Ping']=="yes") {
+    if ($value['collectors']['ping']=="yes") {
         $ipList .= $field."\n";
     }
 }
 //echo print_r($deviceList, true);
-
-
-
 nmapScanAndParseTo($pingOutFile, $ipList, $ipListFile);
 
 
@@ -61,9 +57,7 @@ function nmapScanAndParseTo($outFile, $ipList, $ipListFile) {
     //write the output in json format
     file_put_contents($outFile,json_encode($arrPingNew));
 
-    /*
-     * TODO: NOW WE CAN COMPARE THE OLD AND NEW FILES AND WRITE TO THE CHANGE LOG
-     */
+
     // detectChangesForPing($arrPingOld, $arrPingNew) // This function will trigger an alert action which will run a traceroute
 
 }

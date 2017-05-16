@@ -26,26 +26,46 @@ $device = array_key_exists("d",$o) ? $o["d"] : "";
 if ($device=="") { echo "Device is required. \n$help"; exit; }
 
 
+//include the necessary action library
+if ($action=='ping') {
+    include "_ping.php";
+} elseif ($action=='traceroute') {
+    include "_traceroute.php";
+} elseif ($action=='snmp') {
+    include "_snmp.php";
+} elseif ($action=='configmgmt') {
+    include "_configmgmt.php";
+} else { //no valid action
+
+}
+
 
 if ($device=="all" || $device=="*") { //defaults to all
     writeLogFile("", "Running ".$action." on ALL devices."); //also echos to the console
 
     // Load the devices
     $arrDevices = getDevicesArray(); //json_decode(file_get_contents($pingOutFile), true);
+    $retArr = []; //return array
 
-    // Loop through each device and run traceroute
+    // Create a pool and Loop through each device
     $count = 0;
-    foreach($arrDevices as $device=>$val) {
+    foreach($arrDevices as $device=>$deviceInfo) {
         if ($device!="") {
             // start a thread for each trace
-            $worker[$device] = new CollectionThread($device, "$gFolderScanData/$device/$tracerouteFilename");
+            $worker[$device] = new collectionThread($device, $deviceInfo,"$gFolderScanData/$device");
             $count++;
 
             // lazily just wait x milliseconds every y threads.
 
-            if ($count >= $maxThreads) {
-
+            if ($count < $maxThreads) { //spin up a new thread if we haven't reached our limit
+                foreach ($worker as $w) {
+                    if ($w->complete) {
+                        $count--;
+                    }
+                }
                 usleep($wait);
+            } else {    //see if any workers are complete
+
             }
         }
     }
@@ -59,23 +79,24 @@ if ($device=="all" || $device=="*") { //defaults to all
 /**
  * Class traceThread Will start a thread to run a traceroute on a device
  */
-class CollectionThread extends Threaded {
-    protected $complete;
-    public function __construct($device, $outputFile) {
+class collectionThread extends Thread {
+    public $complete;
+    public function __construct($device, $deviceInfo, $deviceFolder) {
         $this->complete = false;
         $this->device = $device;
-        $this->outputFile = $outputFile;
+        $this->deviceInfo = $deviceInfo;
+        $this->deviceFolder = $deviceFolder;
         $this->data = "";
     }
     public function run() {
-        doTraceroute($this->device, $this->outputFile);
+        //doTraceroute($this->device, $this->deviceFolder);
         $this->complete = true;
     }
     public function isComplete() {
         return $this->complete;
     }
 }
-class CollectionPool extends Pool
+class collectionPool extends Pool
 {
     public $data = array();
     public function process()

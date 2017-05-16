@@ -42,12 +42,12 @@ if [$(which yum) != '']; then
 	yum -y install nmap
 	
 	echo Installing Apache, MySQL, and PHP7.1
-	yum -y install httpd httpd-devel mysql mysql-server mysql-devel mod_ssl openssl
+	yum -y install httpd httpd-devel mysql mysql-server mysql-devel mod_ssl openssl php-zts.x86_64 pecl
 	#yum -y install php php-mysql php-common php-gd php-mbstring php-mcrypt php-devel php-xml
 	rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
     rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
     rpm -Uvh http://repo.mysql.com/mysql-community-release-el6-5.noarch.rpm
-	yum -y install php71w php71w-mysql php71w-gd php71w-mcrypt php71w-mbstring php71w-json php71w-pear php71-php-pecl-ssh2 php71w-pecl-mongodb.
+	yum -y install php71w mod_php71w php71w-opcache php71w-devel php71w-mysql php71w-gd php71w-mcrypt php71w-mbstring php71w-json php71w-pear php71w-pecl-mongodb php71w-snmp php71w-ldap
 
 	# ---------- Start Services and Set Autorun -----------
 	echo Starting Services. 
