@@ -69,9 +69,9 @@ if ($device=="all" || $device=="*") { //defaults to all
             }
         }
     }
-} else {	//only do the traceroute for the 1 device
-    echo "Running traceroute on a single device: $device";
-    doTraceroute($device, "$gFolderScanData/$device/$tracerouteFilename");
+} else {	//only 1 device
+    writeLogFile("", "Running ".$action." on single device: $device"); //also echos to the console
+    //doTraceroute($device, "$gFolderScanData/$device/$tracerouteFilename");
 
 }
 
