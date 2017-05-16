@@ -9,7 +9,7 @@ and open the template in the editor.
     <section class="content-header">
       <h1>
         Dashboard
-        <small>Environment Overview</small>
+        <small>Last Updated {{updated | date:"h:mm:ss a"}}</small>
       </h1>
       <ol class="breadcrumb">
         <li><i class="fa fa-dashboard"></i> Dashboard</li>
@@ -19,28 +19,8 @@ and open the template in the editor.
     <!-- Main content -->
     <section class="content">
         <div class="row">
-            <div class="col-md-6">
-              <!-- Box 1 -->
-              <div class="box box-primary">
-                <div class="box-header with-border">
-                  <h3 class="box-title">I hear you like donuts</h3>
 
-                  <div class="box-tools pull-right">
-                    <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="Alerts">3</span>
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                    </button>
-                    <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button> -->
-                  </div>
-                </div>
-                <!-- /.box-header -->
-                <div class="box-body" style="display: block;">
-                    <canvas id="pieChart" style="height: 163px; width: 326px;" height="163" width="326"></canvas>
-                    
-                </div>
-                <!-- /.box-body -->
-              </div>
-              <!--/.direct-chat -->
-            </div>
+            <!-- SERVER STATS -->
             <div class="col-md-6">
               <!-- Box 2 -->
               <div class="box box-primary">
@@ -48,42 +28,98 @@ and open the template in the editor.
                   <h3 class="box-title">Server Stats</h3>
 
                   <div class="box-tools pull-right">
-                    <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="Alerts">3</span>
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                    </button>
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                     <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button> -->
                   </div>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body" style="display: block;">
                     <div class="row">
-                        <div class="col-xs-6 col-md-4 text-center">
-                            <input type="text" class="knob" value="95" data-width="64" data-height="38" data-fgcolor="#f56954" data-thickness="0.2" data-anglearc="180" data-angleoffset="-90" data-readonly="true">
+                        <div class="col-xs-4 col-md-4 text-center">
+                            <input id="serverHD" type="text" class="knob" value="0" data-toggle="tooltip" title="" data-width="64" data-height="38" data-fgcolor="#f56954" data-thickness="0.2" data-anglearc="180" data-angleoffset="-90" data-readonly="true">
                             <div class="knob-label"><small>Drive Space Usage</small></div>
                         </div>
-                        <div class="col-xs-6 col-md-4 text-center">
-                            <input type="text" class="knob" value="50" data-width="64" data-height="38" data-fgcolor="#3c8dbc" data-thickness="0.2" data-anglearc="180" data-angleoffset="-90" data-readonly="true">
+                        <div class="col-xs-4 col-md-4 text-center">
+                            <input id="serverRAM" type="text" class="knob" value="0" data-toggle="tooltip" title="" data-width="64" data-height="38" data-fgcolor="#3c8dbc" data-thickness="0.2" data-anglearc="180" data-angleoffset="-90" data-readonly="true">
                             <div class="knob-label"><small>RAM Usage</small></div>
                         </div>
-                        <div class="col-xs-6 col-md-4 text-center">
-                            <input type="text" class="knob" value="80" data-width="64" data-height="38" data-fgcolor="orange" data-thickness="0.2" data-anglearc="180" data-angleoffset="-90" data-readonly="true">
+                        <div class="col-xs-4 col-md-4 text-center">
+                            <input id="serverCPU" type="text" class="knob" value="0" data-toggle="tooltip" title="" data-width="64" data-height="38" data-fgcolor="orange" data-thickness="0.2" data-anglearc="180" data-angleoffset="-90" data-readonly="true">
                             <div class="knob-label"><small>CPU Usage</small></div>
                         </div>
+
                     </div>
                 </div>
                 <!-- /.box-body -->
               </div>
               <!--/.direct-chat -->
             </div>
+
+            <!-- BLANK TEMPLATE -->
+            <div class="col-md-6">
+                <!-- Box 2 -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Another Dashboard Widget</h3>
+
+                        <div class="box-tools pull-right">
+                            <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="Alerts">3</span>
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                            </button>
+                            <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button> -->
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body" style="display: block;">
+                        <ol>
+                            <li>System Info: hostname, ip, gateway, mac, ver, cronjobs</li>
+                            <li>Downed Devices</li>
+                            <li>Alerts</li>
+                            <li>Top Sites/Devices with throughput</li>
+                            <li>...</li>
+                        </ol>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!--/.direct-chat -->
+            </div>
+
+
         </div>
         
         <!-- Row 2 -->
         <div class="row">
+
+            <!-- CHART JS -->
+            <div class="col-md-6">
+                <!-- Box 1 -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">ChartJS Example</h3>
+
+                        <div class="box-tools pull-right">
+                            <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="Alerts">3</span>
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                            </button>
+                            <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button> -->
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body" style="display: block;">
+                        <canvas id="pieChart" style="height: 163px; width: 326px;" height="163" width="326"></canvas>
+
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!--/.direct-chat -->
+            </div>
+
+
             <div class="col-md-6">
               <!-- Box 1 -->
               <div class="box box-primary">
                 <div class="box-header with-border">
-                  <h3 class="box-title">Something Else</h3>
+                  <h3 class="box-title">Another JQuery Knob example</h3>
 
                   <div class="box-tools pull-right">
                     <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="Alerts">3</span>
@@ -103,27 +139,9 @@ and open the template in the editor.
               </div>
               <!--/.direct-chat -->
             </div>
-            <div class="col-md-6">
-              <!-- Box 2 -->
-              <div class="box box-primary">
-                <div class="box-header with-border">
-                  <h3 class="box-title">Something Else</h3>
 
-                  <div class="box-tools pull-right">
-                    <span data-toggle="tooltip" title="" class="badge bg-light-blue" data-original-title="Alerts">3</span>
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                    </button>
-                    <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button> -->
-                  </div>
-                </div>
-                <!-- /.box-header -->
-                <div class="box-body" style="display: block;">
-                    
-                </div>
-                <!-- /.box-body -->
-              </div>
-              <!--/.direct-chat -->
-            </div>
+
+
         </div>
         
         
@@ -135,6 +153,15 @@ and open the template in the editor.
     <script src="assets/plugins/chartjs/chart.min.js"></script>
     
     <script>
+        function dashboardRedraw(data){
+            //console.log("data redraw:" + JSON.stringify(data));
+            for (var key in data["Server Stats"]) {
+                $("#"+key).val(data["Server Stats"][key][0]).trigger('change');
+                $("#"+key).attr('title', data["Server Stats"][key][1]).tooltip('fixTitle');
+            }
+
+        }
+
   $(function () {
     /* ChartJS
      * -------

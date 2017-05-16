@@ -238,7 +238,7 @@ function consolePrint($text,$wrapPrefixString) {
 
 function firstRunConfig() {
     //initialize settings and unique values for this instance
-    global $gFileSettings, $gFileUsers;
+    global $gFileSettings, $gFileUsers, $gFileDevices;
 
     if(!file_exists($gFileSettings)) {
         echo "First Run Config: Writing Default Configuration Settings\n";
@@ -311,6 +311,32 @@ function firstRunConfig() {
         $u["admin"]["role"] = "admin";
         $u["admin"]["email"] = "";
         file_put_contents($gFileUsers,json_encode($u));
+    }
+
+    if (!file_exists($gFileDevices)) {
+        $s = '{
+    "localhost": {
+        "added": "'.date(DATE_ATOM).'",
+        "group": "Networking",
+        "site": "Home",
+        "type": "Server",
+        "name": "NeoSentry NMS",
+        "vendor": "",
+        "collectors": {
+            "ping": "yes",
+            "snmp": "yes",
+            "snmp-profile":"public",
+            "configuration":"yes",
+            "configuration-profile": "fw",
+            "services": "yes",
+            "service-ports": "22,80",
+            "netflow":"no",
+            "netflow-port": ""
+        }
+    }
+    
+}';
+
     }
 
 

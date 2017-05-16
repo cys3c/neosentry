@@ -38,8 +38,12 @@ app.config(function($routeProvider, $locationProvider) {
             controller : "settingsCtrl"
         })
         .when("/devices", {
-            templateUrl : "devices.html",
+            templateUrl : "device-list.html",
             controller : "devicesCtrl"
+        })
+        .when("/devices/:deviceId", {
+            templateUrl : "device-detail.html",
+            controller : "devicesDetailCtrl"
         })
         .when("/logs", {
             templateUrl : "logs.html",
@@ -50,125 +54,78 @@ app.config(function($routeProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
 });
 
+/* Custom service for consistent behaviors */
+app.service('gHandler', function() {
+	this.responseError = function (response) {
+        // handle http error response: { data, status, statusText, headers, config }
+        console.log("response error: " + JSON.stringify(response));
+		//console.log("response error: " + response.status + " " + response.statusText);
+		//console.log("  headers: " + response.headers);
+	}
+});
+
 /* The Main controller has always viewable and accessible information like username, search function, etc */
-app.controller("mainCtrl", function ($scope, $http) {
+app.controller("mainCtrl", function ($scope, $http, gHandler) {
 	/* Get the Data for the main page */
+
     $http.get("/api/sessiondata")
-        .success(function (data) {
-            $scope.session = data;
-        })
-        .error(function (data, status, header, config) {
-            console.log("there was an error");
+        .then(function (response) {
+        	$scope.session = response.data;
+        }, function errorCallback(response) {
+            console.log("Error getting Main Controller data: " + JSON.stringify(response));
         });
-    $scope.session = "I love London";
 });
-app.controller("dashboardCtrl", function ($scope) {
-    $scope.msg = "I love London";
-});
-app.controller("settingsCtrl", function ($scope) {
-    $scope.msg = "I love London";
-});
-app.controller("devicesCtrl", function ($scope) {
-    $scope.msg = "I love Paris";
-});
-
-
-
-
-
-/* add a loader, then use jquery to dynamically load the content */
-function loadPage(linkID, containerID, link, useLoader){
-    /* Set the right menu item active */
-    if (linkID){ $('.sidebar-menu li').removeClass("active"); $(linkID).addClass("active"); }
-    
-    /* add a custom loader gif */
-    if (typeof useLoader === 'undefined') { useLoader = true; }
-    if (useLoader===true){
-        var loaders = ["ani_come_with_me.gif","ani_dancing_dalek.gif","ani_death_ray.gif","ani_edbull_glomp.gif","ani_excited.gif","ani_free_pacman.gif","ani_headbang.gif","ani_little_boxes.gif","ani_ninja_vs_pirate.gif","ani_pump_it_up.gif","ani_read_me.gif","ani_rescue_mission.gif","ani_run_away.gif","ani_see_saw.gif","ani_shuffelin.gif","ani_silent_ninja_run_of_awesomness.gif","ani_slinky.gif","ani_walking_llama.gif"];
-        var randomNum = Math.floor(Math.random()*loaders.length);
-        var loaderHTML = "<center><br><br><br><img src=img/" + loaders[randomNum] + " title=\"Loading Content\" /><br><small>Loading Content, Please Wait...</small></center>";
+app.controller("dashboardCtrl", function ($scope, $http, $interval, gHandler) {
+	/* Get the Data for the dashboard */
+	$scope.getData = function() {
+        $http.get("/api/dashboard")
+            .then(function (response) {
+                $scope.data = response.data;
+                $scope.updated = Date.now();
+                dashboardRedraw(response.data);
+            }, function errorCallback(response) {
+                console.log("Error getting dashboard data: " + JSON.stringify(response));
+            });
     }
+    $scope.getData();
 
-    /* grab the document and put it in its place: $("#app-content").load("dashboard.html");*/
-    $(containerID).html(loaderHTML);
-    $(containerID).load(link, function(responseTxt, statusTxt, xhr){
-        if(statusTxt === "success") console.log(linkID + " loaded successfully!");
-        if(statusTxt === "error") console.log(linkID + " Error: " + xhr.status + ": " + xhr.statusText);
-    });
-}
+	//timer to collect the data
+    var collectInterval = $interval(function(){$scope.getData();}, 5000); //delay in milliseconds
+    $scope.stopCollection = function() { if (angular.isDefined(collectInterval)) { $interval.cancel(collectInterval);collectInterval = undefined;}};
+    $scope.$on('$destroy', function() {$scope.stopCollection();});
 
 
+});
+
+app.controller("settingsCtrl", function ($scope, $http, $interval, gHandler) {
+    $scope.msg = "I love London";
+});
+
+app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
+	/* Get the Data for the dashboard */
+	if ($parent.deviceData) {updateData($parent.deviceData)}
+
+    $scope.getData = function() {
+        $http.get("/api/devices")
+            .then(function (response) {
+                $scope.data = response.data;
+                $scope.updated = Date.now();
+                updateData(response.data);
+            }, function errorCallback(response) {
+                console.log("Error getting device list data: " + JSON.stringify(response));
+            });
+    }
+    $scope.getData();
+
+    //timer to collect the data
+	/*
+    var collectInterval = $interval(function(){$scope.getData();}, 5000); //delay in milliseconds
+    $scope.stopCollection = function() { if (angular.isDefined(collectInterval)) { $interval.cancel(collectInterval);collectInterval = undefined;}};
+    $scope.$on('$destroy', function() {$scope.stopCollection();});
+    */
+});
+app.controller("devicesDetailCtrl", function ($scope, $http, $interval, gHandler) {
+    $scope.id = "I love Paris";
+});
 
 
-//for testing go to http://jsfiddle.net/rasvM/
-//allows loading of content on the fly
-function ajaxRequest() {
-	try { var request = new XMLHttpRequest(); }
-	catch(e1) {
-		try { request = new ActiveXObject("Msxml2.XMLHTTP"); }
-		catch(e2) {
-			try { request = new ActiveXObject("Microsoft.XMLHTTP"); }
-			catch(e3) { request = false; }
-		}
-	}
-	return request;
-}
-
-//Ajax to pull down external content in the background
-//params(ex. id=myid&view=top)
-function getContent(page,id,params) {
-	if (params===null) params="";
-	var load_id = id;
-	var loaders = ["ani_come_with_me.gif","ani_dancing_dalek.gif","ani_death_ray.gif","ani_edbull_glomp.gif","ani_excited.gif","ani_free_pacman.gif","ani_headbang.gif","ani_little_boxes.gif","ani_ninja_vs_pirate.gif","ani_pump_it_up.gif","ani_read_me.gif","ani_rescue_mission.gif","ani_run_away.gif","ani_see_saw.gif","ani_shuffelin.gif","ani_silent_ninja_run_of_awesomness.gif","ani_slinky.gif","ani_walking_llama.gif"];
-	var randomNum = Math.floor(Math.random()*loaders.length);
-	
-	if (document.getElementById(id + "_loadarea")!==null) load_id = id + "_loadarea";
-	
-	document.getElementById(load_id).innerHTML = "<center><img src=images/" + loaders[randomNum] + " title=\"Loading Content\" /><br><i>Loading Content, Please Wait...</i></center>";
-	
-	
-	request = new ajaxRequest();
-	request.open("POST", page, true);
-	request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	//request.setRequestHeader("Content-length", params.length);
-	//request.setRequestHeader("Connection", "close");
-	
-	request.onreadystatechange = function() {
-		var toID = id;
-		if (this.readyState === 4) {
-			if (this.status === 200) {
-				if (this.responseText !== null) {
-					//populate the data
-					var s = this.responseText.replace(/^\s+|\s+$/g, '');
-					document.getElementById(toID).innerHTML = s;
-					parseScript(s);
-					
-				} else document.getElementById(toID).innerHTML = ""; //alert("Ajax error: No data received")
-			} else document.getElementById(toID).innerHTML = "Error: " + this.statusText; //alert("Ajax error: " + this.statusText)
-		}
-	};
-	request.send(params);
-}
-
-//if the ajax returns javascript, lets run it.
-function parseScript(_source) {
-	var source = _source;
-	
-	// find script and evaluate it
-	while(source.indexOf("<script") > -1 || source.indexOf("</script") > -1) {
-		var s = source.indexOf("<script");	var s_e = source.indexOf(">", s);
-		var e = source.indexOf("</script", s);	var e_e = source.indexOf(">", e);
-		
-		// Add to scripts array
-		if (source.substring(s_e+1, e) !== "") {
-			eval(source.substring(s_e+1, e));
-		}
-		source = source.substring(0, s) + source.substring(e_e+1);
-	}
-}
-/*
-function toggle(id) {
-	var e = document.getElementById(id);
-	e.style.visibility = (e.is(':visible') ? 'hidden' :  'visible');
-	this.text = "clicked " + (e.is(':visible') ? 'hide' :  'show');
-} */

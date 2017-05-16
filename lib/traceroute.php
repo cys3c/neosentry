@@ -10,9 +10,6 @@ include_once "_db_flatfiles.php";
 $maxThreads = 10;
 $wait = 100; // wait time in milliseconds
 
-// Get variables being passed
-$device = (isset($_GET['device']))?sanitizeString($_GET['device']):""; //file data to add
-if ($device=="") $device = (isset($_POST['device']))?sanitizeString($_POST['device']):"all"; //file data to add
 
 // Get command line arguments, for internal processing
 //	-d: The device name or IP

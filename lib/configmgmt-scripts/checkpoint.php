@@ -55,6 +55,21 @@ if (PHP_SAPI == "cli") {
 */
 
 
+set_include_path('../phpseclib'); //required since these libraries include other libraries
+include('Net/SSH2.php');
+include('Net/SCP.php');
+
+
+//this script will be copied to ~/data/devices/%device%/tmp so lets use this scripts current folder as a scratch directory
+$scratchFolder = dirname(__FILE__);    //a temporary working directory to store and work with files.
+
+// these %variable% strings will be replaced with the appropriate informatoin before running.
+$device = "%device%";           //the device IP or hostname we're connecting to
+$username = "%username%";
+$password = "%password%";
+$password2 = "%password2%";     //this 2nd password is an optional variable only used if a 2nd level password is needed
+
+
 
 /** This is the primary function that's called. output should be saved in JSON format
  * @param $device

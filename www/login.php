@@ -6,6 +6,8 @@ sessionStart();
 
 
 $redirectUrl = dirname($_SERVER['SCRIPT_NAME']); //this will go to the default file (index.php)
+if (array_key_exists('previous_location',$_SESSION) && $_SESSION['previous_location'] != '') $redirectUrl = $_SESSION['previous_location'];
+
 $alert = '';
 $url = trim(substr(filter_input(INPUT_POST, 'url', FILTER_SANITIZE_STRING),0,512)); //the url to return the user to if login succeeds
 $format = trim(substr(filter_input(INPUT_POST, 'format', FILTER_SANITIZE_STRING),0,4));
@@ -22,6 +24,11 @@ if ($action == "login") {
     $loginRet = sessionLogin($username, $pass, $remember);
     if ($loginRet===true) {
         //login SUCCESS
+
+        //clear the previous_location session variable
+        unset($_SESSION['previous_location']);
+
+        //return success or redirect
         if ($format=='ajax') {
             return true;
         } else {

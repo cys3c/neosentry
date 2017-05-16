@@ -1,6 +1,12 @@
 #!/usr/bin/php
 <?php // Collects the firewall and NAT rules from a Palo Alto device
 
+
+set_include_path('../phpseclib'); //required since these libraries include other libraries
+include('Net/SSH2.php');
+include('Net/SCP.php');
+
+
 //this script will be copied to ~/data/devices/%device%/tmp so lets use this scripts current folder as a scratch directory
 $scratchFolder = dirname(__FILE__);    //a temporary working directory to store and work with files.
 

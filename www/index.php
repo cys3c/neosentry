@@ -3,9 +3,10 @@
 include "../lib/_functions.php";
 sessionStart();
 
-//see if the user is logged in and redirect to the app
-if (!isLoggedIn()) {header("Location: login.php");}
-$jsonSession = json_encode($_SESSION);
+//see if the user is logged in and if not, redirect to the login page
+sessionProtect(); //if (!isLoggedIn()) {header("Location: login.php");}
+
+//$jsonSession = json_encode($_SESSION);
 
 ?>
 
@@ -46,7 +47,7 @@ Apply one or more of the following classes to get the desired effect
 |               | sidebar-mini                            |
 |---------------------------------------------------------|
 -->
-<body class="hold-transition sidebar-mini" ng-app="neosentry" ng-controller="mainCtrl as main">
+<body class="hold-transition sidebar-mini" ng-app="neosentry" ng-controller="mainCtrl">
 <div class="wrapper">
 
   <!-- Main Header -->
@@ -172,7 +173,7 @@ Apply one or more of the following classes to get the desired effect
               <!-- The user image in the navbar-->
               <img src="assets/images/user.jpg" class="user-image" alt="">
               <!-- hidden-xs hides the username on small devices so only the image appears. -->
-              <span class="hidden-xs">{{main.name}}</span>
+              <span class="hidden-xs"><?php echo $_SESSION['name'] ?></span>
             </a>
             <ul class="dropdown-menu">
               <!-- The user image in the menu -->
@@ -180,8 +181,9 @@ Apply one or more of the following classes to get the desired effect
                 <img src="assets/images/user.jpg" class="img-circle" alt="">
 
                 <p>
-                    {{main.session.name}}
-                  <small>Member since {{main.session.created}}</small>
+                  {{this.session.name}}
+                  <!-- <small>Member since <?php echo ($_SESSION['created'] > 1)?date('F j, Y', $_SESSION['created']):"the dawn of time"; ?></small> -->
+                  <small>Last logged in {{this.session['last_login'] * 1000 | date:"MMM dd, yyyy 'at' h:mma"}}</small> <!-- <?php echo date('F j, Y \a\t g:i a', $_SESSION['last_login']); ?> -->
                 </p>
               </li>
               <!-- Menu Body 
@@ -361,7 +363,7 @@ Apply one or more of the following classes to get the desired effect
 <!-- ./wrapper -->
 
 <!-- JS SCRIPTS -->
-<script src="assets/plugins/jQuery/jquery-2.2.4.min.js"></script>
+<script src="assets/plugins/jQuery/jquery-3.2.1.min.js"></script>
 <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
 <script src="assets/plugins/angular/angular-all.min.js"></script> <!-- Angular Core & Routing -->
 <script src="assets/app-framework.js"></script> <!-- AdminLTE App Framework, includes fastclick and slimscroll-->

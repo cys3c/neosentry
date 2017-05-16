@@ -3,7 +3,7 @@
 ini_set('display_errors', 1); 
 error_reporting(E_ALL);
 
-date_default_timezone_set('America/New_York');
+//date_default_timezone_set('America/New_York');
 
 //$appname = 'NeoSentry NMS';
 $globalErrorVar = '';
@@ -26,12 +26,12 @@ const ROLE_READONLY = "readonly"; //can only read
 
 
 // Global File and Folder variables
-$gFolderData = realpath("../data");
+$gFolderData = realpath(dirname(__FILE__)."/../data");
 $gFolderLogs = "$gFolderData/logs";   //stores logs for the app and system. device logs stored in db or device folder
 $gFolderScanData = "$gFolderData/devices";
 $gFolderBackups = "$gFolderData/backups";
 
-$gFolderConfigs = realpath("../config");
+$gFolderConfigs = realpath(dirname(__FILE__)."/../config");
 $gFolderMibs = "$gFolderConfigs/mibs";
 $gFileSNMPMap = "$gFolderConfigs/snmpmap.json";
 
@@ -76,6 +76,10 @@ $serviceInterval = "0 */1 * * *"; //get service information every hour
 if (!is_dir($gFolderScanData)) mkdir($gFolderScanData, 0777, true);
 
 
+//function to get an array value without an error if it doesn't exist
+function getArrVal(&$array, &$keyVal, $defaultRet = "") {
+    return array_key_exists($keyVal,$array)?$array[$keyVal]:$defaultRet;
+}
 
 function sanitizeString($var) {
     $var = strip_tags(trim($var));
@@ -99,9 +103,23 @@ function get_string_between($string, $start, $end){
 
 // FUNCTIONS FOR SESSION AND USER LOGIN //
 
-function isLoggedIn() {
-    if (array_key_exists('name',$_SESSION)) return true;
+function isLoggedIn($requiredRole='') {
+    if (array_key_exists('id',$_SESSION) && array_key_exists('role',$_SESSION)) {
+        if ($requiredRole != '') return $_SESSION['role']==$requiredRole;
+        else return true;
+    }
     else return false;
+}
+function sessionProtect($redirectToLogin = true, $requiredRole='', $errorMsg = 'Unauthorized'){
+    if (!isLoggedIn($requiredRole)) {
+        header('HTTP/1.1 401 Unauthorized');
+        if ($redirectToLogin) {
+            $_SESSION['previous_location'] = $_SERVER['REQUEST_URI'];
+            header("Location: /login.php");
+        }
+        echo '{"error":"'.$errorMsg.'"}';
+        exit;
+    }
 }
 function sessionDestroy() {
 	/* Alternative method to check the session before resetting is time
@@ -139,7 +157,7 @@ function sessionStart($regenerate_id = false) {
     //update the users last active time
     if (array_key_exists('id',$_SESSION) && $_SESSION["id"] != "") {
         $u = getUser($_SESSION["id"]);
-        $u["last_active"] = time();
+        $u['last_active'] = time();
         writeUser($_SESSION["id"],$u);
     }
 
@@ -184,6 +202,7 @@ function sessionLogin($id, $pass, $remember_session = false) {
             $_SESSION["name"] = $userData["name"];
             $_SESSION["email"] = $userData["email"];
             $_SESSION["created"] = $userData["created"];
+            if (is_null($_SESSION['created'])) $_SESSION['created'] = 0;
             $_SESSION["last_login"] = time();
             //$_SESSION["token"] = randomToken(); //different from the token in the db
 
@@ -222,7 +241,7 @@ function sessionLogin($id, $pass, $remember_session = false) {
 
 
 
-// FUNCTIONS FOR READING/WRITING CONFIGS AND SETTINGS //
+// FUNCTIONS FOR READING/WRITING DOCUMENTS/TABLES, CONFIGS AND SETTINGS //
 
 function getDocument($docName, $section = "") {
     //$docName = 'settings' or 'devices' or 'security' or 'auth'
@@ -302,7 +321,11 @@ function writeUser($username, $arrValues) {
 }
 
 // FUNCTIONS FOR LOGGING INFORMATION //
-
+/**
+ * @param $fileName : The logfile type (system.log, application.log, etc)
+ * @param $line : The string of text to write
+ * @return bool|int
+ */
 function writeLogFile($fileName, $line) {
     // writes log data related to the app or system
     global $gFolderLogs;
@@ -314,10 +337,35 @@ function writeLogFile($fileName, $line) {
 
     //now write the output
     $output = date(DATE_ATOM).":\t$line\n";
-    //echo $output;
+    echo $fileName . ": " . $output; //display to the console as well as write to the file
     return file_put_contents($logFile,$output,FILE_APPEND);
 
 }
+function getLogFileLines($fileName, $numberOfLines) {
+    global $gFolderLogs;
+    $logFile = "$gFolderLogs/$fileName";
+    if (!file_exists($logFile)) return "";
+
+    $data = "";
+    if($numberOfLines > 0) {
+        $data = shell_exec('tail -n '.$numberOfLines.' '.$logFile);
+    } else {
+        $data = file_get_contents($logFile);
+    }
+
+    return $data;
+}
+function getLogFileSearch($fileName, $searchString) {
+    global $gFolderLogs;
+    $logFile = "$gFolderLogs/$fileName";
+    if (!file_exists($logFile)) return "";
+
+    //search
+    $data = shell_exec('grep "'.$searchString.'" '.$logFile);
+
+    return $data;
+}
+
 
 // FUNCTIONS FOR SECURITY //
 

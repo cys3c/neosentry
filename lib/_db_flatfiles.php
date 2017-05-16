@@ -19,7 +19,7 @@ include_once "_functions.php";
  * @param string $afterChange = [optional] new value of the data that was changed
  * @return boolean whether it successfully wrote to the log or not
  */
-function writeLog($category, $device, $text, $beforeChange = "", $afterChange = "") {
+function writeLogForDevice($category, $device, $text, $beforeChange = "", $afterChange = "") {
     //These logs will be stored in the devices data folder. each line entry will be a json array
     global $gFolderScanData;
 
@@ -49,10 +49,10 @@ function writeLog($category, $device, $text, $beforeChange = "", $afterChange = 
  * @param integer $lineLimit = the number of lines in the log to return. default is all lines.
  * @return array The array of log entries in chronological order
  */
-function getLog($device, $lineLimit = 0) {
+function getLogForDevice($device, $lineLimit = 0) {
     global $gFolderScanData;
     $logFile = $gFolderScanData."/".$device."/log.log";
-    if (!file_exists($logFile)) return ""; //exit if the file doesn't exist
+    if (!file_exists($logFile)) return []; //exit if the file doesn't exist
 
     //get the data we're working with
     $data = "";
@@ -71,6 +71,15 @@ function getLog($device, $lineLimit = 0) {
 
 // FUNCTIONS FOR WRITING AND READING DEVICE DATA
 
+/** returns the array of CURRENT data
+ */
+function getDeviceData($device) {
+    global $gFolderScanData;
+    $dataFile = $gFolderScanData."/".$device."/device_data.json";
+
+    return json_decode(file_get_contents($dataFile), true);
+}
+
 /** writes a json file with variable data in the device data directory
  */
 function updateDeviceData($device, $category, $arrayOfData) {
@@ -78,7 +87,7 @@ function updateDeviceData($device, $category, $arrayOfData) {
     $dataFile = $gFolderScanData."/".$device."/device_data.json";
 
     //add a "last updated" field
-    $arrayOfData['date'] = date(DATE_ATOM);
+    $arrayOfData['last_updated'] = date(DATE_ATOM);
 
     //read the data, update it and write it back to the file
     $dataArr = json_decode(file_get_contents($dataFile), true);
@@ -88,14 +97,6 @@ function updateDeviceData($device, $category, $arrayOfData) {
     return $retval;
 }
 
-/** returns the array of data
- */
-function getDeviceData($device) {
-    global $gFolderScanData;
-    $dataFile = $gFolderScanData."/".$device."/device_data.json";
-
-    return json_decode(file_get_contents($dataFile), true);
-}
 
 /** writes a new json line to the history file for that category
  */
