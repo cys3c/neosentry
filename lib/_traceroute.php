@@ -71,8 +71,9 @@ function tracerouteCompare($oldTraceroute, $newTraceroute, $maxHopCount = 5) {
 		echo "Hop count is over $maxHopCount. No traceroute comparison or change logging will be done on this.\n";
 		return "";
 	}
-	if (count($ot) == 0 ) return ""; //0 most likely means this is the first trace so no need to log a comparison
 
+    //0 most likely means this is the first trace, we still want to add it to the change history so comment this out
+	//if (count($ot) == 0 ) return "";
 
 	//compare the hop count
     echo "\nOT count = ".count($ot)."\nNT count = ".count($nt)."\n\n";

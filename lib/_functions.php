@@ -256,10 +256,11 @@ function getDocument($docName, $section = "") {
 
     //if the document doesn't exist then lets include the main php which does a firstRun and creates the initial docs
     if (!file_exists($gFolderConfigs . "/$docName.json")) include_once "../neosentry.php";
+    if (!file_exists($gFolderConfigs . "/$docName.json")) return "";
 
     $content = json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true);
     if ($section != "") {
-        $content = array_key_exists($section,$content)?$content[$section]:"";
+        $content = isset($content[$section])?$content[$section]:"";
     }
     //return an array with the content
     return $content;
@@ -380,12 +381,7 @@ function encryptString($string) {
     // https://paragonie.com/book/pecl-libsodium/read/00-intro.md#what-is-libsodium
 
     //load the encryption variables
-    $gSecurity = getDocument('security');
-    if ($gSecurity["secret_key"] == "" || $gSecurity["secret_iv"]) {
-        $gSecurity["secret_key"] = bin2hex(openssl_random_pseudo_bytes(48));
-        $gSecurity["secret_iv"] = bin2hex(openssl_random_pseudo_bytes(16));
-        writeToDocument('security',"",$gSecurity);
-    }
+    $gSecurity = securityGetKeyDoc();
 
     // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
     $iv = substr(hash('sha256', $gSecurity["secret_iv"]), 0, 16);
@@ -395,14 +391,19 @@ function encryptString($string) {
     return $output;
 }
 function decryptString($string){
-    $gSecurity = getDocument('security');
+    $gSecurity = securityGetKeyDoc();
 
    // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
-    $iv = substr(hash('sha256', $gSecurity["secret_iv"]), 0, 16);
+    $iv = substr(hash('sha256', isset($gSecurity["secret_iv"])?$gSecurity["secret_iv"]:""), 0, 16);
 
     // decrypt the string
-    $output = openssl_decrypt(base64_decode($string), "AES-256-CBC", hash('sha256', $gSecurity["secret_key"]), 0, $iv);
-    return $output;
+    if (function_exists('openssl_decrypt')) {
+        $output = openssl_decrypt(base64_decode($string), "AES-256-CBC", hash('sha256', isset($gSecurity["secret_key"]) ? $gSecurity["secret_key"] : ""), 0, $iv);
+    } else {
+        writeLogFile('application.log',"Fatal Error: openssl_decrypt is not installed.");
+        $output = $string;
+    }
+        return $output;
 }
 function hashString($string){
     /* SHA512 = crypt('rasmuslerdorf', '$6$rounds=5000$usesome16CHARsalt$') //up to 999,999,999 rounds
@@ -421,6 +422,16 @@ function hashString($string){
     return password_hash($string,PASSWORD_DEFAULT);
 }
 
+function securityGetKeyDoc() {
+    $gSecurity = getDocument('security');
+    if (!is_array($gSecurity)) $gSecurity = array();
+    if (!isset($gSecurity["secret_key"]) || !isset($gSecurity["secret_iv"])) {
+        $gSecurity["secret_key"] = randomToken(48); //bin2hex(openssl_random_pseudo_bytes(48));
+        $gSecurity["secret_iv"] = randomToken(16); //bin2hex(openssl_random_pseudo_bytes(16));
+        writeToDocument('security',"",$gSecurity);
+    }
+    return $gSecurity;
+}
 function randomToken($length = 32){
     if(!isset($length) || intval($length) <= 8 ){ $length = 32; }
     if (function_exists('openssl_random_pseudo_bytes')) {
@@ -429,6 +440,7 @@ function randomToken($length = 32){
     if (function_exists('random_bytes')) { //PHP 7
         return bin2hex(random_bytes($length));
     }
+    throw new Exception("Could not Generate Security Token. Requires OpenSSL or PHP7");
 
 }
 

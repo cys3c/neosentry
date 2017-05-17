@@ -29,7 +29,7 @@ addArg("search", true, 0, "", "Searches the database for your inputted criteria"
 
 
 // If we're running this from command line then...
-if (PHP_SAPI == "cli") {
+if (PHP_SAPI == "cli" && isset($argv)) {
     $script = array_shift($argv);
 
     // show help if no arguments are passed

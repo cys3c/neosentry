@@ -69,8 +69,10 @@ $username = "%username%";
 $password = "%password%";
 $password2 = "%password2%";     //this 2nd password is an optional variable only used if a 2nd level password is needed
 
+
 //run the main collector logic
-$configArr = runCollector($device, $scratchFolder, "configurationOutput.json", $username, $password, $password2);
+echo "Running Check Point Configuration Collection Script";
+//$configArr = runCollector($device, $scratchFolder, "configurationOutput.json", $username, $password, $password2);
 
 //print the output so the parent program can collect it.
 if (is_array($configArr)) echo json_encode($configArr,JSON_PRETTY_PRINT);

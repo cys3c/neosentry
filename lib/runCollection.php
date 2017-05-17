@@ -17,7 +17,7 @@ Usage: php runCollection.php -d "10.10.10.10"
 ';
 
 // Get command line arguments. optionally only from command line: if (PHP_SAPI == "cli") {}
-$o = getopt("a:d:",["config-rule:","config-profile:"]); // 1 : is required, 2 :: is optional
+$o = getopt("a:d:",["snmp-type:", "config-script:","config-profile:"]); // 1 : is required, 2 :: is optional
 $action = array_key_exists("a",$o) ? $o["a"] : "";
 $device = array_key_exists("d",$o) ? $o["d"] : "";
 if ($device=="") { echo "Device is required. \n$help"; exit; }
@@ -118,19 +118,21 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
             break;
 
         case ACTION_CONFIGURATION:
-            //Use hidden options if those are set
-            print_r($opts);
-            //First get the account profile with the login details to the box, if present
-            $accProfile = isset($devInfo['collectors']['configuration-profile'])?$devInfo['collectors']['configuration-profile']:"";
-
+            //Use hidden options if those are set, mainly just for testing
+            $ovScript = isset($opts["config-script"]) ? $opts["config-script"] : "";
+            $ovProf = isset($opts["config-profile"]) ? json_decode($opts["config-profile"], true) : $opts["config-profile"];
 
             //Collect the previous and current configs
             $oldConfig = getDeviceData($device,$action);
-            $newConfig = configurationGet($device, $devInfo, $accProfile);
-            //updateDeviceData($device, $action, $newConfig);
+            $newConfig = configurationGet($device, $devInfo, $ovScript, $ovProf);
+            updateDeviceData($device, $action, $newConfig);
 
             //Now compare
-
+            $confDiff = configurationCompare($oldConfig, $newConfig); //returns a string describing the difference or an empty string
+            if ($confDiff != "" ) {
+                $changeID = updateDeviceHistory($device, $action, $newConfig);
+                writeLogForDevice($device, $action, $confDiff, $changeID);
+            }
 
             break;
     }
