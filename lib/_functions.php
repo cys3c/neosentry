@@ -24,14 +24,20 @@ const SETTING_CATEGORY_CONTACTS = "Contacts";
 const ROLE_ADMIN = "admin"; //can write to the database and view settings
 const ROLE_READONLY = "readonly"; //can only read
 
+const ACTION_PING = 'ping';
+const ACTION_TRACEROUTE = 'traceroute';
+const ACTION_SNMP = 'snmp';
+const ACTION_CONFIGURATION = 'configuration';
+const ACTION_CONFIGMGMT = ACTION_CONFIGURATION;
+
 
 // Global File and Folder variables
-$gFolderData = realpath(dirname(__FILE__)."/../data");
+$gFolderData = realpath(dirname(__FILE__)."/../") . DIRECTORY_SEPARATOR . "data";
 $gFolderLogs = "$gFolderData/logs";   //stores logs for the app and system. device logs stored in db or device folder
 $gFolderScanData = "$gFolderData/devices";
 $gFolderBackups = "$gFolderData/backups";
 
-$gFolderConfigs = realpath(dirname(__FILE__)."/../config");
+$gFolderConfigs = realpath(dirname(__FILE__)."/../") . DIRECTORY_SEPARATOR . "config";
 $gFolderMibs = "$gFolderConfigs/mibs";
 $gFileSNMPMap = "$gFolderConfigs/snmpmap.json";
 
@@ -44,10 +50,9 @@ $gFileUsers = "$gFolderConfigs/auth.json";
 
 
 
-
 // Global variables for Ping and Traceroute
-$ipListFile = "$gFolderScanData/ping.iplist"; //list of ip's that are allowing Ping monitoring.
-$pingOutFile = "$gFolderScanData/ping.out"; //stores the results of the ping scan in json format.
+//$ipListFile = "$gFolderScanData/ping.iplist"; //list of ip's that are allowing Ping monitoring.
+$pingOutFile = "$gFolderScanData/pingResults.json"; //stores the results of the ping scan in json format.
 $tracerouteFilename = "traceroute.out"; //this is stored in the directory of each device. contains current/last successful and failed trace.
 
 /*
@@ -58,10 +63,12 @@ $loggedin = false;
  */
 
 // Cron job variables: [minute 0-59] [hour 0-23] [day 1-31] [month 1-12] [day-of-week 0-7 (0=sunday)]
+/*
 $phpBin = trim(`which php`); //"/usr/bin/php";
 $curlBin = trim(`which curl`); //"/usr/bin/curl";
 $wgetBin = trim(`which wget`); //"/usr/bin/wget";
 $cron_file = "$gFolderData/crontab"; //"/etc/cron.d/neosentry";
+*/
 $mibLocation = $gFolderMibs; //default is /usr/share/snmp/mibs but its write protected
 //$snmpCommandsFile = "$gFolderData/snmp_commands";
 $pingInterval = "*/5 * * * *"; //ping every minute
@@ -332,7 +339,7 @@ function writeLogFile($fileName, $line) {
     $logFile = "$gFolderLogs/$fileName";
 
     // make sure we have a log file to write to
-    if (!file_exists($gFolderLogs)) mkdir($gFolderLogs);
+    if (!file_exists($gFolderLogs)) mkdir($gFolderLogs,0777,true);
     if (!file_exists($logFile)) touch($logFile);
 
     //now write the output
@@ -346,7 +353,6 @@ function getLogFileLines($fileName, $numberOfLines) {
     $logFile = "$gFolderLogs/$fileName";
     if (!file_exists($logFile)) return "";
 
-    $data = "";
     if($numberOfLines > 0) {
         $data = shell_exec('tail -n '.$numberOfLines.' '.$logFile);
     } else {

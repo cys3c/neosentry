@@ -3,27 +3,75 @@
  *  Pings all monitored IP addresses
  */
 
-include "_functions.php";
+//include_once "_functions.php";
 //include "_traceroute.php";
 
-// Variables
-$ipList = "";
 
-// Create the device list with pingable IP's
-$arrDevices = getDevicesArray();
-foreach ($arrDevices as $field => $value) {
-    //echo '\n'.$field." = ".$value['Monitoring']['Ping']."\n";
-    if ($value['collectors']['ping']=="yes") {
-        $ipList .= $field."\n";
+/** ping a single device, parse the results and return the bare minimum info
+ * @param $device
+ * @return float|string "unresolvable, down, or ping response time"
+ */
+function pingSingleDevice($device) {
+    $cmd = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')?"ping -n 1 $device" : "ping -n -c 1 $device";
+    $ret = shell_exec($cmd);
+
+    $retArr['status'] = "";
+    $retArr['ip'] = "";
+    $retArr['ms'] = "";
+
+    if (strpos($ret,"unknown host") > 0 || strpos($ret,"could not find host") > 0) {
+        $retArr['status'] = "unresolvable";
+    } else {
+        $ip = trim(get_string_between($ret, " from ", " "));
+        $retArr['ip'] = rtrim($ip,":");
+
+        $nix = floatval(get_string_between($ret," time="," ms\n"));
+        $win = floatval(get_string_between($ret," time<","ms\n"));
+
+        if ($nix>0) { $retArr['ms'] = $nix; $retArr['status'] = "up"; }
+        elseif ($win>0) { $retArr['ms'] = $win; $retArr['status'] = "up"; }
+        else $retArr['status'] = "down";
     }
+
+    return $retArr;
 }
-//echo print_r($deviceList, true);
-nmapScanAndParseTo($pingOutFile, $ipList, $ipListFile);
+
+function pingCompare($oldPing, $newPing) {
+    $oV = isset($oldPing['status'])?$oldPing['status']:"";
+    $nV = isset($newPing['status'])?$newPing['status']:"";
+    if ($oV != "" && $oV != $nV) return "Ping status changed from '$oV' to '$nV'";
+    return "";
+}
 
 
 
-function nmapScanAndParseTo($outFile, $ipList, $ipListFile) {
+
+
+
+
+//this just saves all results to $pingOutFile = "$gFolderScanData/pingResults.json"
+// it does not update each individual device
+function pingAllDevices() {
+    // Variables
+    global $pingOutFile;
+    $ipList = "";
+
+    // Create the device list with pingable IP's
+    $arrDevices = getDevicesArray();
+    foreach ($arrDevices as $field => $value) {
+        //echo '\n'.$field." = ".$value['Monitoring']['Ping']."\n";
+        if ($value['collectors']['ping'] == "yes") {
+            $ipList .= $field . "\n";
+        }
+    }
+    //echo print_r($deviceList, true);
+    nmapScanAndParseTo($pingOutFile, $ipList);
+}
+
+
+function nmapScanAndParseTo($outFile, $ipList) {
     // Write the file to be used with nmap
+    $ipListFile = sys_get_temp_dir() . "/nms_tempPingFile.tmp";
     file_put_contents($ipListFile, $ipList);
 
     // Load previous results into an array

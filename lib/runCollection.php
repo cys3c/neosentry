@@ -4,81 +4,185 @@
  * Uses multi-threading to call the specified collection script
  */
 
-
 include "_functions.php";
-include_once "_db_flatfiles.php";
 
+// some variables
+$logFile = "collector.log";
 $maxThreads = 100;
-$wait = 100; // wait time in milliseconds
-
-
-// Get command line arguments. optionally only from command line: if (PHP_SAPI == "cli") {}
+$actions = ACTION_PING . " " . ACTION_TRACEROUTE . " " . ACTION_SNMP . " " . ACTION_CONFIGURATION;
 $help = '
 Usage: php runCollection.php -d "10.10.10.10"
-    -a <action>: Available actions [ping, traceroute, snmp, configuration]
+    -a <action>: Available actions ['.$actions.']
 	-d <device>: The device name or IP
 ';
 
-$o = getopt("a:d:"); // 1 : is required, 2 :: is optional
+// Get command line arguments. optionally only from command line: if (PHP_SAPI == "cli") {}
+$o = getopt("a:d:",["config-rule:","config-profile:"]); // 1 : is required, 2 :: is optional
 $action = array_key_exists("a",$o) ? $o["a"] : "";
 $device = array_key_exists("d",$o) ? $o["d"] : "";
-
 if ($device=="") { echo "Device is required. \n$help"; exit; }
 
-
 //include the necessary action library
-if ($action=='ping') {
-    include "_ping.php";
-} elseif ($action=='traceroute') {
-    include "_traceroute.php";
-} elseif ($action=='snmp') {
-    include "_snmp.php";
-} elseif ($action=='configmgmt') {
-    include "_configmgmt.php";
-} else { //no valid action
-
-}
+if (file_exists("_".$action.".php")) include "_".$action.".php";
+else { echo "Action '$action' not supported.$help"; exit;}
 
 
-if ($device=="all" || $device=="*") { //defaults to all
-    writeLogFile("", "Running ".$action." on ALL devices."); //also echos to the console
+
+// LOOP THROUGH ALL DEVICES, THEN EXIT
+
+if ($device=="all" || $device=="*") {
+    writeLogFile($logFile, "Running ".$action." on ALL devices."); //also echos to the console
 
     // Load the devices
     $arrDevices = getDevicesArray(); //json_decode(file_get_contents($pingOutFile), true);
-    $retArr = []; //return array
+    $processArr = []; //return array
 
-    // Create a pool and Loop through each device
-    $count = 0;
+    // Loop through each device
     foreach($arrDevices as $device=>$deviceInfo) {
-        if ($device!="") {
-            // start a thread for each trace
-            $worker[$device] = new collectionThread($device, $deviceInfo,"$gFolderScanData/$device");
-            $count++;
+        //An alternate way of threading, just recall this script in the background and define a device. Only works on linux
+        $processArr[$device] = new BackgroundProcess('php ' . __FILE__ . " -a $action -d $device");
+        $processArr[$device]->run();
 
-            // lazily just wait x milliseconds every y threads.
-
-            if ($count < $maxThreads) { //spin up a new thread if we haven't reached our limit
-                foreach ($worker as $w) {
-                    if ($w->complete) {
-                        $count--;
-                    }
-                }
-                usleep($wait);
-            } else {    //see if any workers are complete
-
-            }
+        //only allow the number of processes defined by maxThreads
+        while (count($processArr) > $maxThreads) {
+            foreach ($processArr as $key => $val) if (!$val->isRunning()) unset($processArr[$key]);
         }
     }
-} else {	//only 1 device
-    writeLogFile("", "Running ".$action." on single device: $device"); //also echos to the console
-    //doTraceroute($device, "$gFolderScanData/$device/$tracerouteFilename");
+
+    //stay resident until all processes finish
+    while (count($processArr) > 0) {
+        foreach ($processArr as $key => $val) if (!$val->isRunning()) unset($processArr[$key]);
+    }
+
+    //done with all devices, write to the log and exit
+    writeLogFile("", "Completed running ".$action." on ALL devices.");
+    exit;
 
 }
+
+
+
+// PERFORM THE ACTION FOR THE SINGLE DEVICE
+
+// Check configuration to see if we should collect the info
+$devInfo = getDeviceSettings($device);
+if (is_array($devInfo) && array_key_exists("collectors",$devInfo) && array_key_exists($action,$devInfo["collectors"])) {
+    if ($devInfo["collectors"][$action] == "no" || $devInfo["collectors"][$action] == false ) {
+        //we shouldn't collect this information
+        echo "Device settings say we shouldn't collect $action on $device, so we won't.\n";
+        exit;
+    }
+}
+
+
+include_once "_db_flatfiles.php";
+writeLogFile($logFile, "Collecting ".$action." on single device: $device"); //also echos to the console
+processDevice($device, $action, $devInfo, $o);
+exit;
+
+
+function processDevice($device, $action, $devInfo = [], $opts = []) {
+    switch ($action) {
+        case ACTION_PING:
+            $oldPing = getDeviceData($device,$action);
+            $newPing = pingSingleDevice($device);
+            updateDeviceData($device,$action,$newPing);
+            updateDeviceHistory($device,$action,$newPing['ms']);
+
+            //Now compare
+            $pingDiff = pingCompare($oldPing, $newPing);
+            if ($pingDiff != "" ) {
+                writeLogForDevice($device, $action, $pingDiff);
+                //device state changed, lets also collect an updated traceroute
+                processDevice($device, ACTION_TRACEROUTE);
+            }
+
+            break;
+
+        case ACTION_TRACEROUTE:
+            $oldTrace = getDeviceData($device,$action);
+            $newTrace = tracerouteRun($device);
+            updateDeviceData($device, $action, $newTrace);
+
+            //Now compare
+            $traceDiff = tracerouteCompare($oldTrace, $newTrace); //returns a string describing the difference or an empty string
+            if ($traceDiff != "" ) {
+                $changeID = updateDeviceHistory($device, $action, $newTrace);
+                writeLogForDevice($device, $action, $traceDiff, $changeID);
+            }
+
+            break;
+
+        case ACTION_SNMP:
+            echo "snmpbulkget $device";
+            break;
+
+        case ACTION_CONFIGURATION:
+            //Use hidden options if those are set
+            print_r($opts);
+            //First get the account profile with the login details to the box, if present
+            $accProfile = isset($devInfo['collectors']['configuration-profile'])?$devInfo['collectors']['configuration-profile']:"";
+
+
+            //Collect the previous and current configs
+            $oldConfig = getDeviceData($device,$action);
+            $newConfig = configurationGet($device, $devInfo, $accProfile);
+            //updateDeviceData($device, $action, $newConfig);
+
+            //Now compare
+
+
+            break;
+    }
+
+}
+
+
+
+class BackgroundProcess
+{
+    private $command;
+    private $pid;
+
+    public function __construct($command)
+    {
+        $this->command = $command;
+    }
+
+    public function run($outputFile = '/dev/null')
+    {
+        $this->pid = shell_exec(sprintf(
+            '%s > %s 2>&amp;1 &amp; echo $!',
+            $this->command,
+            $outputFile
+        ));
+    }
+
+    public function isRunning()
+    {
+        try {
+            $result = shell_exec(sprintf('ps %d', $this->pid));
+            if(count(preg_split("/\n/", $result)) > 2) {
+                return true;
+            }
+        } catch(Exception $e) {}
+
+        return false;
+    }
+
+    public function getPid()
+    {
+        return $this->pid;
+    }
+}
+
+
 
 
 /**
  * Class traceThread Will start a thread to run a traceroute on a device
  */
+/*
 class collectionThread extends Thread {
     public $complete;
     public function __construct($device, $deviceInfo, $deviceFolder) {
@@ -122,3 +226,7 @@ class collectionPool extends Pool
         return $this->data;
     }
 }
+
+//to use thread
+$worker[$device] = new collectionThread($device, $deviceInfo,"$gFolderScanData/$device");
+//*/

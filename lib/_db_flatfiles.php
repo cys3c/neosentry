@@ -15,11 +15,10 @@ include_once "_functions.php";
  * @param string $category mapped to the data collections of the device, like [routes, if_table, configuration, ping, general, etc]
  * @param string $device the device name or ip we're updating.
  * @param string $text = a brief summary
- * @param string $beforeChange = [optional] if this is a change log then the old value of the data
- * @param string $afterChange = [optional] new value of the data that was changed
- * @return boolean whether it successfully wrote to the log or not
+ * @param string $changeID = [optional] if this is a change log then the unique value we can look the change up with
+  * @return boolean whether it successfully wrote to the log or not
  */
-function writeLogForDevice($category, $device, $text, $beforeChange = "", $afterChange = "") {
+function writeLogForDevice($device, $category, $text, $changeID = "") {
     //These logs will be stored in the devices data folder. each line entry will be a json array
     global $gFolderScanData;
 
@@ -28,19 +27,17 @@ function writeLogForDevice($category, $device, $text, $beforeChange = "", $after
         'date'=>date(DATE_ATOM),
         'category'=>$category,
         'text'=>$text,
-        'before'=>$beforeChange,
-        'after'=>$afterChange);
+        'change_id'=>$changeID);    //changeID is the ATOM date value returned from updateDeviceHistory().
     $data = json_encode($arrData);
 
     //ensure there's a file to write to
     $logFolder = $gFolderScanData."/".$device;
     $logFile = $logFolder."/log.log";
-    if (!file_exists($logFolder)) mkdir($logFolder);
+    if (!file_exists($logFolder)) mkdir($logFolder,0777,true);
     if (!file_exists($logFile)) touch($logFile);
 
     //write the log entry
     $retval = file_put_contents($logFile,$data."\n",FILE_APPEND);
-
     return $retval;
 }
 
@@ -72,55 +69,72 @@ function getLogForDevice($device, $lineLimit = 0) {
 // FUNCTIONS FOR WRITING AND READING DEVICE DATA
 
 /** returns the array of CURRENT data
+ * $category = ping, traceroute, configuration, etc
  */
-function getDeviceData($device) {
+function getDeviceData($device, $category) {
     global $gFolderScanData;
-    $dataFile = $gFolderScanData."/".$device."/device_data.json";
+    $dataFile = $gFolderScanData."/".$device."/device_data_".$category.".json";
 
-    return json_decode(file_get_contents($dataFile), true);
+    return json_decode(file_exists($dataFile)?file_get_contents($dataFile):"[]", true);
 }
 
 /** writes a json file with variable data in the device data directory
  */
+function putDeviceData($device, $category, $arrayOfData) { return updateDeviceData($device, $category, $arrayOfData);}
 function updateDeviceData($device, $category, $arrayOfData) {
     global $gFolderScanData;
-    $dataFile = $gFolderScanData."/".$device."/device_data.json";
+    $dataFile = $gFolderScanData."/".$device."/device_data_".$category.".json";
+    if (!file_exists($gFolderScanData."/".$device)) mkdir($gFolderScanData."/".$device,0777,true);
+    if (!file_exists($dataFile)) touch($dataFile);
 
-    //add a "last updated" field
-    $arrayOfData['last_updated'] = date(DATE_ATOM);
+    //make sure we have an array
+    if(!is_array($arrayOfData)) $arrayOfData[] = $arrayOfData;
 
-    //read the data, update it and write it back to the file
-    $dataArr = json_decode(file_get_contents($dataFile), true);
-    $dataArr[$category] = $arrayOfData;
+    //load the current data and merge the arrays
+    $dataArr = file_exists($dataFile)?json_decode(file_get_contents($dataFile), true):[];
+    $dataArr = is_array($dataArr)?array_merge($dataArr, $arrayOfData):$arrayOfData;
+    $dataArr['last_updated'] = date(DATE_ATOM); //add a "last updated" field
+
+    //write the data back and return
     $retval = file_put_contents($dataFile,json_encode($dataArr));
-
     return $retval;
 }
 
 
 /** writes a new json line to the history file for that category
  */
-function updateDeviceHistory($device, $category, $arrayOfData) {
+function putDeviceHistory($device, $category, $data) { updateDeviceHistory($device, $category, $data); }
+function updateDeviceHistory($device, $category, $data) {
     global $gFolderScanData;
     $dataFile = $gFolderScanData."/".$device."/device_history_".$category.".json";
 
-    //Make sure the file exists
-    if (!file_exists($dataFile)) touch($dataFile);
+    //make sure we have a string
+    if (is_array($data)) $data = json_encode($data);
 
-    //write the log entry
-    $arrayOfData['date'] = date(DATE_ATOM);
-    $retval = file_put_contents($dataFile,json_encode($arrayOfData)."\n",FILE_APPEND);
-    return $retval;
+    //create the simple json type array string
+    $date = date(DATE_ATOM);
+    $w = '["'.$date.'",';
+    $w .= is_numeric($data)?$data:'"'.$data.'"';
+    $w .= ']';
+
+    //write to the file and return
+    if (!file_exists($dataFile)) {
+        $ret = file_put_contents($dataFile,$w);
+    } else {
+        $ret = file_put_contents($dataFile,",\n".$w,FILE_APPEND);
+    }
+
+    return $ret?$date:"";
 }
 
 /** returns an array of the device history
  */
-function getDeviceHistory($device, $category, $lineLimit = 0) {
+function getDeviceHistory($device, $category, $lineLimit = 0, $returnSortedArray = false) {
     global $gFolderScanData;
     $dataFile = $gFolderScanData."/".$device."/device_history_".$category.".json";
+    if (!file_exists($dataFile)) return $returnSortedArray?[]:"";
 
     //get the data we're working with
-    $data = "";
     if($lineLimit > 0) {
         $data = shell_exec('tail -n '.$lineLimit.' '.$dataFile);
     } else {
@@ -128,8 +142,13 @@ function getDeviceHistory($device, $category, $lineLimit = 0) {
     }
 
     //format, sort, and return the reversed (chronologically sorted) array
-    $arrData = json_decode("{[".$data."]}", true);
-    return array_reverse($arrData); //the entries are added chronologically, so all we have to do is reverse the array, instead of sort
+    if ($returnSortedArray) {
+        $arrData = json_decode($data, true);
+        return array_reverse($arrData); //the entries are added chronologically, so all we have to do is reverse the array, instead of sort
+    } else {
+        return $data;
+    }
+
 }
 
 

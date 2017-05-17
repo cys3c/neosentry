@@ -64,10 +64,50 @@ else
 	echo Installing some useful linux network admin related packages
 	apt-get -m -y install mtr traceroute dnsutils tcpdump whois snmp curl wget htop diffutils ipcalc
 	apt-get -m -y install nmap
-	
-	echo Installing Apache, MySQL, PHP, and Python
-	apt-get -m -y install apache2 mysql-server libapache2-mod-python libapache2-mod-php5 openssh-server sudo mod_ssl openssl
-	apt-get -m -y install php5 php-pear php5-mysql
+
+    apt-get -m -y install apache2 python libapache2-mod-python
+	#php5
+	#apt-get -m -y install apache2 mysql-server libapache2-mod-python libapache2-mod-php5 openssh-server sudo mod_ssl openssl
+	#apt-get -m -y install php5 php-pear php5-mysql
+
+	echo Installing PHP7, Compiling from source with pthreads
+	apt-get -m -y install bison autoconf build-essential pkg-config git-core libltdl-dev libbz2-dev libxml2-dev libxslt1-dev libssl-dev libicu-dev libpspell-dev libenchant-dev libmcrypt-dev libpng-dev libjpeg* libfreetype6-dev libmysqlclient-dev libreadline-dev libcurl4-openssl-dev
+	mkdir /usr/local/php-7.1
+	cd /usr/local/php-7.1
+	git clone https://github.com/php/php-src.git
+	cd php-src/ext
+	git clone https://github.com/krakjoe/pthreads -b master pthreads
+	cd ..
+	./buildconf --force
+	CONFIGURE_STRING="--prefix=/etc/php7 --with-bz2 --with-zlib --enable-zip --disable-cgi \
+   --enable-soap --enable-intl --with-mcrypt --with-openssl --with-readline --with-curl \
+   --enable-ftp --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
+   --enable-sockets --enable-pcntl --with-pspell --with-enchant --with-gettext \
+   --with-gd --enable-exif --with-jpeg-dir --with-png-dir --with-freetype-dir --with-xsl \
+   --enable-bcmath --enable-mbstring --enable-calendar --enable-simplexml --enable-json \
+   --enable-hash --enable-session --enable-xml --enable-wddx --enable-opcache \
+   --with-pcre-regex --with-config-file-path=/etc/php7/cli \
+   --with-config-file-scan-dir=/etc/php7/etc --enable-cli --enable-maintainer-zts \
+   --with-tsrm-pthreads --enable-debug"
+   ./configure $CONFIGURE_STRING
+    make && make install
+
+    chmod o+x /etc/php7/bin/phpize
+    chmod o+x /etc/php7/bin/php-config
+    cd ext/pthreads*
+    /etc/php7/bin/phpize
+
+    ./configure --prefix='/etc/php7' --with-libdir='/lib/x86_64-linux-gnu' --enable-pthreads=shared --with-php-config='/etc/php7/bin/php-config'
+    make && make install
+
+    cd ../../
+    cp php.ini-production /etc/php7/cli/php-cli.ini
+    echo "extension=pthreads.so" > /etc/php7/cli/php-cli.ini
+
+
+    echo Installing Apache2 and Python
+
+
 	
 	# ---------- Start Services -----------
 	echo Starting Services.
