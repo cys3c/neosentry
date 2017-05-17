@@ -33,29 +33,9 @@ egrep -o "rule: [0-9]*|NAT_rulenum: [0-9]*" | awk '{count[$1,$2]++} END {for (wo
  */
 
 
-/*
-// If we're running this from command line then get the input
-if (PHP_SAPI == "cli") {
-    $o = getopt("d:u::p::e::"); // 1 : is required, 2 :: is optional
-    $device = array_key_exists("d",$o) ? $o["d"] : "";
-
-    if ($device=="") {
-        echo "Device is required. Use \"-d [device]\"\n";
-        exit;
-    }
-
-    $u = array_key_exists("u",$o) ? $o["u"] : readline("Enter Username: ");
-    $p = array_key_exists("p",$o) ? $o["p"] : rtrim(shell_exec('read -s -p "Password: "'));
-    echo "\n";
-    $p2 = array_key_exists("e",$o) ? $o["e"] : rtrim(shell_exec('read -s -p "2nd Password [optional]: "'));
-    echo "\n";
-
-    runCollector($device,"./$device","configuration.json",$u,$p,$p2);
-}
-*/
 
 // Required includes for ssh connection.
-set_include_path('../../../lib/phpseclib'); //required since these libraries include other libraries
+set_include_path('phpseclib'); //required since these libraries include other libraries
 include('Net/SSH2.php');
 include('Net/SCP.php');
 
@@ -72,7 +52,7 @@ $password2 = "%password2%";     //this 2nd password is an optional variable only
 
 //run the main collector logic
 echo "Running Check Point Configuration Collection Script";
-//$configArr = runCollector($device, $scratchFolder, "configurationOutput.json", $username, $password, $password2);
+$configArr = runCollector($device, $scratchFolder, "configurationOutput.json", $username, $password, $password2);
 
 //print the output so the parent program can collect it.
 if (is_array($configArr)) echo json_encode($configArr,JSON_PRETTY_PRINT);
@@ -92,13 +72,14 @@ exit;
 function runCollector($device, $saveToFolder, $saveToFile, $username, $password, $password2="") {
 
     // Get the last time we modified the config file
-    $lastRunTime = filemtime($saveToFolder . "/" . $saveToFile);
+    $lastRunTime = file_exists($saveToFolder . "/" . $saveToFile)?filemtime($saveToFolder . "/" . $saveToFile):0;
+    $arrConfig = [];
 
     //Set up the SSH and SCP constructors
     echo "connecting to $device\n >> ".LOG_FILE;
     $ssh = new Net_SSH2($device);
     if (!$ssh->login($username, $password)) {
-        return "Error: Login Failed using username $username.";
+        return "Error: Login Failed using username $username. " . $ssh->getLastError();
     }
     $scp = new Net_SCP($ssh);
 

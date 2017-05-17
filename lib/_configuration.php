@@ -68,7 +68,8 @@ function configurationGet($device, &$deviceInfo, $overrideScript = "", $override
     if (substr($scriptName,-3)==".py") $cmd = "python $outFile";
     echo "About to run $cmd\n";
     $start = microtime(true);
-    $ret = shell_exec($outFile);
+    $ret = shell_exec($cmd);
+    echo $ret;
     $retArr = json_decode($ret,true);
     if (!is_array($retArr)) $retArr = array("Error"=>"Script $scriptName did not return the expected JSON configuration.", "Return Data"=>$ret);
     echo "Execution completed in " . (microtime(true) - $start) . " seconds\n";
