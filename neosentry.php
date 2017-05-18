@@ -3,6 +3,9 @@
  * Main core logic to handle elevated and centralized tasks
  */
 
+//first lets set the current working directory to this scripts
+chdir(dirname(__FILE__));
+
 include_once "lib/_functions.php";
 firstRunConfig(); // creates the settings files if they need to be created.
 

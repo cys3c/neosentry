@@ -8,6 +8,7 @@
  *
  */
 
+chdir(dirname(__FILE__));
 include_once "_functions.php";
 
 // some variables

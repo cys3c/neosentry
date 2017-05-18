@@ -37,7 +37,7 @@ egrep -o "rule: [0-9]*|NAT_rulenum: [0-9]*" | awk '{count[$1,$2]++} END {for (wo
 //exit;
 
 // Required includes for ssh connection.
-set_include_path('lib/phpseclib'); //required since these libraries include other libraries
+set_include_path('phpseclib'); //required since these libraries include other libraries
 include('Net/SSH2.php');
 include('Net/SCP.php');
 
@@ -53,7 +53,7 @@ $password2 = "%password2%";     //this 2nd password is an optional variable only
 
 
 //run the main collector logic
-echo "Running Check Point Configuration Collection Script";
+//echo "Running Check Point Configuration Collection Script\n";
 $configArr = runCollector($device, $scratchFolder, "configurationOutput.json", $username, $password, $password2);
 
 //print the output so the parent program can collect it.
