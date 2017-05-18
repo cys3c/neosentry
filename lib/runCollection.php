@@ -34,8 +34,7 @@ while(strpos($device,"  ") > 0) { $device = str_replace("  "," ",$device); }
 
 
 //include the necessary action library
-$path = realpath(dirname(__FILE__));
-if (file_exists("$path/_".$action.".php")) include "$path/_".$action.".php";
+if (file_exists("_".$action.".php")) include "_".$action.".php";
 else { echo "Action '$action' not supported.$help"; exit;}
 
 
@@ -158,6 +157,9 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
             }
 
             break;
+
+        default:
+            echo $action . " does not have a processor\n";
     }
 
 }
