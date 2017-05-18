@@ -11,6 +11,8 @@ firstRunConfig(); // creates the settings files if they need to be created.
 
 $argMap = [];
 //add our command line arguments
+addArg("collect", true, 0, "", "Runs the collector against a device");
+
 addArg("add", false, false, "", "Add an element to the database");
 addArg("add account-profile", true, 1, "", "Add an account profile used to remotely log into a device to gather configs");
 addArg("add device", true, 1, "", "[hostname/IP] - The devices IP or hostname");
@@ -28,9 +30,11 @@ addArg("search", true, 0, "", "Searches the database for your inputted criteria"
 
 
 
+
 // If we're running this from command line then...
 if (PHP_SAPI == "cli" && isset($argv)) {
     $script = array_shift($argv);
+    $fullCmdArr = $argv;
 
     // show help if no arguments are passed
     if (sizeof($argv) <=0 ) {
@@ -39,13 +43,21 @@ if (PHP_SAPI == "cli" && isset($argv)) {
     }
 
     $arr = processArgs($argv);
-    $path = $arr["path"];
-    $vals = $arr["args"];
-    switch ($path) {
-        case "add device":
-            //add the device to the devices list
+    $path = $arr["path"];       //the full command, ie "get device ... [args]"
+    $action = $arr["action"];   //the first command, ex "get"
+    $subject = $arr["full_cmdline"]; //the rest of the command, ie "device ..."
+    $vals = $arr["args"];       //the arguments for the path
+
+    switch ($action) {
+        case "add":
             echo "$path:\n";
             print_r($vals);
+            break;
+
+        case "collect":
+            echo "$subject:\n";
+            $passTo = realpath(dirname(__FILE__)."/lib/runCollection.php");
+            shell_exec("php $passTo $subject");
             break;
 
         default:
@@ -75,6 +87,8 @@ function addArg($path, $required = false, $takesInput = false, $regexConstraint 
  */
 function processArgs(&$argv) {
     global $argMap;
+    if ($argv[0] == __FILE__) array_shift($argv);
+    $fullCmdArr = $argv;
     $path = "";
     $vals = [];
     $pathComplete = false;
@@ -143,7 +157,13 @@ function processArgs(&$argv) {
         }
     }
 
-    $arr["path"] = $path;
+    $arr["action"] = array_shift($fullCmdArr);
+    $arr["full_cmdline"] = "";
+    foreach ($fullCmdArr as $cmd) {
+        $arr["full_cmdline"] .= '"' . str_replace('"','\"',$cmd) . '"';
+    }
+
+    $arr["path"] = $path;   //the full command path before arguments
     $arr["args"] = $vals;
 
     return $arr;
