@@ -33,7 +33,6 @@ if ($key=='') trim(substr(filter_input(INPUT_GET, 'key', FILTER_SANITIZE_STRING)
 $retJson = '';
 switch ($method) {
     case 'GET':
-        //$sql = "select * from `$table`".($key?" WHERE id=$key":''); break;
         //first handle special case GET requests
         if ($table == "sessiondata") {
             $retJson = json_encode($_SESSION);
@@ -47,6 +46,12 @@ switch ($method) {
             $retJson = '{"Server Stats":{"serverHD":['.$diskUsed[0].',"'.$diskUsed[1].'"],"serverRAM":['.$ramUsed[0].',"'.$ramUsed[1].'"],"serverCPU":['.$cpuUsed[0].',"'.$cpuUsed[1].'"]}}';
 
         } elseif ($table == "devices") {
+            if ($key != '') {   //get all devices
+                $data = getDevicesArray();
+            } else {    //only get the one device
+                $data = getDeviceSettings($key);
+            }
+
 
 
         } else { //get the table requested
@@ -54,19 +59,20 @@ switch ($method) {
         }
         break;
 
-    case 'PUT':
+
+    case 'PUT':     // UPDATE
         sessionProtect(false,ROLE_ADMIN);
-        //$sql = "update `$table` set $set where id=$key"; break;
+
         break;
 
-    case 'POST':
+    case 'POST':    // CREATE New / Overwrite Old
         sessionProtect(false,ROLE_ADMIN);
-        //$sql = "insert into `$table` set $set"; break;
+
         break;
 
     case 'DELETE':
         sessionProtect(false,ROLE_ADMIN);
-        //$sql = "delete `$table` where id=$key"; break;
+
         break;
 }
 

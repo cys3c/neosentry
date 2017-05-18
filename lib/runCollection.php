@@ -2,6 +2,10 @@
 <?php
 /**
  * Uses multi-threading to call the specified collection script
+ *
+ * Example:
+ * runCollection.php -a configuration -d localhost --config-script "checkpoint.php" --config-profile "{\"username\": \"fwadmin\", \"password\": \"testing\" }"
+ *
  */
 
 include "_functions.php";
@@ -18,9 +22,13 @@ Usage: php runCollection.php -d "10.10.10.10"
 
 // Get command line arguments. optionally only from command line: if (PHP_SAPI == "cli") {}
 $o = getopt("a:d:",["snmp-type:", "config-script:","config-profile:"]); // 1 : is required, 2 :: is optional
-$action = array_key_exists("a",$o) ? $o["a"] : "";
-$device = array_key_exists("d",$o) ? $o["d"] : "";
+$action = array_key_exists("a",$o) ? trim($o["a"]) : "";
+$device = array_key_exists("d",$o) ? trim($o["d"]) : "";
 if ($device=="") { echo "Device is required. \n$help"; exit; }
+//clean up extra characters that may be used to separate devices
+$device = str_replace(["\t","\r","\n","|",";",","]," ",$device);
+while(strpos($device,"  ") > 0) { $device = str_replace("  "," ",$device); }
+
 
 //include the necessary action library
 if (file_exists("_".$action.".php")) include "_".$action.".php";
@@ -30,11 +38,17 @@ else { echo "Action '$action' not supported.$help"; exit;}
 
 // LOOP THROUGH ALL DEVICES, THEN EXIT
 
-if ($device=="all" || $device=="*") {
+if ($device=="all" || $device=="*" || strpos($device, " ") > 0) {
     writeLogFile($logFile, "Running ".$action." on ALL devices."); //also echos to the console
 
     // Load the devices
-    $arrDevices = getDevicesArray(); //json_decode(file_get_contents($pingOutFile), true);
+    if (strpos($device, " ") > 0) {
+        //multiple devices were specified in the command line
+        $arrDevices = explode(" ", $device);
+    } else {
+        $arrDevices = getDevicesArray(); //json_decode(file_get_contents($pingOutFile), true);
+    }
+
     $processArr = []; //return array
 
     // Loop through each device

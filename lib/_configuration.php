@@ -77,8 +77,8 @@ function configurationGet($device, &$deviceInfo, $overrideScript = "", $override
 
     //cleanup, securely delete it (linux) and then delete
     echo "cleaning up files\n";
-    //shell_exec("shred -u \"$outFile\"");
-    //unlink($outFile);
+    shell_exec("shred -u \"$outFile\"");
+    if (file_exists($outFile)) unlink($outFile);
 
 
     return $retArr;
