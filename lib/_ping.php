@@ -21,7 +21,7 @@ function pingSingleDevice($device) {
 
     if (strpos($ret,"unknown host") > 0 || strpos($ret,"could not find host") > 0) {
         $retArr['status'] = "unresolvable";
-        echo "Device $device is {$retArr['status']}\n";
+
     } else {
         $ip = trim(get_string_between($ret, " from ", " "));
         $retArr['ip'] = rtrim($ip,":");
@@ -32,10 +32,11 @@ function pingSingleDevice($device) {
         if ($nix>0) { $retArr['ms'] = $nix; $retArr['status'] = "up"; }
         elseif ($win>0) { $retArr['ms'] = $win; $retArr['status'] = "up"; }
         else $retArr['status'] = "down";
-
-        echo "Device $device ({$retArr['ip']}) is {$retArr['status']}: reply {$retArr['ms']} ms\n";
     }
 
+    //some verbosity
+    if ($retArr['status']=='up') echo "Device $device ({$retArr['ip']}) is {$retArr['status']}: reply {$retArr['ms']} ms\n";
+    else echo "Device $device is {$retArr['status']}\n";
 
     return $retArr;
 }

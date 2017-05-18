@@ -33,7 +33,8 @@ function tracerouteRun($device, $tcpScan = false, $tcpPort = ""){
 	$lastIP = tracerouteGetHop($hopArr, -1);
     $deviceIPs = gethostbynamel($device); //get the IP of the device
 
-	echo $tcpScan?"TCP":"ICMP" . " TRACEROUTE\n  > Last hop: [$lastHop] Last IP: [$lastIP] Device IP(s): [" . rtrim(implode(", ",$deviceIPs), ", ") . "]\n";
+    $type = $tcpScan?"TCP":"ICMP";
+	echo  "$type TRACEROUTE\n  > Last hop: [$lastHop] Last IP: [$lastIP] Device IP(s): [" . rtrim(implode(", ",$deviceIPs), ", ") . "]\n";
 
 
     if (in_array($lastIP, $deviceIPs) || $lastIP == "127.0.0.1" || $lastIP == "::1") {
