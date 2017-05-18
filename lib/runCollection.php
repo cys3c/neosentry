@@ -41,37 +41,40 @@ else { echo "Action '$action' not supported.$help"; exit;}
 // LOOP THROUGH ALL DEVICES, THEN EXIT
 
 if ($device=="all" || $device=="*" || strpos($device, " ") > 0) {
-    writeLogFile($logFile, "Running ".$action." on ALL devices."); //also echos to the console
+    writeLogFile($logFile, "Running ".$action." on devices: $device"); //also echos to the console
+
 
     // Load the devices
-    if (strpos($device, " ") > 0) {
-        //multiple devices were specified in the command line
+    if (strpos($device, " ") > 0) { //multiple devices were specified in the command line
         $arrDevices = explode(" ", $device);
-    } else {
+    } else {    //get all configured devices
         $arrDevices = getDevicesArray(); //json_decode(file_get_contents($pingOutFile), true);
     }
 
     $processArr = []; //return array
 
     // Loop through each device
-    foreach($arrDevices as $device=>$deviceInfo) {
+    foreach($arrDevices as $dev=>$devInfo) {
         //An alternate way of threading, just recall this script in the background and define a device. Only works on linux
-        $processArr[$device] = new BackgroundProcess('php ' . __FILE__ . " -a $action -d $device");
-        $processArr[$device]->run();
+        if (!is_array($devInfo)) $dev = $devInfo; //accommodate for command line supplied IPs
+
+        $processArr[$dev] = new BackgroundProcess('php ' . __FILE__ . " -a $action -d $dev");
+        $processArr[$dev]->run();
 
         //only allow the number of processes defined by maxThreads
         while (count($processArr) > $maxThreads) {
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') sleep(3); //at least until i get threading in php7.1 working...
             foreach ($processArr as $key => $val) if (!$val->isRunning()) unset($processArr[$key]);
         }
     }
 
     //stay resident until all processes finish
     while (count($processArr) > 0) {
-        foreach ($processArr as $key => $val) if (!$val->isRunning()) unset($processArr[$key]);
-    }
+           foreach ($processArr as $key => $val) if (!$val->isRunning()) unset($processArr[$key]);
+     }
 
     //done with all devices, write to the log and exit
-    writeLogFile("", "Completed running ".$action." on ALL devices.");
+    writeLogFile($logFile, "Completed running ".$action." on devices");
     exit;
 
 }
@@ -169,15 +172,25 @@ class BackgroundProcess
 
     public function run($outputFile = '/dev/null')
     {
-        $this->pid = shell_exec(sprintf(
-            '%s > %s 2>&amp;1 &amp; echo $!',
-            $this->command,
-            $outputFile
-        ));
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $this->pid = shell_exec("start /B ". $this->command);
+
+        } else { //Assume Linux
+            $this->pid = shell_exec(sprintf(
+                '%s > %s 2>&amp;1 &amp; echo $!',
+                $this->command,
+                $outputFile
+            ));
+        }
     }
+
+    //These 2 functions won't work on windows
 
     public function isRunning()
     {
+        //we can't track a windows process this way so just return false
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') return false;
+
         try {
             $result = shell_exec(sprintf('ps %d', $this->pid));
             if(count(preg_split("/\n/", $result)) > 2) {

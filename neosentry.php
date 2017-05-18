@@ -165,10 +165,11 @@ function processArgs(&$argv) {
     $arr["action"] = array_shift($fullCmdArr);
     $arr["full_cmdline"] = "";
     foreach ($fullCmdArr as $cmd) {
-        $cmd = " " . addslashes($cmd); //escape characters
-        $arr["full_cmdline"] .= (strpos($cmd," "))?'"' . $cmd . '"' : $cmd;
-        $arr["full_cmdline"] = trim($arr["full_cmdline"]);
+        $cmd = addslashes($cmd); //escape characters
+        $arr["full_cmdline"] .= (strpos($cmd," ")>0)?'"' . $cmd . '"' : $cmd;
+        $arr["full_cmdline"] .= " ";
     }
+    $arr["full_cmdline"] = trim($arr["full_cmdline"]);
 
     $arr["path"] = $path;   //the full command path before arguments
     $arr["args"] = $vals;

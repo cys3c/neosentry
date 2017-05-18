@@ -264,7 +264,7 @@ function getDocument($docName, $section = "") {
 
     //if the document doesn't exist then lets include the main php which does a firstRun and creates the initial docs
     if (!file_exists($gFolderConfigs . "/$docName.json")) {
-        writeLogFile("application.log","ERROR: $gFolderConfigs/$docName.json does not exist. Cannot retrieve document.");
+        writeLogFile("application.log","WARNING: $gFolderConfigs/$docName.json does not exist. Cannot retrieve document.");
         return "";
     }
 

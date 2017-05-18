@@ -10,10 +10,10 @@ function tracerouteRun($device, $tcpScan = false, $tcpPort = ""){
 
 	//Set up the command [TCP or ICMP]
     $isWIN = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-    $trCmd = ($isWIN)?"tracert -d -w 500 $device" : "traceroute -n -N30 -q1 $device";
+    $trCmd = ($isWIN)?"tracert -d -w 500 $device" : "traceroute -n -N30 -q1 -w0.5 $device";
     if ($tcpScan && !$isWIN) { //wont work on windows
         //set up the default tcp scan
-        $trCmd = "traceroute -n -N30 -q1 -T $device";
+        $trCmd = "traceroute -n -N30 -q1 -w1 -T $device";
 
         //find an open port and use that if available
         $oPort = intval($tcpPort);
@@ -21,7 +21,7 @@ function tracerouteRun($device, $tcpScan = false, $tcpPort = ""){
             $oPort = shell_exec("nmap -PN -p80,443,22,21,25,8080,8081,53,3389,23,110,445,135,139,5000,6002,500,389 $device | grep \"open\"");
             $oPort = intval(substr($oPort,0,strpos($oPort,"/")));
         }
-        if ($oPort > 0 && $oPort < 65535) $trCmd = "traceroute -n -N30 -q1 -T -p$oPort $device";
+        if ($oPort > 0 && $oPort < 65535) $trCmd = "traceroute -n -N30 -q1 -w1 -T -p$oPort $device";
     }
 
     //Run the command
@@ -33,7 +33,7 @@ function tracerouteRun($device, $tcpScan = false, $tcpPort = ""){
 	$lastIP = tracerouteGetHop($hopArr, -1);
     $deviceIPs = gethostbynamel($device); //get the IP of the device
 
-	echo "ICMP TRACEROUTE\n  > Last hop: [$lastHop] Last IP: [$lastIP] Device IP(s): [" . rtrim(implode(", ",$deviceIPs), ", ") . "]\n";
+	echo $tcpScan?"TCP":"ICMP" . " TRACEROUTE\n  > Last hop: [$lastHop] Last IP: [$lastIP] Device IP(s): [" . rtrim(implode(", ",$deviceIPs), ", ") . "]\n";
 
 
     if (in_array($lastIP, $deviceIPs) || $lastIP == "127.0.0.1" || $lastIP == "::1") {
