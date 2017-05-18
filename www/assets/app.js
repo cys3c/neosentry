@@ -67,6 +67,7 @@ app.service('gHandler', function() {
 /* The Main controller has always viewable and accessible information like username, search function, etc */
 app.controller("mainCtrl", function ($scope, $http, gHandler) {
 	/* Get the Data for the main page */
+    var deviceData;
 
     $http.get("/api/sessiondata")
         .then(function (response) {
@@ -102,20 +103,36 @@ app.controller("settingsCtrl", function ($scope, $http, $interval, gHandler) {
 });
 
 app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
-	/* Get the Data for the dashboard */
-	if ($parent.deviceData) {updateData($parent.deviceData)}
+	/* Get the Data  */
+	//if ($scope.$parent.deviceData) {updateData($scope.$parent.deviceData)}
 
     $scope.getData = function() {
         $http.get("/api/devices")
             .then(function (response) {
-                $scope.data = response.data;
+                $scope.devData = response.data;
                 $scope.updated = Date.now();
-                updateData(response.data);
+                //updateData(response.data);
             }, function errorCallback(response) {
                 console.log("Error getting device list data: " + JSON.stringify(response));
             });
     }
     $scope.getData();
+
+    $scope.sort = function(keyname){
+        $scope.sortKey = keyname;   //set the sortKey to the param passed
+        $scope.reverse = !$scope.reverse; //if true make it false and vice versa
+    }
+    $scope.devSortType     = 'name'; // set the default sort type
+    $scope.devSortReverse  = false;  // set the default sort order
+    $scope.devSearch   = '';     // set the default search/filter term
+
+    // create the list of sushi rolls
+    $scope.devData = [
+        { name: 'Cali Roll', fish: 'Crab', tastiness: 2 },
+        { name: 'Philly', fish: 'Tuna', tastiness: 4 },
+        { name: 'Tiger', fish: 'Eel', tastiness: 7 },
+        { name: 'Rainbow', fish: 'Variety', tastiness: 6 }
+    ];
 
     //timer to collect the data
 	/*

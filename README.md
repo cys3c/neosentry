@@ -38,9 +38,14 @@ Features
 Installation
 ------------
 
+It's recommended to have PHP7.1 which performs far better than PHP5, but is also a little tricky to setup. 
+This will install the prerequisites, configure apache, build the binary, and initialize the app.
+I'd recommend CentOS, but Debian based OS's are supported in the script.
+
+``git clone https://github.com/dje144/neosentry.git /usr/share/neosentry``
 ``./_setup.sh`` supports Debian, CentOS, and RedHat based linux distros.
 
-Installs all prerequisite packages and copies files to /usr/share/neosentry.
+If you download the source then running setup.sh will copy the files to /usr/share/neosentry
 
 
 Changes

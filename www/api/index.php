@@ -46,8 +46,11 @@ switch ($method) {
             $retJson = '{"Server Stats":{"serverHD":['.$diskUsed[0].',"'.$diskUsed[1].'"],"serverRAM":['.$ramUsed[0].',"'.$ramUsed[1].'"],"serverCPU":['.$cpuUsed[0].',"'.$cpuUsed[1].'"]}}';
 
         } elseif ($table == "devices") {
-            if ($key != '') {   //get all devices
+            if ($key == '') {   //get all devices
                 $data = getDevicesArray();
+                $retJson = json_encode($data);
+                //$ret["columns"] =
+
             } else {    //only get the one device
                 $data = getDeviceSettings($key);
             }
