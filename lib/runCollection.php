@@ -144,6 +144,7 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
             //Collect the previous and current configs
             $oldConfig = getDeviceData($device,$action);
             $newConfig = configurationGet($device, $devInfo, $ovScript, $ovProf);
+            echo json_encode($newConfig,JSON_PRETTY_PRINT);
             updateDeviceData($device, $action, $newConfig);
 
             //Now compare
