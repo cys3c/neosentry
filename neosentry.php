@@ -59,7 +59,7 @@ if (PHP_SAPI == "cli" && isset($argv)) {
 
         case "collect":
             $passTo = realpath(dirname(__FILE__)."/lib/runCollection.php");
-            //echo "running: php $passTo $subject\n";
+            echo "running: php $passTo $subject\n";
             system("php $passTo $subject");
             //$ret = shell_exec("php $passTo $subject");
             //echo $ret;
@@ -168,9 +168,13 @@ function processArgs(&$argv) {
     $arr["action"] = array_shift($fullCmdArr);
     $arr["full_cmdline"] = "";
     foreach ($fullCmdArr as $cmd) {
+        $escapeChar = isWindows()?"^":"\\";
         $cmd = addslashes($cmd); //escape characters
+        $cmd = str_replace("<",$escapeChar. "<",$cmd);
+        $cmd = str_replace(">",$escapeChar. ">",$cmd);
         $arr["full_cmdline"] .= (strpos($cmd," ")>0)?'"' . $cmd . '"' : $cmd;
         $arr["full_cmdline"] .= " ";
+
     }
     $arr["full_cmdline"] = trim($arr["full_cmdline"]);
 

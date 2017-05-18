@@ -53,7 +53,7 @@ $password2 = "%password2%";     //this 2nd password is an optional variable only
 
 
 //run the main collector logic
-//echo "Running Check Point Configuration Collection Script\n";
+//outputText("Running Check Point Configuration Collection Script\n");
 $configArr = runCollector($device, $scratchFolder, "configurationOutput.json", $username, $password, $password2);
 
 //print the output so the parent program can collect it.
@@ -78,7 +78,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     $arrConfig = [];
 
     //Set up the SSH and SCP constructors
-    echo "connecting to $device\n >> ".LOG_FILE;
+    outputText("connecting to $device");
     $ssh = new Net_SSH2($device);
     if (!$ssh->login($username, $password)) {
         return "Error: Login Failed using username $username. " . $ssh->getLastError();
@@ -90,7 +90,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     if (strpos($ret,"whoami")>0) {
         //not in expert
         $err =  "Error: Incorrect shell detected. To collect this devices configuration then log in as Expert and run the following command: 'chsh -s /bin/bash $username'";
-        echo $err . " >> ".LOG_FILE;
+        outputText($err);
         return $err;
         //$ssh->write("expert\n");
         //$buf = $ssh->read('Enter expert password:');
@@ -100,7 +100,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
 
     // Get the version of Check Point we're working with so we know the right folder
-    echo "Connected. Running Check Point Collection Script\n" . " >> ".LOG_FILE;
+    outputText("Connected. Running Check Point Collection Script");
     $ver = trim($ssh->exec('ls /opt | grep CPsuite | sort -r | head -n1'));
 
     // Find the latest objects file and get its contents
@@ -117,7 +117,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     }
 
     // we have the latest file, lets convert its contents
-    echo "Collecting " . $objFile . " with last modified date of " . date("M d, Y h:m:s", $objMod) . "\n" . " >> ".LOG_FILE;
+    outputText("Collecting " . $objFile . " with last modified date of " . date("M d, Y h:m:s", $objMod));
     //$ret = $ssh->exec("cat $objFile");
     //file_put_contents($saveToFolder . "/configmgmt_objects.C", $ret);
 
@@ -130,14 +130,14 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
     $ret = file_get_contents($saveToFolder."/configmgmt_objects.C");
 
-    echo "Converting and Importing Objects File.\n" . " >> ".LOG_FILE;
+    outputText("Converting and Importing Objects File.");
     $objJSON = parseToJson($ret);
     file_put_contents($saveToFolder . "/configmgmt_objects.json", $objJSON);
     $arrObjects = json_decode($objJSON, true);
     if (json_last_error()) {    // there was something wrong with the conversion, lets save the bad json file to look at
-        echo " - " . json_last_error_msg() . PHP_EOL . " >> ".LOG_FILE;
+        outputText(" - " . json_last_error_msg());
     } else {    // successfully converted, save the json.
-        echo " - Success\n" . " >> ".LOG_FILE;
+        outputText(" - Success");
     }
 
 
@@ -155,20 +155,20 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     }
 
     // we have the latest file, lets convert its contents
-    echo "Collecting " . $ruleFile . " with last modified date of " . date("M d, Y h:m:s", $ruleMod) . "\n" . " >> ".LOG_FILE;
+    outputText("Collecting " . $ruleFile . " with last modified date of " . date("M d, Y h:m:s", $ruleMod));
     $ret = $ssh->exec("cat $ruleFile");
     file_put_contents($saveToFolder . "/configmgmt_rules.C", $ret);
 
-    echo "Converting and Importing Rules File.\n" . " >> ".LOG_FILE;
+    outputText("Converting and Importing Rules File.");
     $ruleJSON = parseToJson($ret);
     $arrRules = json_decode($ruleJSON, true);
     if (json_last_error()) {
         // there was something wrong with the conversion, lets save the bad json file to look at
-        echo " - " . json_last_error_msg() . PHP_EOL . " >> ".LOG_FILE;
+        outputText(" - " . json_last_error_msg());
         file_put_contents($saveToFolder . "/configmgmt_rules.json", $ruleJSON);
     } else {
         // success, write the json file.
-        echo " - Success\n" . " >> ".LOG_FILE;
+        outputText(" - Success");
         file_put_contents($saveToFolder . "/configmgmt_rules.json", json_encode($arrRules, JSON_PRETTY_PRINT));
 
         //Convert the Firewall Rules
@@ -226,13 +226,13 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
 
     // On newer versions with the clish shell, we can get a configuration output similar to palo alto and cisco
-    echo "Attempting to get the newer version of the configuration settings... " . " >> ".LOG_FILE;
+    outputText("Attempting to get the newer version of the configuration settings... ");
     $config = $ssh->exec('/etc/cli.sh -c "show configuration"');
     if (strlen($config) < 100) {
         $config = "";
-        echo "Failed, cli.sh not present.\n" . " >> ".LOG_FILE;
+        outputText("Failed, cli.sh not present.");
     } else {
-        echo "Success!\n" . " >> ".LOG_FILE;
+        outputText("Success!");
         $arrConfig["Configuration"] = $config;
     }
 
@@ -242,7 +242,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
     // Save the consolidated configuration
     file_put_contents($saveToFolder . "/" . $saveToFile, json_encode($arrConfig));
-    echo "Saved Consolidated configuration to $saveToFolder/$saveToFile\n" . " >> ".LOG_FILE;
+    outputText("Saved Consolidated configuration to $saveToFolder/$saveToFile");
 
 
 
@@ -266,7 +266,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     $strEnd = date("F d, Y h:m:s", $etime);
     $cmd = 'fw log -l -n -p -z -b "' . $strStart . '" "' . $strEnd . '" | egrep -o "rule: [0-9]*|NAT_rulenum: [0-9]*" | awk \'{count[$1,$2]++} END {for (word in count) print word, count[word]}\'';
 
-    echo "Collecting hit count from $strStart to $strEnd\n\n" . " >> ".LOG_FILE;
+    outputText("Collecting hit count from $strStart to $strEnd");
 
     $ret = $ssh->exec($cmd);
     $collected = false;
@@ -289,10 +289,10 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     if ($collected) {
         //save the config again
         file_put_contents($saveToFolder . "/" . $saveToFile, json_encode($arrConfig));
-        echo "Collection complete!\n" . " >> ".LOG_FILE;
+        outputText("Collection complete!");
     } else {
         //nothing collected
-        echo "Could not collect hit count.\n  cmd: " . $cmd . "\n" . " >> ".LOG_FILE;
+        outputText("Could not collect hit count.\n  cmd: " . $cmd);
     }
 
     // Exit
@@ -480,7 +480,7 @@ function parseToJson($text){
                  $sJson .= '"'.$svar.'": {'."\n";
                  $addComma = false; */
         } else {
-            echo "Line $cnt not processed. Text = [$s]\n" . " >> ".LOG_FILE;
+            outputText("Line $cnt not processed. Text = [$s]");
         }
     }
 
@@ -512,6 +512,11 @@ function getLastJsonError(){
             break;
     }
 
+}
+
+function outputText($string){
+    //echo $string . "\n";
+    file_put_contents(LOG_FILE,$string . "\n",FILE_APPEND);
 }
 
 /*

@@ -4,9 +4,10 @@
  * Uses multi-threading to call the specified collection script
  *
  * Example:
- * runCollection.php -a configuration -d localhost --config-script "checkpoint.php" --config-profile "{\"username\": \"fwadmin\", \"password\": \"1<3@n0v3mb3rm00n#\" }"
+ * runCollection.php -a configuration -d localhost --config-script "checkpoint.php" --config-profile "{\"username\": \"fwadmin\", \"password\": \"pass\" }"
  *
  */
+
 
 chdir(dirname(__FILE__));
 include_once "_functions.php";
@@ -140,8 +141,9 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
         case ACTION_CONFIGURATION:
             //Use hidden options if those are set, mainly just for testing
             $ovScript = isset($opts["config-script"]) ? $opts["config-script"] : "";
-            $ovProf = isset($opts["config-profile"]) ? json_decode($opts["config-profile"], true) : "";
-
+            $ovProf = isset($opts["config-profile"]) ? json_decode($opts["config-profile"], true) : [];
+            print_r($ovProf);
+            exit;
             //Collect the previous and current configs
             $oldConfig = getDeviceData($device,$action);
             $newConfig = configurationGet($device, $devInfo, $ovScript, $ovProf);
