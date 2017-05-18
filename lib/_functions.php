@@ -104,6 +104,14 @@ function get_string_between($string, $start, $end){
     return substr($string, $ini, $len);
 }
 
+function isWindows(){
+    return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+}
+function command_exist($cmd) {
+    $return = shell_exec(sprintf("which %s", escapeshellarg($cmd)));
+    return !empty($return);
+}
+
 
 
 

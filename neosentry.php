@@ -11,7 +11,7 @@ firstRunConfig(); // creates the settings files if they need to be created.
 
 $argMap = [];
 //add our command line arguments
-addArg("collect", true, 0, "", "Runs the collector against a device");
+addArg("collect", true, 10, "", "Runs the collector against a device");
 
 addArg("add", false, false, "", "Add an element to the database");
 addArg("add account-profile", true, 1, "", "Add an account profile used to remotely log into a device to gather configs");
@@ -55,9 +55,11 @@ if (PHP_SAPI == "cli" && isset($argv)) {
             break;
 
         case "collect":
-            echo "$subject:\n";
             $passTo = realpath(dirname(__FILE__)."/lib/runCollection.php");
-            shell_exec("php $passTo $subject");
+            //echo "running: php $passTo $subject\n";
+            system("php $passTo $subject");
+            //$ret = shell_exec("php $passTo $subject");
+            //echo $ret;
             break;
 
         default:
@@ -71,7 +73,7 @@ if (PHP_SAPI == "cli" && isset($argv)) {
 }
 
 
-function addArg($path, $required = false, $takesInput = false, $regexConstraint = "", $description = ""){
+function addArg($path, $required = false, $takesInput = 0, $regexConstraint = "", $description = ""){
     //ex: addArg("add device host", true, 1, "[hostname/IP] Required. Takes 1 parameter, the devices IP or hostname");
     //Allow option chaining if there's no more sub-options. ie chaining under "add device" since host
     global $argMap;
@@ -103,9 +105,12 @@ function processArgs(&$argv) {
 
         //see if this command path takes an argument
         if (array_key_exists($path, $argMap)){
-            if ($argMap[$path]["input"]) {
+            if ($argMap[$path]["input"] > 0) {
                 //this command path takes input so lets get the data
-                $val = (sizeof($argv)>0)?array_shift($argv):"";
+                $val = "";
+                for ($c=1; $c <= $argMap[$path]["input"]; $c++) {
+                    $val = trim($val . " " . array_shift($argv));
+                }
                 if ($val=="") showHelp($path);
 
                 $vals[$key] = $val;
@@ -160,7 +165,9 @@ function processArgs(&$argv) {
     $arr["action"] = array_shift($fullCmdArr);
     $arr["full_cmdline"] = "";
     foreach ($fullCmdArr as $cmd) {
-        $arr["full_cmdline"] .= '"' . str_replace('"','\"',$cmd) . '"';
+        $cmd = " " . addslashes($cmd); //escape characters
+        $arr["full_cmdline"] .= (strpos($cmd," "))?'"' . $cmd . '"' : $cmd;
+        $arr["full_cmdline"] = trim($arr["full_cmdline"]);
     }
 
     $arr["path"] = $path;   //the full command path before arguments
@@ -214,9 +221,9 @@ function showHelp($path = "", $error = "") {
 
     //if there's no help then there's no sub-parameters available. modify the help accordingly
     if (array_key_exists($validPath,$argMap) && $strHelp == "") {
-        if ($argMap[$validPath]["input"]) {
-            $strHelp = "  This command takes 1 value and no additional parameters\n";
-            $strHelp .="     Command Help: " . $argMap[$validPath]["description"] . "\n\n";
+        if ($argMap[$validPath]["input"]>0) {
+            $strHelp = "  This command takes 1 or more parameters. ". $argMap[$validPath]["description"] . "\n";
+            //$strHelp .="  Command Help: " . $argMap[$validPath]["description"] . "\n";
         }
     }
 
@@ -227,7 +234,7 @@ function showHelp($path = "", $error = "") {
     } else {
         if ($error != "") echo "ERROR: $error\n";
         $s = ($validPath != "") ? " for '$validPath'" : "";
-        $out = "Available commands".$s.":\n" . $strHelp;
+        $out = "Available options".$s.":\n" . $strHelp;
         consolePrint($out,str_repeat(" ",$longestWord)."    ");
     }
 
@@ -236,7 +243,7 @@ function showHelp($path = "", $error = "") {
 }
 
 function consolePrint($text,$wrapPrefixString) {
-    $cols = intval(exec('tput cols'));
+    $cols = isWindows()?0:intval(exec('tput cols'));
     if (strlen($wrapPrefixString) * 3 <= $cols) {
         $arr = explode("\n",$text);
         foreach ($arr as $line) {

@@ -8,22 +8,23 @@
  *
  */
 
-include "_functions.php";
+include_once "_functions.php";
 
 // some variables
 $logFile = "collector.log";
 $maxThreads = 100;
-$actions = ACTION_PING . " " . ACTION_TRACEROUTE . " " . ACTION_SNMP . " " . ACTION_CONFIGURATION;
+$actions = ACTION_PING . ", " . ACTION_TRACEROUTE . ", " . ACTION_SNMP . ", " . ACTION_CONFIGURATION;
 $help = '
-Usage: php runCollection.php -d "10.10.10.10"
+Usage: ... -a <action> -d <device> {optional parameters based on the action}
     -a <action>: Available actions ['.$actions.']
-	-d <device>: The device name or IP
+    -d <device>: The device name or IP
 ';
 
 // Get command line arguments. optionally only from command line: if (PHP_SAPI == "cli") {}
 $o = getopt("a:d:",["snmp-type:", "config-script:","config-profile:"]); // 1 : is required, 2 :: is optional
 $action = array_key_exists("a",$o) ? trim($o["a"]) : "";
 $device = array_key_exists("d",$o) ? trim($o["d"]) : "";
+if ($action=="") { echo "Action is required. \n$help"; exit; }
 if ($device=="") { echo "Device is required. \n$help"; exit; }
 //clean up extra characters that may be used to separate devices
 $device = str_replace(["\t","\r","\n","|",";",","]," ",$device);
@@ -31,7 +32,8 @@ while(strpos($device,"  ") > 0) { $device = str_replace("  "," ",$device); }
 
 
 //include the necessary action library
-if (file_exists("_".$action.".php")) include "_".$action.".php";
+$path = realpath(dirname(__FILE__));
+if (file_exists("$path/_".$action.".php")) include "$path/_".$action.".php";
 else { echo "Action '$action' not supported.$help"; exit;}
 
 
