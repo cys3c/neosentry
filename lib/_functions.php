@@ -263,8 +263,10 @@ function getDocument($docName, $section = "") {
     global $gFolderConfigs;
 
     //if the document doesn't exist then lets include the main php which does a firstRun and creates the initial docs
-    if (!file_exists($gFolderConfigs . "/$docName.json")) include_once "../neosentry.php";
-    if (!file_exists($gFolderConfigs . "/$docName.json")) return "";
+    if (!file_exists($gFolderConfigs . "/$docName.json")) {
+        writeLogFile("application.log","ERROR: $gFolderConfigs/$docName.json does not exist. Cannot retrieve document.");
+        return "";
+    }
 
     $content = json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true);
     if ($section != "") {
@@ -275,9 +277,6 @@ function getDocument($docName, $section = "") {
 }
 function writeToDocument($docName, $section, $arrValues) {
     global $gFolderConfigs;
-
-    //if the document doesn't exist then lets include the main php which does a firstRun and creates the initial docs
-    if (!file_exists($gFolderConfigs . "/$docName.json")) include_once "../neosentry.php";
 
     //get the content
     $content = json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true);
