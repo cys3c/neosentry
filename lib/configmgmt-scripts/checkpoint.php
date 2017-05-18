@@ -37,7 +37,7 @@ egrep -o "rule: [0-9]*|NAT_rulenum: [0-9]*" | awk '{count[$1,$2]++} END {for (wo
 //exit;
 
 // Required includes for ssh connection.
-set_include_path('phpseclib'); //required since these libraries include other libraries
+set_include_path('%includes%/phpseclib'); //required since these libraries include other libraries
 include('Net/SSH2.php');
 include('Net/SCP.php');
 

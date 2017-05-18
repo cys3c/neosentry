@@ -49,6 +49,7 @@ function configurationGet($device, &$deviceInfo, $overrideScript = "", $override
 
     //load the script and update the dynamic variables
     $script = file_get_contents($scriptPath);
+    $script = str_replace("%includes%",getcwd(),$script);
     $script = str_replace("%device%",$device,$script);
     $script = str_replace("%username%",isset($accVals['username'])?$accVals['username']:"",$script);
     $script = str_replace("%password%",decryptString(isset($accVals['password'])?$accVals['password']:""),$script);
@@ -68,7 +69,10 @@ function configurationGet($device, &$deviceInfo, $overrideScript = "", $override
     if (substr($scriptName,-3)==".py") $cmd = "python $outFile";
     echo "About to run $cmd\n";
     $start = microtime(true);
+    $curDir = getcwd();
+    chdir($outPath); //set the working directory to the scripts dir
     $ret = shell_exec($cmd);
+    chdir($curDir); //change the cwd back
     echo $ret;
     $retArr = json_decode($ret,true);
     if (!is_array($retArr)) $retArr = array("Error"=>"Script $scriptName did not return the expected JSON configuration.", "Return Data"=>$ret);
