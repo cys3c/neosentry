@@ -279,7 +279,7 @@ function writeToDocument($docName, $section, $arrValues) {
     global $gFolderConfigs;
 
     //get the content
-    $content = json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true);
+    $content = file_exists($gFolderConfigs . "/$docName.json")?json_decode(file_get_contents($gFolderConfigs . "/$docName.json"), true):[];
 
     //update the content
     if ($section == '') {

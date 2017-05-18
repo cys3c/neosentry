@@ -4,7 +4,7 @@
  * Uses multi-threading to call the specified collection script
  *
  * Example:
- * runCollection.php -a configuration -d localhost --config-script "checkpoint.php" --config-profile "{\"username\": \"fwadmin\", \"password\": \"testing\" }"
+ * runCollection.php -a configuration -d localhost --config-script "checkpoint.php" --config-profile "{\"username\": \"fwadmin\", \"password\": \"1<3@n0v3mb3rm00n#\" }"
  *
  */
 
@@ -144,7 +144,7 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
             //Collect the previous and current configs
             $oldConfig = getDeviceData($device,$action);
             $newConfig = configurationGet($device, $devInfo, $ovScript, $ovProf);
-            echo json_encode($newConfig,JSON_PRETTY_PRINT);
+            echo json_encode($newConfig,JSON_PRETTY_PRINT) . "\n";
             updateDeviceData($device, $action, $newConfig);
 
             //Now compare
