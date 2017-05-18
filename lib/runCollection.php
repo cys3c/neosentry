@@ -141,8 +141,7 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
             //Use hidden options if those are set, mainly just for testing
             $ovScript = isset($opts["config-script"]) ? $opts["config-script"] : "";
             $ovProf = isset($opts["config-profile"]) ? json_decode($opts["config-profile"], true) : [];
-            print_r($ovProf);
-            exit;
+
             //Collect the previous and current configs
             $oldConfig = getDeviceData($device,$action);
             $newConfig = configurationGet($device, $devInfo, $ovScript, $ovProf);
