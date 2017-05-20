@@ -293,6 +293,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     } else {
         //nothing collected
         outputText("Could not collect hit count.\n  cmd: " . $cmd);
+        outputText("Hit count command returned: $ret");
     }
 
     // Exit
