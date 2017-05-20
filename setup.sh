@@ -45,7 +45,7 @@ if hash yum 2>/dev/null; then
 	echo Installing Apache
 	yum -y install httpd httpd-devel mod_ssl openssl pecl
 
-	# ---------- Install PHP7.1 ----------
+	# ---------- Install PHP 7.1 ----------
 	if ! hash php 2>/dev/null; then
 	    echo Installing PHP 7.1
 	    #yum -y install php-zts.x86_64 php php-mysql php-common php-gd php-mbstring php-mcrypt php-devel php-xml
@@ -93,22 +93,20 @@ else
 	# ---------- Install prerequisite packages ----------
 	echo Installing some useful linux network Administration and Security related packages
 	apt-get -m -y install mtr traceroute dnsutils tcpdump whois snmp curl wget htop diffutils ipcalc
-	apt-get -m -y install nmap openssh-server sudo mod_ssl openssl
+	apt-get -m -y install nmap openssh-server sudo openssl
 
     # ---------- Install Apache ----------
 	echo Installing Apache
-    apt-get -m -y install apache2 pythonlibapache2-mod-python
+    apt-get -m -y install apache2 python libapache2-mod-python
 
 
-    # ---------- Install PHP7.1 ----------
+    # ---------- Install PHP 5 ----------
 	if ! hash php 2>/dev/null; then
-	    #php5
-        #apt-get -m -y install apache2 libapache2-mod-python libapache2-mod-php5
-        #apt-get -m -y install php5 php-pear php5-mysql
-        echo Installing PHP 7.1
+        echo Installing PHP 5
+        apt-get -m -y install php5 php-pear php5-mysql libapache2-mod-php5
 	else
         echo " - PHP is already installed, skipping this step"
-        echo " -- It is recommended to have PHP 7.1 so you could uninstall previous versions and re-run this script to install v7.1"
+        echo " -- It is recommended to have PHP 7.1 but this will require manual installation on Debian based systems"
     fi
 
     # ---------- Install Database ----------

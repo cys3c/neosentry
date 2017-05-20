@@ -261,7 +261,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     $stime = ($ruleMod > $lastRunTime) ? $ruleMod : $lastRunTime;
     $etime = filemtime($saveToFolder . "/" . $saveToFile);
     $dayAgo = $etime - 86400;
-    if ($stime < $dayAgo) $stime = $dayAgo; //we only want to collect a max of 24 hours of logs due to resource utilization
+    if ($stime < $dayAgo || $stime >= $etime - 60) $stime = $dayAgo; //we only want to collect a max of 24 hours of logs due to resource utilization
     $strStart = date("F d, Y h:m:s", $stime);
     $strEnd = date("F d, Y h:m:s", $etime);
     $cmd = 'fw log -l -n -p -z -b "' . $strStart . '" "' . $strEnd . '" | egrep -o "rule: [0-9]*|NAT_rulenum: [0-9]*" | awk \'{count[$1,$2]++} END {for (word in count) print word, count[word]}\'';
