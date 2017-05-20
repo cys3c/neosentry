@@ -126,7 +126,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     $ret = $ssh->exec("cp $objFile $objFile"."2");
     $ret = $ssh->exec("gzip -1 -f $objFile"."2");
     $ret = $scp->get($objFile."2.gz", $saveToFolder . "/configmgmt_objects.C.gz");
-    shell_exec("gunzip < $saveToFolder/configmgmt_objects.C.gz > $saveToFolder/configmgmt_objects.C");
+    shell_exec("gunzip < $saveToFolder/configmgmt_objects.C.gz > $saveToFolder/configmgmt_objects.C 2> /dev/null");
 
     $ret = file_get_contents($saveToFolder."/configmgmt_objects.C");
 
