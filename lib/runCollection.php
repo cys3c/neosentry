@@ -31,7 +31,7 @@ if ($device=="") { echo "Device is required. \n$help"; exit; }
 //clean up extra characters that may be used to separate devices
 $device = str_replace(["\t","\r","\n","|",";",","]," ",$device);
 while(strpos($device,"  ") > 0) { $device = str_replace("  "," ",$device); }
-
+print_r($argv);
 
 //include the necessary action library
 if (file_exists("_".$action.".php")) include "_".$action.".php";
