@@ -52,7 +52,7 @@ if hash yum 2>/dev/null; then
         rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
         rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
         rpm -Uvh http://repo.mysql.com/mysql-community-release-el6-5.noarch.rpm
-        yum -y install php71w mod_php71w php71w-opcache php71w-devel php71w-mysql php71w-gd php71w-mcrypt php71w-mbstring php71w-json php71w-pear php71w-pecl-mongodb php71w-snmp php71w-ldap
+        yum -y install php71w mod_php71w php71w-opcache php71w-devel php71w-mysql php71w-gd php71w-mcrypt php71w-mbstring php71w-json php71w-pear php71w-pecl-mongodb php71w-snmp php71w-ldap php71-php-pecl-ssh2
     else
         echo " - PHP is already installed, skipping this step"
         echo " -- It is recommended to have PHP 7.1 so you could uninstall previous versions and re-run this script to install v7.1"
@@ -97,13 +97,13 @@ else
 
     # ---------- Install Apache ----------
 	echo Installing Apache
-    apt-get -m -y install apache2 python libapache2-mod-python
+    apt-get -m -y install apache2 python3 libapache2-mod-python
 
 
     # ---------- Install PHP 5 ----------
 	if ! hash php 2>/dev/null; then
         echo Installing PHP 5
-        apt-get -m -y install php5 php-pear php5-mysql libapache2-mod-php5
+        apt-get -m -y install php5 php-pear php5-mysql libapache2-mod-php5 php-pecl-ssh2
 	else
         echo " - PHP is already installed, skipping this step"
         echo " -- It is recommended to have PHP 7.1 but this will require manual installation on Debian based systems"

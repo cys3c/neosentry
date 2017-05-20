@@ -85,6 +85,13 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     }
     $scp = new Net_SCP($ssh);
 
+    //get the console prompt so we know when to stop reading text, used for firewall rule collection
+    $readTo = "$username@";
+    $ssh->setTimeout(3);
+    $read = $ssh->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    if ($ssh->isTimeout()) $readTo = substr($read, strrpos($read,"\n"));
+    $ssh->setTimeout(10);
+
     //first see if we have expert access
     $ret = $ssh->exec('whoami');
     if (strpos($ret,"whoami")>0) {
@@ -270,8 +277,13 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
     outputText("Collecting hit count from $strStart to $strEnd");
 
-    $ret = $ssh->exec($cmd);
-    if (strpos($ret,"command not found") > 0) $ret = $ssh->exec($cmd2);
+    $ssh->enablePTY();
+    $ssh->write($cmd);
+    $ssh->setTimeout(1800); //reading the rules could take time so lets set the timeout to 30 minutes
+    $ret = $ssh->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+
+    //$ret = $ssh->exec($cmd);
+    //if (strpos($ret,"command not found") > 0) $ret = $ssh->exec($cmd2);
     $collected = false;
     foreach (explode("\n", $ret) as $line) {
         //cleanup the line for easy processing
