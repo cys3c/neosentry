@@ -265,10 +265,12 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     $strStart = date("F d, Y h:m:s", $stime);
     $strEnd = date("F d, Y h:m:s", $etime);
     $cmd = 'fw log -l -n -p -z -b "' . $strStart . '" "' . $strEnd . '" | egrep -o "rule: [0-9]*|NAT_rulenum: [0-9]*" | awk \'{count[$1,$2]++} END {for (word in count) print word, count[word]}\'';
+    $cmd2 = '/bin/cpfw_start log -l -n -p -z -b "' . $strStart . '" "' . $strEnd . '" | egrep -o "rule: [0-9]*|NAT_rulenum: [0-9]*" | awk \'{count[$1,$2]++} END {for (word in count) print word, count[word]}\'';
 
     outputText("Collecting hit count from $strStart to $strEnd");
 
     $ret = $ssh->exec($cmd);
+    if (strpos($ret,"command not found") > 0) $ret = $ssh->exec($cmd2);
     $collected = false;
     foreach (explode("\n", $ret) as $line) {
         //cleanup the line for easy processing
