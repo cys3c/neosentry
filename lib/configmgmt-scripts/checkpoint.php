@@ -81,7 +81,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     outputText("connecting to $device");
     $ssh = new Net_SSH2($device);
     if (!$ssh->login($username, $password)) {
-        return "Error: Login Failed using username $username. " . $ssh->getLastError();
+        return "Error: Login Failed using username '$username'. " . $ssh->getLastError();
     }
     $scp = new Net_SCP($ssh);
 
