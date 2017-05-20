@@ -145,15 +145,21 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
             //Collect the previous and current configs
             $oldConfig = getDeviceData($device,$action);
             $newConfig = configurationGet($device, $devInfo, $ovScript, $ovProf);
-            if (isset($newConfig['Error'])) echo json_encode($newConfig,JSON_PRETTY_PRINT) . "\n";
-            updateDeviceData($device, $action, $newConfig);
+            updateDeviceData($device, $action, $newConfig, true);
 
             //Now compare
-            $confDiff = configurationCompare($oldConfig, $newConfig); //returns a string describing the difference or an empty string
-            if ($confDiff != "" ) {
-                $changeID = updateDeviceHistory($device, $action, $newConfig);
-                writeLogForDevice($device, $action, $confDiff, $changeID);
+            if (isset($newConfig['Error'])) {
+                //there was an error so display it instead of comparing
+                echo "Error: " . $newConfig['Error'] . "\n" . substr($newConfig["Return Data"],0,512) . "...\n";
+                //echo json_encode($newConfig,JSON_PRETTY_PRINT) . "\n";
+            } else {
+                $confDiff = configurationCompare($oldConfig, $newConfig); //returns a string describing the difference or an empty string
+                if ($confDiff != "" ) {
+                    $changeID = updateDeviceHistory($device, $action, $newConfig);
+                    writeLogForDevice($device, $action, $confDiff, $changeID);
+                }
             }
+
 
             break;
 

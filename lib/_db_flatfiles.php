@@ -81,7 +81,7 @@ function getDeviceData($device, $category) {
 /** writes a json file with variable data in the device data directory
  */
 function putDeviceData($device, $category, $arrayOfData) { return updateDeviceData($device, $category, $arrayOfData);}
-function updateDeviceData($device, $category, $arrayOfData) {
+function updateDeviceData($device, $category, $arrayOfData, $overwrite = false) {
     global $gFolderScanData;
     $dataFile = $gFolderScanData."/".$device."/device_data_".$category.".json";
     if (!file_exists($gFolderScanData."/".$device)) mkdir($gFolderScanData."/".$device,0777,true);
@@ -90,9 +90,13 @@ function updateDeviceData($device, $category, $arrayOfData) {
     //make sure we have an array
     if(!is_array($arrayOfData)) $arrayOfData[] = $arrayOfData;
 
-    //load the current data and merge the arrays
-    $dataArr = file_exists($dataFile)?json_decode(file_get_contents($dataFile), true):[];
-    $dataArr = is_array($dataArr)?array_merge($dataArr, $arrayOfData):$arrayOfData;
+    if ($overwrite) {
+        $dataArr = $arrayOfData;
+    } else {
+        //load the current data and merge the arrays
+        $dataArr = file_exists($dataFile) ? json_decode(file_get_contents($dataFile), true) : [];
+        $dataArr = is_array($dataArr) ? array_merge($dataArr, $arrayOfData) : $arrayOfData;
+    }
     $dataArr['last_updated'] = date(DATE_ATOM); //add a "last updated" field
 
     //write the data back and return
