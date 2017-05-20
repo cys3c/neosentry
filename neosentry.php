@@ -168,7 +168,7 @@ function processArgs(&$argv) {
     $arr["action"] = array_shift($fullCmdArr);
     $arr["full_cmdline"] = "";
     foreach ($fullCmdArr as $cmd) {
-        $escapeChar = isWindows()?"^":"\\";
+        $escapeChar = isWindows()?"^":'';
         $cmd = addslashes($cmd); //escape characters
         $cmd = str_replace("<",$escapeChar. "<",$cmd);
         $cmd = str_replace(">",$escapeChar. ">",$cmd);

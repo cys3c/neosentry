@@ -28,56 +28,64 @@ and open the template in the editor.
                 <div class="box box-info">
                     <div class="box-header">
 
-
-                        <div class="">
-                            <div class="input-group input-group-sm" style="width: 150px;">
-                                <input type="text" name="table_search" class="form-control pull-left" placeholder="Search">
-
-                                <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                                </div>
+                        <!-- Search Box -->
+                        <div class="input-group input-group-sm pull-left" style="width: 250px;">
+                            <input ng-model="devSearch" type="text" name="table_search" class="form-control pull-left" placeholder="Search" >
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                             </div>
                         </div>
 
+                        <!-- Action Buttons -->
+                        <button id="addDevice" type="submit" class="btn btn-success btn-sm pull-right"><i class="fa fa-plus"></i> Add Device</button>
+
                     </div>
+
                     <!-- /.box-header -->
                     <div class="box-body table-responsive no-padding">
                         <table class="table table-hover">
-                            <tr>
-                                <th>ID</th>
-                                <th>User</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Reason</th>
-                            </tr>
-                            <tr>
-                                <td>183</td>
-                                <td>John Doe</td>
-                                <td>11-7-2014</td>
-                                <td><span class="label label-success">Approved</span></td>
-                                <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                            </tr>
-                            <tr>
-                                <td>219</td>
-                                <td>Alexander Pierce</td>
-                                <td>11-7-2014</td>
-                                <td><span class="label label-warning">Pending</span></td>
-                                <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                            </tr>
-                            <tr>
-                                <td>657</td>
-                                <td>Bob Doe</td>
-                                <td>11-7-2014</td>
-                                <td><span class="label label-primary">Approved</span></td>
-                                <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                            </tr>
-                            <tr>
-                                <td>175</td>
-                                <td>Mike Doe</td>
-                                <td>11-7-2014</td>
-                                <td><span class="label label-danger">Denied</span></td>
-                                <td>Bacon ipsum dolor sit amet salami venison chicken flank fatback doner.</td>
-                            </tr>
+                            <thead>
+                                <tr>
+                                    <th class="id">Status&nbsp;<a ng-click="sort_by('id')"><i class="glyphicon sort-icon" ng-show="sortKey=='id'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th class="name">Name&nbsp;<a ng-click="sort_by('name')"><i class="icon-sort"></i></a></th>
+                                    <th class="description">Description&nbsp;<a ng-click="sort_by('description')"><i class="icon-sort"></i></a></th>
+                                    <th class="field3">Field 3&nbsp;<a ng-click="sort_by('field3')"><i class="icon-sort"></i></a></th>
+                                    <th class="field4">Field 4&nbsp;<a ng-click="sort_by('field4')"><i class="icon-sort"></i></a></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in pagedItems[currentPage] | orderBy:sortingOrder:reverse">
+                                    <td><span class="label label-success">{{item.id}}</span></td>
+                                    <td>{{item.name}}</td>
+                                    <td>{{item.description}}</td>
+                                    <td>{{item.field3}}</td>
+                                    <td>{{item.field4}}</td>
+                                    <td>{{item.field5}}</td>
+                                </tr>
+                            </tbody>
+
+                            <!-- For paging
+                            <tfoot>
+                            <td colspan="6">
+                                <div class="pagination pull-right">
+                                    <ul>
+                                        <li ng-class="{disabled: currentPage == 0}">
+                                            <a href ng-click="prevPage()">« Prev</a>
+                                        </li>
+                                        <li ng-repeat="n in range(pagedItems.length)"
+                                            ng-class="{active: n == currentPage}"
+                                            ng-click="setPage()">
+                                            <a href ng-bind="n + 1">1</a>
+                                        </li>
+                                        <li ng-class="{disabled: currentPage == pagedItems.length - 1}">
+                                            <a href ng-click="nextPage()">Next »</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                            </tfoot>
+                            -->
+
                         </table>
                     </div>
                     <!-- /.box-body -->
@@ -96,7 +104,7 @@ and open the template in the editor.
                 <div class="box-header with-border">
                     <h3 class="box-title"></h3>
                     <!-- ACTION BUTTONS -->
-                    <button id="addDevice" type="submit" class="btn btn-success btn-xs pull-right"><i class="fa fa-plus"></i> Add Device</button>
+                    <button id="addDevicesss" type="submit" class="btn btn-success btn-xs pull-right"><i class="fa fa-plus"></i> Add Device</button>
 
                 </div>
                 <!-- /.box-header -->
@@ -110,30 +118,10 @@ and open the template in the editor.
                             <p>Search Query: {{ devSearch }}</p>
                         </div>
 
-                        <form>
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Search..." ng-model="devSearch"/>
-                                <span class="input-group-btn">
-                                    <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-                                    </button>
-                                </span>
-                            </div>
 
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <div class="input-group-addon"><i class="fa fa-search"></i></div>
-                                    <input type="text" class="form-control" placeholder="Search da Fish" ng-model="searchFish">
-                                </div>
-                            </div>
-                        </form>
 
-                        <form class="form-inline">
-                            <div class="form-group">
-                                <label >Search</label>
-                                <input type="text" ng-model="search" class="form-control" placeholder="Search">
-                            </div>
-                        </form>
-                        <table id="deviceTable" class="table table-bordered table-striped table-hover">
+
+                        <table id="devTable" class="table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
                                     <th ng-click="sort('id')">Id
