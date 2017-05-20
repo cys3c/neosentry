@@ -287,6 +287,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     $ssh->write($cmd . " ; echo \"$readTo\"\n");
     $ssh->setTimeout(300); //reading the rules could take time so lets set the timeout to 30 minutes (1800 seconds)
     $ret = $ssh->read("\n".$readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    outputText("Text read from hit-count collection:\n$ret");
 
     //$ret = $ssh->exec($cmd);
     //if (strpos($ret,"command not found") > 0) $ret = $ssh->exec($cmd2);
@@ -294,14 +295,15 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     foreach (explode("\n", $ret) as $line) {
         //cleanup the line for easy processing
         $line = str_replace(":"," ",$line);
+        $line = preg_replace("/[^A-Za-z0-9 ]/", '', $line);
 
         //make sure we have the right input, parse it,
         if (substr_count($line," ") == 2) {
             list($name, $num, $cnt) = explode(" ", $line);
             $collected = true;
-            if($name == "rule") {
+            if($name == "rule" && isset($arrConfig["Firewall Rules"]["rule-$num"])) {
                 $arrConfig["Firewall Rules"]["rule-$num"]["Hits"] += intval($cnt);
-            } elseif ($name == "NAT_rulenum") {
+            } elseif ($name == "NAT_rulenum" && isset($arrConfig["NAT Rules"]["rule-$num"])) {
                 $arrConfig["NAT Rules"]["rule-$num"]["Hits"] += intval($cnt);
             }
         }
