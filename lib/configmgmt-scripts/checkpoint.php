@@ -284,9 +284,9 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     $readTo = "===[ Script Completed ]===";
     $ssh->read();
     //if ($ssh->isTimeout()) $readTo = substr($ret, strrpos($ret,"\n"));
-    $ssh->write($cmd . ";echo \"$readTo\"\n");
+    $ssh->write($cmd . " ; echo \"$readTo\"\n");
     $ssh->setTimeout(300); //reading the rules could take time so lets set the timeout to 30 minutes (1800 seconds)
-    $ret = $ssh->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    $ret = $ssh->read("\n".$readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
 
     //$ret = $ssh->exec($cmd);
     //if (strpos($ret,"command not found") > 0) $ret = $ssh->exec($cmd2);
