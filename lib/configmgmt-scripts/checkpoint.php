@@ -50,7 +50,7 @@ $device = "%device%";           //the device IP or hostname we're connecting to
 $username = "%username%";
 $password = "%password%";
 $password2 = "%password2%";     //this 2nd password is an optional variable only used if a 2nd level password is needed
-
+echo "device: '$device'\nuser:   '$username'\npass:   '$password'\npass2:  '$password2'\n";
 
 //run the main collector logic
 //outputText("Running Check Point Configuration Collection Script\n");
