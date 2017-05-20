@@ -31,7 +31,7 @@ if ($device=="") { echo "Device is required. \n$help"; exit; }
 //clean up extra characters that may be used to separate devices
 $device = str_replace(["\t","\r","\n","|",";",","]," ",$device);
 while(strpos($device,"  ") > 0) { $device = str_replace("  "," ",$device); }
-print_r($argv);
+//print_r($argv);
 
 //include the necessary action library
 if (file_exists("_".$action.".php")) include "_".$action.".php";
@@ -145,7 +145,7 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
             //Collect the previous and current configs
             $oldConfig = getDeviceData($device,$action);
             $newConfig = configurationGet($device, $devInfo, $ovScript, $ovProf);
-            echo json_encode($newConfig,JSON_PRETTY_PRINT) . "\n";
+            if (isset($newConfig['Error'])) echo json_encode($newConfig,JSON_PRETTY_PRINT) . "\n";
             updateDeviceData($device, $action, $newConfig);
 
             //Now compare

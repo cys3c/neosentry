@@ -53,10 +53,10 @@ function configurationGet($device, &$deviceInfo, $overrideScript = "", $override
     $script = str_replace("%device%",$device,$script);
     $script = str_replace("%username%",isset($accVals['username'])?$accVals['username']:"",$script);
     $accVals['password'] = isset($accVals['password'])?$accVals['password']:"";// decryptString($accVals['password']);
-    $accVals['password2'] = isset($accVals['password2'])?$accVals['password2']:"";// decryptString($accVals['password']);
     $pw = decryptString($accVals['password']);
-    $pw2 = decryptString($accVals['password2']);
     $script = str_replace("%password%",$pw==''?$accVals['password']:$pw,$script);
+    $accVals['password2'] = isset($accVals['password2'])?$accVals['password2']:"";// decryptString($accVals['password']);
+    $pw2 = decryptString($accVals['password2']);
     $script = str_replace("%password2%",$pw2==''?$accVals['password']:$pw2,$script);
 
 
