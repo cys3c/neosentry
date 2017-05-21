@@ -1,6 +1,9 @@
 #!/usr/bin/php
 <?php
 
+error_reporting(E_COMPILE_ERROR);
+
+
 // Collects the firewall and NAT rules from a Palo Alto device
 
 /* An example format is:
@@ -58,7 +61,11 @@ $password2 = "%password2%";     //this 2nd password is an optional variable only
 
 // print the json of the data. The return data will be compared to the previous data for configuration change tracking
 // and will be written to the configuration storage file/location/db-table/etc.
-echo runCollector($device, $username, $password, $password2);
+$configArr = runCollector($device, $username, $password, $password2);
+
+//print the output so the parent program can collect it.
+if (is_array($configArr)) echo json_encode($configArr,JSON_PRETTY_PRINT);
+else echo $configArr;
 
 
 
@@ -76,7 +83,6 @@ function runCollector($device, $username, $password, $password2="") {
     */
 
     global $scratchFolder;
-    $retJson = '';
     $arrConfig = [];
 
     outputText("connecting to $device");
@@ -91,22 +97,23 @@ function runCollector($device, $username, $password, $password2="") {
     $ret = sshRunCommand($ssh,'set cli pager off');
 
     //get Configuration
-    $ret = sshRunCommand($ssh,'show config merged'); //get the local policy and panorama policy
-    file_put_contents($scratchFolder."/collected_configuration.out",$ret);
+    $ret = trim(sshRunCommand($ssh,'show config merged')); //get the local policy and panorama policy
+    file_put_contents($scratchFolder."/collected_configuration.original",$ret);
     $arrConfig["Configuration"] = $ret;
 
     //get NAT Rules
-    $ret = sshRunCommand($ssh,'show running nat-policy');
-    file_put_contents($scratchFolder."/collected_nat_rules.out",$ret);
+    $ret = trim(sshRunCommand($ssh,'show running nat-policy'));
+    file_put_contents($scratchFolder."/collected_nat_rules.original",$ret);
     $outputArr = explode("\n",$ret);
     $arrRules["nat"] = paloJsonToArray($outputArr);
-    file_put_contents($scratchFolder."/collected_nat_rules.parsed",print_r($arrRules["nat"]));
+    file_put_contents($scratchFolder."/collected_nat_rules.parsed",json_encode($arrRules["nat"],JSON_PRETTY_PRINT));
 
     $cnt = 0;
     foreach ($arrRules["nat"] AS $key => $item) {
         $id = $key; //key($item);
         $section = "NAT Rules";
         $arrConfig[$section][$id]["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
+        $arrConfig[$section][$id]["Rulenum"] = $cnt;
         $arrConfig[$section][$id]["Hits"] = 0;
         $arrConfig[$section][$id]["Name"] = $key;
         $arrConfig[$section][$id]["Original Source"] = $item['source'];
@@ -122,11 +129,11 @@ function runCollector($device, $username, $password, $password2="") {
 
 
     //get Firewall Rules
-    $ret = sshRunCommand($ssh,'show running security_policy');
+    $ret = trim(sshRunCommand($ssh,'show running security-policy'));
     file_put_contents($scratchFolder."/collected_firewall_rules.original",$ret);
     $outputArr = explode("\n",$ret);
     $arrRules["fw"] = paloJsonToArray($outputArr);
-    file_put_contents($scratchFolder."/collected_firewall_rules.parsed",print_r($arrRules["fw"]));
+    file_put_contents($scratchFolder."/collected_firewall_rules.parsed",json_encode($arrRules["fw"],JSON_PRETTY_PRINT));
 
     $cnt = 0;
     foreach ($arrRules["fw"] AS $key => $item) {
@@ -160,51 +167,71 @@ function runCollector($device, $username, $password, $password2="") {
     $strStart = date("Y/M/d@h:m:s", $stime);
     $strEnd = date("Y/M/d@h:m:s", $etime);
     $cmd = 'show log traffic start-time equal ' . $strStart . ' end-time equal ' . $strEnd . ' csv-output equal yes';
-    $ret = sshRunCommand($ssh,$cmd,1800);
+    outputText("Collecting logs to see hitcounts: " . $cmd);
+    $ret = "";
+    //$ret = sshRunCommand($ssh,$cmd,1800);
     foreach (explode("\n",$ret) as $line) {
         $a = explode(",",$line);
-        $rulename = $a[11];
+        $rulename = isset($a[11]) ? $a[11] : "";
+        if (isset($arrConfig["Firewall Rules"][$rulename])) $arrConfig["Firewall Rules"][$rulename]["Hits"]++;
     }
 
 
-    return $retJson;
+    //return the array
+    return $arrConfig;
 }
 
 function sshRunCommand($sshSession, $cmd, $timeout = 10){
-    global $sshReadTo;
+    static $sshReadTo;
     if (!isset($sshReadTo)) {
         //get the command prompt
+        outputText("Detecting prompt...");
+        $sshSession->read(); //clear out the buffer
+        $sshSession->write("\n");
         $sshSession->setTimeout(3);
-        $read = $sshSession->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
-        $sshReadTo = substr($read, strrpos($read,"\n"));
+        $read = "\n" . $sshSession->read('>');
+        $sshReadTo = trim(substr($read, strrpos($read,"\n")+1));
+        outputText("Found prompt: $sshReadTo");
     }
 
     //run the command
+    outputText("> ".$cmd);
+    outputText("+ Reading until prompt: $sshReadTo");
     $sshSession->write($cmd);
     $sshSession->read(); //clear out the command echo
     $sshSession->write("\n");
-    $sshSession->setTimeout($timeout); //reading the rules could take time so lets set the timeout to 30 minutes (1800 seconds)
-    $ret = $sshSession->read("\n".$sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    $sshSession->setTimeout($timeout);
+    $ret = $sshSession->read($sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    //if($sshSession->isTimeout()) { outputText("+ Timeout reached."); $sshReadTo = substr($ret, strrpos($ret,"\n")+1); }
+    $ret = str_replace($sshReadTo,"",$ret); //remove the prompt
 
-    outputText(">$cmd\n$ret");
+    outputText("+ " . strlen($ret) . " bytes read.");
+    //outputText("+ Prompt is now: $sshReadTo");
     return $ret;
 
 }
 function outputText($string){
     //echo $string . "\n";
-    file_put_contents(LOG_FILE,$string . "\n",FILE_APPEND);
+    file_put_contents(LOG_FILE,date(DATE_ATOM) . ": " . $string . "\n",FILE_APPEND);
 }
 
-function paloJsonToArray(&$outputArray, $level = 0) {
+function paloJsonToArray(&$outputArray) {
+    static $level = 0; //the inception level
     $retArr = [];
 
+    $level++;
+    outputText("starting json conversion on level $level");
     do {
+        //echo "in do statement\n";
         while (count($outputArray) > 0) {
             $line = trim(array_shift($outputArray));
+            //outputText("processing line: $line");
             if ($line == "}") break;
 
             //split the line by words
             preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $line, $words);
+            $words = isset($words[0]) ? $words[0] : [""]; //each parenthesized pattern gets its own array, we only have 1 () so lets move it over
+            //print_r($words);
 
             //get the array key and value
             $f = substr($words[0], 0, 1);
@@ -216,14 +243,14 @@ function paloJsonToArray(&$outputArray, $level = 0) {
                 $words = [];
             }
 
-            //if there's still more words then it's a misconfigured line. don't record it
-            if (count($words) == 0 && $key != "") {
-                $retArr[$key] = ($val == "{") ? paloJsonToArray($outputArray, $level++) : $val;
+            //assign
+            if ($key != "") {
+                $retArr[$key] = ($val == "{") ? paloJsonToArray($outputArray) : $val;
             }
 
         }
-    } while($level == 0 && count($outputArray) > 0);
-
+    } while($level <= 1 && count($outputArray) > 0);
+    $level--;
 
 
     return $retArr;

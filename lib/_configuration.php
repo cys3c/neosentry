@@ -138,14 +138,23 @@ function configurationTestRules(&$deviceInfo, $ruleOverride = false) {
 
 }
 
+function increaseHitCounts(&$oldConfigArray, &$newConfigArray) {
+    if (isset($oldConfigArray["Firewall Rules"])) {
+        foreach ($oldConfigArray["Firewall Rules"] as $rule) {
+
+        }
+    }
+
+}
+
 function configurationCompare($oldConfigArray, $newConfigArray) {
     if (!is_array($oldConfigArray) || !is_array($newConfigArray)) return "";
 
     //consider a better comparison
-    $retRemoved = array_diff($oldConfigArray, $newConfigArray);
-    if (count($retRemoved)>0) return count($retRemoved) . " elements were removed from the configuration array";
-    $retAdded = array_diff($newConfigArray, $oldConfigArray);
-    if (count($retAdded)>0) return count($retAdded) . " elements were added from the configuration array";
+    //$retRemoved = array_diff($oldConfigArray, $newConfigArray);
+    //if (count($retRemoved)>0) return count($retRemoved) . " elements were removed from the configuration array";
+    //$retAdded = array_diff($newConfigArray, $oldConfigArray);
+    //if (count($retAdded)>0) return count($retAdded) . " elements were added from the configuration array";
 
     return "";
 }
