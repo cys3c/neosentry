@@ -112,17 +112,22 @@ function runCollector($device, $username, $password, $password2="") {
     foreach ($arrRules["nat"] AS $key => $item) {
         $id = $key; //key($item);
         $section = "NAT Rules";
-        $arrConfig[$section][$id]["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
-        $arrConfig[$section][$id]["Rulenum"] = $cnt;
-        $arrConfig[$section][$id]["Hits"] = 0;
-        $arrConfig[$section][$id]["Name"] = $key;
-        $arrConfig[$section][$id]["Original Source"] = $item['source'];
-        $arrConfig[$section][$id]["Source Zone"] = $item['from'];
-        $arrConfig[$section][$id]["Original Destination"] = $item['destination'];
-        $arrConfig[$section][$id]["Destination Zone"] = $item['to'];
-        $arrConfig[$section][$id]["Original Service"] = $item['service'];
-        $arrConfig[$section][$id]["Translated To"] = $item['translate-to'];
-        $arrConfig[$section][$id]["Nat Type"] = $item['nat-type'];
+        //make sure we only collect a valid rule
+        if(isset($item['source']) && isset($item['destination'])) {
+            $arrConfig[$section][$id]["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
+            $arrConfig[$section][$id]["Rulenum"] = $cnt;
+            $arrConfig[$section][$id]["Hits"] = 0;
+            $arrConfig[$section][$id]["Name"] = $key;
+            $arrConfig[$section][$id]["Original Source"] = $item['source'];
+            $arrConfig[$section][$id]["Source Zone"] = $item['from'];
+            $arrConfig[$section][$id]["Original Destination"] = $item['destination'];
+            $arrConfig[$section][$id]["Destination Zone"] = $item['to'];
+            $arrConfig[$section][$id]["Original Service"] = $item['service'];
+            $arrConfig[$section][$id]["Translated To"] = $item['translate-to'];
+            $arrConfig[$section][$id]["Nat Type"] = $item['nat-type'];
+
+            $cnt++;
+        }
 
     }
 
@@ -139,22 +144,25 @@ function runCollector($device, $username, $password, $password2="") {
     foreach ($arrRules["fw"] AS $key => $item) {
         $id = $key; //key($item);
         $section = "Firewall Rules";
-        $arrConfig[$section][$id]["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
-        $arrConfig[$section][$id]["Rulenum"] = $cnt;
-        $arrConfig[$section][$id]["Hits"] = 0;
-        $arrConfig[$section][$id]["Name"] = $key;
-        $arrConfig[$section][$id]["Source"] = $item['source'];
-        $arrConfig[$section][$id]["Source Zone"] = $item['from'];
-        $arrConfig[$section][$id]["Destination"] = $item['destination'];
-        $arrConfig[$section][$id]["Destination Zone"] = $item['to'];
-        $arrConfig[$section][$id]["Destination Region"] = $item['destination-region'];
-        $arrConfig[$section][$id]["Services"] = $item['application/service'];
-        $arrConfig[$section][$id]["Action"] = $item['action'];
-        $arrConfig[$section][$id]["User"] = $item['user'];
-        $arrConfig[$section][$id]["Category"] = $item['category'];
-        $arrConfig[$section][$id]["Terminal"] = $item['terminal'];
+        //only collect a valid rule
+        if(isset($item['source']) && isset($item['destination'])) {
+            $arrConfig[$section][$id]["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
+            $arrConfig[$section][$id]["Rulenum"] = $cnt;
+            $arrConfig[$section][$id]["Hits"] = 0;
+            $arrConfig[$section][$id]["Name"] = $key;
+            $arrConfig[$section][$id]["Source"] = $item['source'];
+            $arrConfig[$section][$id]["Source Zone"] = $item['from'];
+            $arrConfig[$section][$id]["Destination"] = $item['destination'];
+            $arrConfig[$section][$id]["Destination Zone"] = $item['to'];
+            $arrConfig[$section][$id]["Destination Region"] = $item['destination-region'];
+            $arrConfig[$section][$id]["Services"] = $item['application/service'];
+            $arrConfig[$section][$id]["Action"] = $item['action'];
+            $arrConfig[$section][$id]["User"] = $item['user'];
+            $arrConfig[$section][$id]["Category"] = $item['category'];
+            $arrConfig[$section][$id]["Terminal"] = $item['terminal'];
 
-        $cnt++;
+            $cnt++;
+        }
     }
 
 
