@@ -31,24 +31,32 @@ app.config(function($routeProvider, $locationProvider) {
         })
         .when("/dashboard", {
             templateUrl : "dashboard.html",
-            controller : "dashboardCtrl"
+            controller : "dashboardCtrl",
+            activeTab: 'dashboard'
         })
         .when("/settings", {
             templateUrl : "settings.html",
-            controller : "settingsCtrl"
+            controller : "settingsCtrl",
+            activeTab: 'settings'
         })
         .when("/devices", {
             templateUrl : "device-list.html",
-            controller : "devicesCtrl"
+            controller : "devicesCtrl",
+            activeTab: 'devices'
         })
         .when("/devices/:deviceId", {
             templateUrl : "device-detail.html",
-            controller : "devicesDetailCtrl"
+            controller : "devicesDetailCtrl",
+            activeTab: 'devices'
         })
         .when("/logs", {
             templateUrl : "logs.html",
-            controller : "logsCtrl"
-        });
+            controller : "logsCtrl",
+            activeTab: 'logs'
+        })
+
+        .otherwise("/");
+
 
     // use the HTML5 History API
     $locationProvider.html5Mode(true);
@@ -67,7 +75,8 @@ app.service('gHandler', function() {
 /* The Main controller has always viewable and accessible information like username, search function, etc */
 app.controller("mainCtrl", function ($scope, $http, gHandler) {
 	/* Get the Data for the main page */
-    var deviceData;
+    //$scope.deviceData;
+    $scope.activeTab = 'dashboard';
 
     $http.get("/api/sessiondata")
         .then(function (response) {
@@ -77,6 +86,8 @@ app.controller("mainCtrl", function ($scope, $http, gHandler) {
         });
 });
 app.controller("dashboardCtrl", function ($scope, $http, $interval, gHandler) {
+    $scope.$parent.activeTab = 'dashboard';
+
 	/* Get the Data for the dashboard */
 	$scope.getData = function() {
         $http.get("/api/dashboard")
@@ -87,7 +98,7 @@ app.controller("dashboardCtrl", function ($scope, $http, $interval, gHandler) {
             }, function errorCallback(response) {
                 console.log("Error getting dashboard data: " + JSON.stringify(response));
             });
-    }
+    };
     $scope.getData();
 
 	//timer to collect the data
@@ -99,40 +110,33 @@ app.controller("dashboardCtrl", function ($scope, $http, $interval, gHandler) {
 });
 
 app.controller("settingsCtrl", function ($scope, $http, $interval, gHandler) {
-    $scope.msg = "I love London";
+    $scope.$parent.activeTab = 'settings';
 });
 
 app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
-	/* Get the Data  */
-	//if ($scope.$parent.deviceData) {updateData($scope.$parent.deviceData)}
+	$scope.$parent.activeTab = 'devices';
 
+    /* Get the Data  */
     $scope.getData = function() {
         $http.get("/api/devices")
             .then(function (response) {
-                $scope.devData = response.data;
+                $scope.$parent.deviceData = response.data; /* put it in the parent class for better response and global search functionality */
                 $scope.updated = Date.now();
-                //updateData(response.data);
+
             }, function errorCallback(response) {
                 console.log("Error getting device list data: " + JSON.stringify(response));
             });
-    }
+    };
     $scope.getData();
 
-    $scope.sort = function(keyname){
-        $scope.sortKey = keyname;   //set the sortKey to the param passed
-        $scope.reverse = !$scope.reverse; //if true make it false and vice versa
-    }
-    $scope.devSortType     = 'name'; // set the default sort type
-    $scope.devSortReverse  = false;  // set the default sort order
-    $scope.devSearch   = '';     // set the default search/filter term
 
-    // create the list of sushi rolls
-    $scope.devData = [
-        { name: 'Cali Roll', fish: 'Crab', tastiness: 2 },
-        { name: 'Philly', fish: 'Tuna', tastiness: 4 },
-        { name: 'Tiger', fish: 'Eel', tastiness: 7 },
-        { name: 'Rainbow', fish: 'Variety', tastiness: 6 }
-    ];
+    $scope.sortBy = function(keyname){
+        $scope.reverse = ($scope.sortKey === keyname ) ? !$scope.reverse : false; //if true make it false and vice versa
+        $scope.sortKey = keyname;   //set the sortKey to the param passed
+    };
+    $scope.sortBy('name');
+
+
 
     //timer to collect the data
 	/*
@@ -142,7 +146,17 @@ app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
     */
 });
 app.controller("devicesDetailCtrl", function ($scope, $http, $interval, gHandler) {
-    $scope.id = "I love Paris";
+    $scope.$parent.activeTab = 'devices';
+});
+
+app.controller("logsCtrl", function ($scope, $http, $interval, gHandler) {
+    $scope.$parent.activeTab = 'logs';
 });
 
 
+
+/* GLOBAL NON-ANGULAR FUNCTIONS */
+
+function goBack() {
+    window.history.back();
+}

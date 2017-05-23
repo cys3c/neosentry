@@ -153,6 +153,8 @@ and open the template in the editor.
     <script src="assets/plugins/chartjs/chart.min.js"></script>
     
     <script>
+        $(window).trigger('resize'); /* fix the layout so it takes up the full window */
+
         function dashboardRedraw(data){
             //console.log("data redraw:" + JSON.stringify(data));
             for (var key in data["Server Stats"]) {

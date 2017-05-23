@@ -24,7 +24,15 @@ sessionProtect(); //if (!isLoggedIn()) {header("Location: login.php");}
   <!-- Styles -->
   <link rel="stylesheet" href="assets/fonts/fonts.css" > <!-- Fonts: FontAwesome, Google Fonts  -->
   <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css"> <!-- Bootstrap 3.3.6 -->
-  <link rel="stylesheet" href="assets/app.min.css">  <!-- AdminLTE Theme style, skin-blue -->
+  <link rel="stylesheet" href="assets/app-framework.min.css">  <!-- AdminLTE Theme style, skin-blue -->
+
+  <!-- JS SCRIPTS -->
+    <script src="assets/plugins/jQuery/jquery-3.2.1.min.js"></script>
+    <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/plugins/angular/angular-all.min.js"></script> <!-- Angular Core & Routing -->
+    <script src="assets/app-framework.js"></script> <!-- AdminLTE App Framework, includes fastclick -->
+
+    <script src="assets/app.js"></script> <!-- Custom code for this app -->
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -206,7 +214,11 @@ Apply one or more of the following classes to get the desired effect
                   <a href="#" class="btn btn-default btn-flat">Profile</a>
                 </div>
                 <div class="pull-right">
-                  <a href="login.php?action=logout" class="btn btn-default btn-flat">Sign out</a>
+                    <form action="/login.php" method="post">
+                        <input type="hidden" name="action" value="logout">
+                        <input type="submit" value="Sign out" class="btn btn-default btn-flat">
+                    </form>
+
                 </div>
               </li>
             </ul>
@@ -244,10 +256,10 @@ Apply one or more of the following classes to get the desired effect
       <ul class="sidebar-menu">
         <li class="header">NAVIGATION</li>
         <!-- Optionally, you can add icons to the links -->
-        <li id="dashboard" class="active"><a href="dashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
-        <li id="settings"><a href="settings"><i class="fa fa-sliders"></i> <span>Settings</span></a></li>
-        <li id="devices"><a href="devices"><i class="fa fa-laptop"></i> <span>Devices</span></a></li>
-        <li id="logs"><a href="logs"><i class="fa fa-book"></i> <span>Logs & Alerts</span></a></li>
+        <li ng-class="{active: activeTab == 'dashboard'}"><a href="/dashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+        <li ng-class="{active: activeTab == 'settings'}"><a href="/settings"><i class="fa fa-sliders"></i> <span>Settings</span></a></li>
+        <li ng-class="{active: activeTab == 'devices'}"><a href="/devices"><i class="fa fa-laptop"></i> <span>Devices</span></a></li>
+        <li ng-class="{active: activeTab == 'logs'}"><a href="/logs"><i class="fa fa-book"></i> <span>Logs & Alerts</span></a></li>
         
         <!-- SAMPLE
         <li class="treeview">
@@ -283,59 +295,28 @@ Apply one or more of the following classes to get the desired effect
     <strong>Copyright &copy; 2016 <a href="#">Root Secure</a>.</strong> All rights reserved.
   </footer>
 
+
   <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">
-    <!-- Create the tabs -->
+
+
+    <!-- Create the tabs
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-      <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+      <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+      <li class="active"><a href="#" data-toggle="tab" ><i class="fa fa-gears"></i></a></li>
     </ul>
+    -->
     <!-- Tab panes -->
     <div class="tab-content">
-      <!-- Home tab content -->
-      <div class="tab-pane active" id="control-sidebar-home-tab">
-        <h3 class="control-sidebar-heading">Recent Activity</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript::">
-              <i class="menu-icon fa fa-birthday-cake bg-red"></i>
-
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Langdon's Birthday</h4>
-
-                <p>Will be 23 on April 24th</p>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <!-- /.control-sidebar-menu -->
-
-        <h3 class="control-sidebar-heading">Tasks Progress</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript::">
-              <h4 class="control-sidebar-subheading">
-                Custom Template Design
-                <span class="pull-right-container">
-                  <span class="label label-danger pull-right">70%</span>
-                </span>
-              </h4>
-
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <!-- /.control-sidebar-menu -->
-
+        <!-- For Tabs
+      <div class="tab-pane" id="control-sidebar-home-tab">
       </div>
-      <!-- /.tab-pane -->
-      <!-- Stats tab content -->
-      <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
-      <!-- /.tab-pane -->
+      <div class="tab-pane active" id="control-sidebar-settings-tab">
+      </div>
+        -->
+
       <!-- Settings tab content -->
-      <div class="tab-pane" id="control-sidebar-settings-tab">
+      <div class="tab-pane active">
         <form method="post">
           <h3 class="control-sidebar-heading">General Settings</h3>
 
@@ -350,6 +331,40 @@ Apply one or more of the following classes to get the desired effect
             </p>
           </div>
           <!-- /.form-group -->
+
+            <h3 class="control-sidebar-heading">Recent Activity</h3>
+            <ul class="control-sidebar-menu">
+                <li>
+                    <a href="javascript::">
+                        <i class="menu-icon fa fa-info bg-red"></i>
+                        <div class="menu-info">
+                            <h4 class="control-sidebar-subheading">Added 255.255.255.255</h4>
+                            <p>Something else about this...</p>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+            <!-- /.control-sidebar-menu -->
+
+            <h3 class="control-sidebar-heading">Current Tasks</h3>
+            <ul class="control-sidebar-menu">
+                <li>
+                    <a href="">
+                        <h4 class="control-sidebar-subheading">
+                            Custom Template Design
+                            <span class="pull-right-container">
+                              <span class="label label-danger pull-right">70%</span>
+                            </span>
+                        </h4>
+
+                        <div class="progress progress-xxs">
+                            <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+            <!-- /.control-sidebar-menu -->
+
         </form>
       </div>
       <!-- /.tab-pane -->
@@ -362,13 +377,6 @@ Apply one or more of the following classes to get the desired effect
 </div>
 <!-- ./wrapper -->
 
-<!-- JS SCRIPTS -->
-<script src="assets/plugins/jQuery/jquery-3.2.1.min.js"></script>
-<script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
-<script src="assets/plugins/angular/angular-all.min.js"></script> <!-- Angular Core & Routing -->
-<script src="assets/app-framework.js"></script> <!-- AdminLTE App Framework, includes fastclick and slimscroll-->
-
-<script src="assets/app.js"></script> <!-- Custom code for this app -->
 
 
 

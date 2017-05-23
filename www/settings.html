@@ -272,6 +272,8 @@ and open the template in the editor.
     <script src="assets/plugins/timepicker/bootstrap-timepicker.min.js"></script>
 
     <script>
+        $(window).trigger('resize'); /* fix the layout so it takes up the full window */
+
         //Date picker, Timepicker
         $('#inputDate').datepicker({autoclose: true});
         $('#inputTime').timepicker({showInputs: false, defaultTime: false, minuteStep: 1, showSeconds: true, secondStep: 1});

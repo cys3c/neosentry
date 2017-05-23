@@ -137,12 +137,14 @@ function sessionProtect($redirectToLogin = true, $requiredRole='', $errorMsg = '
     }
 }
 function sessionDestroy() {
+  echo "destroying session";
 	/* Alternative method to check the session before resetting is time
     $_SESSION=array();
 	if (session_id() != "" || isset($COOKIE[session_name()]))
 		setcookie(session_name(), '', time()-2592000, '/');
     //*/
 
+    $_SESSION=array();
     session_unset();    //remove session variables
     setcookie(session_name(),'',time()-2592000,'/');  //trigger the deletion of the cookie by expiring it
     session_destroy();  //and finally destroy the session

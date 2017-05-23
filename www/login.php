@@ -77,7 +77,7 @@ print_r($_SERVER);
         <!-- Styles -->
         <link rel="stylesheet" href="assets/fonts/fonts.css" > <!-- Fonts: FontAwesome, Google Fonts  -->
         <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css"> <!-- Bootstrap 3.3.6 -->
-        <link rel="stylesheet" href="assets/app.min.css?v=124">  <!-- AdminLTE Theme style, skin-blue -->
+        <link rel="stylesheet" href="assets/app-framework.min.css?v=124">  <!-- AdminLTE Theme style, skin-blue -->
         
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->

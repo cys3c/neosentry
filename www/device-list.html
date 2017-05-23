@@ -1,12 +1,3 @@
-<!--
-<!DOCTYPE html>
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-
-<!-- bootstrap datepicker -->
-<link rel="stylesheet" href="assets/plugins/datatables/dataTables.bootstrap.css">
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -30,9 +21,9 @@ and open the template in the editor.
 
                         <!-- Search Box -->
                         <div class="input-group input-group-sm pull-left" style="width: 250px;">
-                            <input ng-model="devSearch" type="text" name="table_search" class="form-control pull-left" placeholder="Search" >
+                            <input ng-model="devSearch" type="text" class="form-control pull-left" placeholder="Filter Table..." >
                             <div class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                <button type="submit" class="btn btn-flat"><i class="fa fa-search"></i></button>
                             </div>
                         </div>
 
@@ -46,21 +37,32 @@ and open the template in the editor.
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th class="id">Status&nbsp;<a ng-click="sort_by('id')"><i class="glyphicon sort-icon" ng-show="sortKey=='id'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                                    <th class="name">Name&nbsp;<a ng-click="sort_by('name')"><i class="icon-sort"></i></a></th>
-                                    <th class="description">Description&nbsp;<a ng-click="sort_by('description')"><i class="icon-sort"></i></a></th>
-                                    <th class="field3">Field 3&nbsp;<a ng-click="sort_by('field3')"><i class="icon-sort"></i></a></th>
-                                    <th class="field4">Field 4&nbsp;<a ng-click="sort_by('field4')"><i class="icon-sort"></i></a></th>
+                                    <th width="40"><a href="" ng-click="sortBy('ping')">Status&nbsp;<i ng-show="sortKey==='ping'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('region')">Region&nbsp;<i ng-show="sortKey==='region'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('site')">Site&nbsp;<i ng-show="sortKey==='site'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('ip')">IP / Host&nbsp;<i ng-show="sortKey==='ip'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('name')">Name&nbsp;<i ng-show="sortKey==='name'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('type')">Type&nbsp;<i ng-show="sortKey==='type'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('vendor')">Vendor&nbsp;<i ng-show="sortKey==='vendor'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('model')">Model&nbsp;<i ng-show="sortKey==='model'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('collectors')">Collectors&nbsp;<i ng-show="sortKey==='collectors'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th width="40">Action</th>
+
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="item in pagedItems[currentPage] | orderBy:sortingOrder:reverse">
-                                    <td><span class="label label-success">{{item.id}}</span></td>
+                                <tr ng-repeat="item in $parent.deviceData | orderBy:sortKey:reverse | filter:devSearch">
+                                    <td><span class="label" ng-class="item.ping.status != 'up' ? 'label-danger' : (item.ping.ms < 500 ? 'label-success' : 'label-warning')" data-toggle="tooltip" title="{{ 'last updated ' + (item.ping.last_updated | date:'medium')}}">{{(item.ping.status=='up') ? item.ping.ms + ' ms' : item.ping.status}}</span></td>
+                                    <td>{{item.region}}</td>
+                                    <td>{{item.site}}</td>
+                                    <td><a href="/devices/{{item.ip}}">{{item.ip}}</a></td>
                                     <td>{{item.name}}</td>
-                                    <td>{{item.description}}</td>
-                                    <td>{{item.field3}}</td>
-                                    <td>{{item.field4}}</td>
-                                    <td>{{item.field5}}</td>
+                                    <td>{{item.type}}</td>
+                                    <td>{{item.vendor}}</td>
+                                    <td>{{item.model}}</td>
+                                    <td>{{item.collectors.ping}}</td>
+                                    <td><a href="" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-pencil"></i> Edit</a></td>
+
                                 </tr>
                             </tbody>
 
@@ -95,78 +97,6 @@ and open the template in the editor.
         </div>
 
 
-
-
-
-        <div class="row">
-            <div class="col-md-12">
-              <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title"></h3>
-                    <!-- ACTION BUTTONS -->
-                    <button id="addDevicesss" type="submit" class="btn btn-success btn-xs pull-right"><i class="fa fa-plus"></i> Add Device</button>
-
-                </div>
-                <!-- /.box-header -->
-                <form role="form" class="form-horizontal">
-                <div class="box-body">
-                    <div class="col-sm-12">
-
-                        <div class="alert alert-info">
-                            <p>Sort Type: {{ devSortType }}</p>
-                            <p>Sort Reverse: {{ devSortReverse }}</p>
-                            <p>Search Query: {{ devSearch }}</p>
-                        </div>
-
-
-
-
-                        <table id="devTable" class="table table-bordered table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th ng-click="sort('id')">Id
-                                        <span class="glyphicon sort-icon" ng-show="sortKey=='id'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
-                                    </th>
-                                    <th ng-click="sort('first_name')">First Name
-                                        <span class="glyphicon sort-icon" ng-show="sortKey=='first_name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
-                                    </th>
-                                    <th ng-click="sort('last_name')">Last Name
-                                        <span class="glyphicon sort-icon" ng-show="sortKey=='last_name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
-                                    </th>
-                                    <th ng-click="sort('hobby')">Hobby
-                                        <span class="glyphicon sort-icon" ng-show="sortKey=='hobby'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr dir-paginate="user in users|orderBy:sortKey:reverse|filter:search|itemsPerPage:5">
-                                    <td>{{user.id}}</td>
-                                    <td>{{user.first_name}}</td>
-                                    <td>{{user.last_name}}</td>
-                                    <td>{{user.hobby}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                    </div>
-
-                </div>
-
-                <!--
-                <div class="box-footer">
-                    <button id="cfgSNMPReset" type="submit" class="btn btn-default">Reset</button>
-                    <button id="cfgSNMPSubmit" type="submit" class="btn btn-success pull-right">Save</button>
-                </div>
-                -->
-                </form>
-              </div>
-            </div>
-        </div>
-        
-
-        
-
-        
         
     </section>
     <!-- /.content -->
@@ -174,24 +104,9 @@ and open the template in the editor.
     
     
     <!-- Page Specific Javascript - Form Processing -->
-    <!-- datatables -->
-    <script src="assets/plugins/datatables/jquery.dataTables.js"></script>
-    <script src="assets/plugins/datatables/dataTables.bootstrap.js"></script>
 
     <script>
-        function updateData(table){
-            $('#deviceTable').DataTable( {
-                "data": table.data,
-                "columns": table.columns
-            });
-        }
-/*
-        $(document).ready(function() {
-            $('#deviceTable').DataTable( {
-                //"ajax": "/api/devices"
-                "data": [["test","2",3,4,5,6],["test","2",3,4,5,6]],
-                "columns": [{title:"Name"},{title:"Name"},{title:"a"},{title:"c"},{title:"v"},{title:"b"}]
-            } );
-        } );//*/
+        $(window).trigger('resize'); /* fix the layout so it takes up the full window */
+
     </script>
         

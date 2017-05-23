@@ -71,9 +71,9 @@ function getLogForDevice($device, $lineLimit = 0) {
 /** returns the array of CURRENT data
  * $category = ping, traceroute, configuration, etc
  */
-function getDeviceData($device, $category) {
+function getDeviceData($device, $actionCategory) {
     global $gFolderScanData;
-    $dataFile = $gFolderScanData."/".$device."/device_data_".$category.".json";
+    $dataFile = $gFolderScanData."/".$device."/device_data_".$actionCategory.".json";
 
     return json_decode(file_exists($dataFile)?file_get_contents($dataFile):"[]", true);
 }

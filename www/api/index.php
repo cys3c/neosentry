@@ -6,6 +6,7 @@
 
 //required libraries
 include "../../lib/_functions.php";
+include "../../lib/_db_flatfiles.php";
 
 //start the session and require authentication
 
@@ -32,51 +33,55 @@ if ($key=='') trim(substr(filter_input(INPUT_GET, 'key', FILTER_SANITIZE_STRING)
 //perform actions based on what REST action the user wants to take
 $retJson = '';
 switch ($method) {
-    case 'GET':
-        //first handle special case GET requests
-        if ($table == "sessiondata") {
-            $retJson = json_encode($_SESSION);
-        } elseif ($table == "dashboard") {
-            $diskUsed[0] = round(1-disk_free_space(getcwd())/disk_total_space(getcwd()),4) * 100;
-            $diskUsed[1] = "Used " . $diskUsed[0] . "% of " . round(disk_total_space(getcwd()) / 1024 / 1024 / 1024,1) . "Gb, " . round(disk_free_space(getcwd()) / 1024 / 1024 / 1024,1) . "Gb Free" ;
-            $ramUsed[0] = memory_get_usage(true);
-            $ramUsed[1] = "Used " . $ramUsed[0] / 1024 / 1024 . "Mb";
-            $cpuUsed[0] = rand(0,100);//sys_getloadavg();
-            $cpuUsed[1] = "Used ".$cpuUsed[0]."% of 2Ghz";
-            $retJson = '{"Server Stats":{"serverHD":['.$diskUsed[0].',"'.$diskUsed[1].'"],"serverRAM":['.$ramUsed[0].',"'.$ramUsed[1].'"],"serverCPU":['.$cpuUsed[0].',"'.$cpuUsed[1].'"]}}';
+  case 'GET':
+    //first handle special case GET requests
+    if ($table == "sessiondata") {
+      $retJson = json_encode($_SESSION);
+    } elseif ($table == "dashboard") {
+      $diskUsed[0] = round(1-disk_free_space(getcwd())/disk_total_space(getcwd()),4) * 100;
+      $diskUsed[1] = "Used " . $diskUsed[0] . "% of " . round(disk_total_space(getcwd()) / 1024 / 1024 / 1024,1) . "Gb, " . round(disk_free_space(getcwd()) / 1024 / 1024 / 1024,1) . "Gb Free" ;
+      $ramUsed[0] = memory_get_usage(true);
+      $ramUsed[1] = "Used " . $ramUsed[0] / 1024 / 1024 . "Mb";
+      $cpuUsed[0] = rand(0,100);//sys_getloadavg();
+      $cpuUsed[1] = "Used ".$cpuUsed[0]."% of 2Ghz";
+      $retJson = '{"Server Stats":{"serverHD":['.$diskUsed[0].',"'.$diskUsed[1].'"],"serverRAM":['.$ramUsed[0].',"'.$ramUsed[1].'"],"serverCPU":['.$cpuUsed[0].',"'.$cpuUsed[1].'"]}}';
 
-        } elseif ($table == "devices") {
-            if ($key == '') {   //get all devices
-                $data = getDevicesArray();
-                $retJson = json_encode($data);
-                //$ret["columns"] =
-
-            } else {    //only get the one device
-                $data = getDeviceSettings($key);
-            }
-
-
-
-        } else { //get the table requested
-
+    } elseif ($table == "devices") {
+      if ($key == '') {   //get all devices
+        $devices = getDevicesArray();
+        foreach ($devices as $dev=>$devData) {
+          $devices[$dev]["ping"] = getDeviceData($dev,ACTION_PING);
+          $retArr[] = $devices[$dev];
         }
-        break;
+        $retJson = json_encode($retArr);
+        //$ret["columns"] =
+
+      } else {    //only get the one device
+        $data = getDeviceSettings($key);
+      }
 
 
-    case 'PUT':     // UPDATE
-        sessionProtect(false,ROLE_ADMIN);
 
-        break;
+    } else { //get the table requested
 
-    case 'POST':    // CREATE New / Overwrite Old
-        sessionProtect(false,ROLE_ADMIN);
+    }
+    break;
 
-        break;
 
-    case 'DELETE':
-        sessionProtect(false,ROLE_ADMIN);
+  case 'PUT':     // UPDATE
+    sessionProtect(false,ROLE_ADMIN);
 
-        break;
+    break;
+
+  case 'POST':    // CREATE New / Overwrite Old
+    sessionProtect(false,ROLE_ADMIN);
+
+    break;
+
+  case 'DELETE':
+    sessionProtect(false,ROLE_ADMIN);
+
+    break;
 }
 
 //FOR TESTING
