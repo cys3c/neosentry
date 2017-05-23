@@ -1,6 +1,8 @@
 #!/usr/bin/php
 <?php
 
+error_reporting(E_COMPILE_ERROR);
+
 /*
  *  CHECK POINT SCRIPT
 
@@ -137,6 +139,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     $ret = $scp->get($objFile."2.gz", $saveToFolder . "/configmgmt_objects.C.gz");
     shell_exec("gunzip < $saveToFolder/configmgmt_objects.C.gz > $saveToFolder/configmgmt_objects.C 2> /dev/null");
 
+    if (!file_exists($saveToFolder."/configmgmt_objects.C")) return "Could not load the objects.C file required to convert checkpoint objects into ip addresses.";
     $ret = file_get_contents($saveToFolder."/configmgmt_objects.C");
 
     outputText("Converting and Importing Objects File.");
@@ -268,7 +271,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
     //get the start and end times
     $stime = ($ruleMod > $lastRunTime) ? $ruleMod : $lastRunTime;
-    $etime = filemtime($saveToFolder . "/" . $saveToFile);
+    $etime = file_exists($saveToFolder . "/" . $saveToFile) ? filemtime($saveToFolder . "/" . $saveToFile) : 0;
     $dayAgo = $etime - 86400;
     if ($stime < $dayAgo || $stime >= $etime - 60) $stime = $dayAgo; //we only want to collect a max of 24 hours of logs due to resource utilization
     $strStart = date("F d, Y h:m:s", $stime);
