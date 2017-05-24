@@ -42,12 +42,15 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
     echo "To get a file run command '\$fileput [remote_file] [local_file]'**\n";
     echo "** Files will be copied to " . $saveToFolder . "\n\n";
 
+    /*
     $ret = "";
     $readTo = "$username@";
     $read = $ssh->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
     echo $read;
     //get the console prompt so we know when to stop reading text
     if ($ssh->isTimeout()) $readTo = substr($read, strrpos($read,"\n"));
+    */
+    sshRunCommand($ssh, "\n",2);
 
     while($ssh->isConnected()) {
         $cmd = rtrim(readline());
@@ -70,13 +73,15 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
 
             //$ret = $ssh->exec(str_replace('$ret', $ret, $cmd));
             //echo $ret;
-
+            /*
             $ssh->write(str_replace('$ret', $ret, $cmd)."\n");
             //$read = $ssh->read('_@.*[$#>]_', NET_SSH2_READ_REGEX);
             $read = $ssh->read($readTo);
             echo $read;
             //if we reached a timeout then we have a new console prompt, lets get it so we know where to read till
             if ($ssh->isTimeout()) $readTo = trim(substr($read, strrpos($read,"\n")));
+            */
+            sshRunCommand($ssh,$cmd);
 
         }
 
