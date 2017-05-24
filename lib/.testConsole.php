@@ -83,6 +83,7 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
             */
             $ret = sshRunCommand($ssh,$cmd);
             echo $ret;
+            echo $readTo;
 
         }
 
