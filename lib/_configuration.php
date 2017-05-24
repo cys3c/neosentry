@@ -10,18 +10,6 @@
 
 
 
-// Set up some variables
-$saveToFile = "configuration.json";
-$username = "fwadmin";
-$password = "1<3@n0v3mb3rm00n#";
-$password2 = "1<3@n0v3mb3rm00n#";
-
-
-// CHECK POINT SCRIPT
-
-// END CHECK POINT SCRIPT
-
-
 function configurationGet($device, &$deviceInfo, $overrideScript = "", $overrideProfile = "") {
     //get the username and passwords from the assigned account profile name.
     $accProfile = isset($devInfo['collectors']['configuration-profile'])?$devInfo['collectors']['configuration-profile']:"";
@@ -159,81 +147,3 @@ function configurationCompare($oldConfigArray, $newConfigArray) {
     return "";
 }
 
-
-
-
-
-
-function showConsoleConnection($device, $username, $password, $saveToFolder = ".") {
-    //Required includes
-    set_include_path(dirname(__FILE__) . '/phpseclib');
-    include('Net/SSH2.php');
-    include('Net/SCP.php');
-
-
-    //Set up the SSH and SCP constructors
-    echo "connecting to $device\n";
-    $ssh = new Net_SSH2($device);
-    if (!$ssh->login($username, $password)) {
-        exit('Login Failed'."\n");
-    }
-    $scp = new Net_SCP($ssh);
-    //$ssh->_initShell();
-    echo $ssh->getBannerMessage();
-
-    //$ssh->write("?");
-    //$ssh->enablePTY();
-
-    // Give console access
-    echo "\nConnected to " . $device . "\n";
-    echo "To get a file run command '\$fileget [remote_file] [local_file]'\n";
-    echo "To get a file run command '\$fileput [remote_file] [local_file]'**\n";
-    echo "** Files will be copied to " . $saveToFolder . "\n\n";
-
-    $ret = "";
-    $readTo = "$username@";
-    $read = $ssh->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
-    echo $read;
-    //get the console prompt so we know when to stop reading text
-    if ($ssh->isTimeout()) $readTo = substr($read, strrpos($read,"\n"));
-
-    while($ssh->isConnected()) {
-        $cmd = rtrim(readline());
-
-        if ($cmd=="quit") break;
-        if (strstr($cmd,'$fileget')) { //$fileget [remote file] [local file]
-            $a = explode(" ",$cmd);
-            if (!$scp->get($a[1], $saveToFolder."/".$a[2])) {
-                echo "Failed Download. Syntax is \$fileget [remote_file] [local_file]\n";
-                throw new Exception("Failed to get file");
-            }
-
-        } elseif (strstr($cmd,'$fileput')) { //$fileput [remote file] [local file]
-            $a = explode(" ",$cmd);
-            if (!$scp->put($a[1], $saveToFolder."/".$a[2], NET_SCP_LOCAL_FILE)) {
-                echo "Failed Upload. Syntax is \$fileput [remote_file] [local_file]\n";
-                throw new Exception("Failed to send file");
-            }
-        } else {
-
-            //$ret = $ssh->exec(str_replace('$ret', $ret, $cmd));
-            //echo $ret;
-
-            $ssh->write(str_replace('$ret', $ret, $cmd)."\n");
-            //$read = $ssh->read('_@.*[$#>]_', NET_SSH2_READ_REGEX);
-            $read = $ssh->read($readTo);
-            echo $read;
-            //if we reached a timeout then we have a new console prompt, lets get it so we know where to read till
-            if ($ssh->isTimeout()) $readTo = trim(substr($read, strrpos($read,"\n")));
-
-        }
-
-
-
-    }
-
-    //disconnect
-    $ssh->disconnect();
-
-    echo "\nConnection Closed\n";
-}

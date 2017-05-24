@@ -35,16 +35,13 @@ egrep -o "rule: [0-9]*|NAT_rulenum: [0-9]*" | awk '{count[$1,$2]++} END {for (wo
  */
 
 
-//echo "File: " . __FILE__ . "\nCurrent working Dir: " . getcwd();
-//exit;
 
 // Required includes for ssh connection.
 set_include_path('%includes%/phpseclib'); //required since these libraries include other libraries
 include('Net/SSH2.php');
 include('Net/SCP.php');
 
-//this script will be copied to ~/data/devices/%device%/tmp so lets use this scripts current folder as a scratch directory
-$scratchFolder = dirname(__FILE__);    //a temporary working directory to store and work with files.
+//this script will be copied to ~/data/devices/%device%/tmp
 const LOG_FILE = "configuration.log";
 
 // these %variable% strings will be replaced with the appropriate information before running.
@@ -56,7 +53,7 @@ $password2 = "%password2%";     //this 2nd password is an optional variable only
 
 //run the main collector logic
 //outputText("Running Check Point Configuration Collection Script\n");
-$configArr = runCollector($device, $scratchFolder, "configurationOutput.json", $username, $password, $password2);
+$configArr = runCollector($device, $username, $password, $password2);
 
 //print the output so the parent program can collect it.
 if (is_array($configArr)) echo json_encode($configArr,JSON_PRETTY_PRINT);
@@ -67,16 +64,17 @@ exit;
 
 /** This is the primary function that's called. output should be saved in JSON format
  * @param $device
- * @param $saveToFolder = The folder to save files to
- * @param $saveToFile = The Final save file, ie configuration.json
  * @param $username = username to log into the device
  * @param $password = password to log into the device
- * @param string $password2 = optional 2nd password for 2nd level auth
+ * @param $password2 = optional 2nd password for 2nd level auth
  */
-function runCollector($device, $saveToFolder, $saveToFile, $username, $password, $password2="") {
+function runCollector($device, $username, $password, $password2="") {
+
+    $saveToFolder = dirname(__FILE__);
+    $saveToFile = "configurationOutput.json";
 
     // Get the last time we modified the config file
-    $lastRunTime = file_exists($saveToFolder . "/" . $saveToFile)?filemtime($saveToFolder . "/" . $saveToFile):0;
+    $lastRunTime = file_exists($saveToFile)?filemtime($saveToFile):0;
     $arrConfig = [];
 
     //Set up the SSH and SCP constructors
@@ -87,14 +85,6 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
     }
     $scp = new Net_SCP($ssh);
 
-    /*
-    //get the console prompt so we know when to stop reading text, used for firewall rule collection
-    $readTo = "$username@";
-    $ssh->setTimeout(3);
-    $read = $ssh->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
-    if ($ssh->isTimeout()) $readTo = substr($read, strrpos($read,"\n"));
-    $ssh->setTimeout(10);
-    */
 
     //first see if we have expert access
     $ret = $ssh->exec('whoami');
@@ -253,8 +243,8 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
 
     // Save the consolidated configuration
-    file_put_contents($saveToFolder . "/" . $saveToFile, json_encode($arrConfig));
-    outputText("Saved Consolidated configuration to $saveToFolder/$saveToFile");
+    file_put_contents($saveToFile, json_encode($arrConfig));
+    outputText("Saved Consolidated configuration to $saveToFile");
 
 
 
@@ -271,7 +261,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
     //get the start and end times
     $stime = ($ruleMod > $lastRunTime) ? $ruleMod : $lastRunTime;
-    $etime = file_exists($saveToFolder . "/" . $saveToFile) ? filemtime($saveToFolder . "/" . $saveToFile) : 0;
+    $etime = file_exists($saveToFile) ? filemtime($saveToFile) : 0;
     $dayAgo = $etime - 86400;
     if ($stime < $dayAgo || $stime >= $etime - 60) $stime = $dayAgo; //we only want to collect a max of 24 hours of logs due to resource utilization
     $strStart = date("F d, Y h:m:s", $stime);
@@ -314,7 +304,7 @@ function runCollector($device, $saveToFolder, $saveToFile, $username, $password,
 
     if ($collected) {
         //save the config again
-        file_put_contents($saveToFolder . "/" . $saveToFile, json_encode($arrConfig));
+        file_put_contents($saveToFile, json_encode($arrConfig));
         outputText("Collection complete!");
     } else {
         //nothing collected
