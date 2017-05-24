@@ -42,14 +42,14 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
     echo "To get a file run command '\$fileput [remote_file] [local_file]'**\n";
     echo "** Files will be copied to " . $saveToFolder . "\n\n";
 
-    /*
-    $ret = "";
-    $readTo = "$username@";
-    $read = $ssh->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+
+    $read = $ssh->read(); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    $readTo = substr($ssh->read(), strrpos($read,"\n"));
+    echo "+ Detected prompt: $readTo\n";
     echo $read;
     //get the console prompt so we know when to stop reading text
-    if ($ssh->isTimeout()) $readTo = substr($read, strrpos($read,"\n"));
-    */
+    //if ($ssh->isTimeout()) $readTo = substr($ssh->read(), strrpos($read,"\n"));
+
     sshRunCommand($ssh, "\n",2);
 
     while($ssh->isConnected()) {
@@ -81,7 +81,8 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
             //if we reached a timeout then we have a new console prompt, lets get it so we know where to read till
             if ($ssh->isTimeout()) $readTo = trim(substr($read, strrpos($read,"\n")));
             */
-            sshRunCommand($ssh,$cmd);
+            $ret = sshRunCommand($ssh,$cmd);
+            echo $ret;
 
         }
 
@@ -95,32 +96,20 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
     echo "\nConnection Closed\n";
 }
 
-function sshRunCommand($sshSession, $cmd, $timeout = 10){
-    static $sshReadTo;
-    if (!isset($sshReadTo)) {
-        //get the command prompt
-        outputText("Detecting prompt...");
-        $sshSession->read(); //clear out the buffer
-        $sshSession->write("\n");
-        $sshSession->setTimeout(3);
-        $read = "\n" . $sshSession->read('>');
-        $sshReadTo = trim(substr($read, strrpos($read,"\n")+1));
-        outputText("Found prompt: $sshReadTo");
-    }
-
+function sshRunCommand(&$sshSession, $cmd, $readTo = '', $timeout = 10){
     //run the command
-    outputText("> ".$cmd);
-    outputText("+ Reading until prompt: $sshReadTo");
+    $cmd = rtrim($cmd,"\n") . "\n";
     $sshSession->write($cmd);
-    $sshSession->read(); //clear out the command echo
-    $sshSession->write("\n");
-    $sshSession->setTimeout($timeout);
-    $ret = $sshSession->read($sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
-    if($sshSession->isTimeout()) { outputText("+ Timeout reached."); /* $sshReadTo = substr($ret, strrpos($ret,"\n")+1);*/ }
-    $ret = str_replace($sshReadTo,"",$ret); //remove the prompt
 
-    outputText("+ " . strlen($ret) . " bytes read.");
-    //outputText("+ Prompt is now: $sshReadTo");
+    //get the output
+    $sshSession->setTimeout($timeout);
+    $ret = $sshSession->read($readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    if($sshSession->isTimeout()) outputText("+ Timeout reached.");
+
+    //clear out the command echo and command prompt
+    if(substr($ret,0,strlen($cmd)) == $cmd) $ret = substr($ret,strlen($cmd)+1);
+    if(substr($ret,-1 - strlen($readTo)) == $readTo) $ret = substr($ret,-1 - strlen($readTo));
+
     return $ret;
 
 }
