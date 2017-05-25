@@ -43,8 +43,8 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
     echo "** Files will be copied to " . $saveToFolder . "\n\n";
 
     //get the prompt
-    //$ssh->write("\n");
-    $ssh->setTimeout(2);
+    $ssh->write("\n");
+    sleep(2);
     $read = $ssh->read(); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
     $readTo = substr($read, strrpos($read,"\n"));
     echo "+ Detected prompt: $readTo\n";
@@ -99,7 +99,7 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
     echo "\nConnection Closed\n";
 }
 
-function sshRunCommand(&$sshSession, $cmd, $readTo = '', $timeout = 10){
+function sshRunCommand(&$sshSession, $cmd, $readTo = '', $timeout = 5){
     //run the command
     $cmd = rtrim($cmd,"\n") . "\n";
     $sshSession->write($cmd);
