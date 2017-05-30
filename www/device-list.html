@@ -21,14 +21,12 @@
 
                         <!-- Search Box -->
                         <div class="input-group input-group-sm pull-left" style="width: 250px;">
-                            <input ng-model="devSearch" type="text" class="form-control pull-left" placeholder="Filter Table..." >
-                            <div class="input-group-btn">
-                                <button type="submit" class="btn btn-flat"><i class="fa fa-search"></i></button>
-                            </div>
+                            <span class="input-group-addon btn-info"><i class="fa fa-search"></i></span>
+                            <input ng-model="devSearch" type="text" class="form-control" placeholder="Filter table..." >
                         </div>
 
                         <!-- Action Buttons -->
-                        <button id="addDevice" type="submit" class="btn btn-success btn-sm pull-right"><i class="fa fa-plus"></i> Add Device</button>
+                        <button id="addDevice" type="submit" class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#modalDevice"><i class="fa fa-plus"></i> Add Device</button>
 
                     </div>
 
@@ -100,7 +98,82 @@
         
     </section>
     <!-- /.content -->
-    
+
+
+    <!-- Pop-up box -->
+    <div id="modalDevice" class="modal modal-primary" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form ng-submit="postDevice()">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Add / Edit Device</h4>
+                    </div>
+                    <div class="modal-body form-horizontal">
+
+                        <div class="alert alert-danger" ng-show="postStatus=='Error'"><strong>{{postStatus}}</strong> {{postStatusMsg}}</div>
+                        <div class="alert alert-warning" ng-show="postStatus=='Warning'"><strong>{{postStatus}}</strong> {{postStatusMsg}}</div>
+                        <div class="alert alert-success" ng-show="postStatus=='Success'"><strong>{{postStatus}}</strong> {{postStatusMsg}}</div>
+
+
+                        <div class="form-group" >
+                            <label class="control-label col-sm-2">Hostname or IP *</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" ng-model="device.ip" ng-change="devCheck()" placeholder="" required="required">
+                                <span ng-show="devMsg"><i class="glyphicon glyphicon-info-sign"></i> {{devMsg}}</span>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Region</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" ng-model="device.region" placeholder="Americas, EMEA, APAC..."></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Site</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" ng-model="device.site" placeholder="Name, Address, ID, etc..."></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Device Name *</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" ng-model="device.name" placeholder="" required="required"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Type</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" ng-model="device.type" placeholder="Router, Switch, Firewall, etc..."></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Vendor</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" ng-model="device.vendor" placeholder="Cisco, Check Point, Palo Alto, etc..."></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Model</label>
+                            <div class="col-sm-10"><input type="text" class="form-control" ng-model="device.model" placeholder=""></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Notes</label>
+                            <div class="col-sm-10"><textarea rows="5" class="form-control" ng-model="device.notes" placeholder="Additional Information about this device"></textarea></div>
+                        </div>
+
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                        <img id="mySpinner" src="assets/images/loaders/ani_free_pacman.gif" ng-show="devLoading" />
+                        <input type="submit" class="btn btn-success" value="Save">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
     
     
     <!-- Page Specific Javascript - Form Processing -->
