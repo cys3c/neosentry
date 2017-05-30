@@ -6,15 +6,16 @@ error_reporting(E_ALL);
 //date_default_timezone_set('America/New_York');
 
 //$appname = 'NeoSentry NMS';
-$globalErrorVar = '';
+//$globalErrorVar = '';
 
 //Global Constants
 const SETTING_CATEGORY_SESSION = "Session Settings";
 const SETTING_CATEGORY_MAIL = "Mail Settings";
 const SETTING_CATEGORY_TASKS = "Task Scheduler";
 const SETTING_CATEGORY_RETENTION = "Data Retention";
+
 const SETTING_CATEGORY_PROFILES = "Account Profiles";
-const SETTING_CATEGORY_SNMP = "SNMP Settings";
+const SETTING_CATEGORY_SNMP = "SNMP Profiles";
 const SETTING_CATEGORY_CONFIGMGMT = "Configuration Management";
 const SETTING_CATEGORY_ALERTS = "Alerts";
 const SETTING_CATEGORY_SITES = "Sites";
@@ -43,10 +44,10 @@ $gFileSNMPMap = "$gFolderConfigs/snmpmap.json";
 
 
 //THESE MAY NOT BE NEEDED
-$gFileDevices = "$gFolderConfigs/devices.json";
-$gFileSettings = "$gFolderConfigs/settings.json";
-$gFileSecurity = "$gFolderConfigs/security.json";
-$gFileUsers = "$gFolderConfigs/auth.json";
+//$gFileDevices = "$gFolderConfigs/devices.json";
+//$gFileSettings = "$gFolderConfigs/settings.json";
+//$gFileSecurity = "$gFolderConfigs/security.json";
+//$gFileUsers = "$gFolderConfigs/auth.json";
 
 
 
@@ -306,10 +307,18 @@ function getDevicesArray() {
     return getDocument('devices');
 }
 function getDeviceSettings($device){
-    return getDocument('devices',$device);
+    $d = getDocument('devices',$device);
+    return is_array($d) ? $d : [];
 }
 function writeDeviceSettings($device, $arrSettings){
-    return writeToDocument('devices', $device, $arrSettings);
+    //set up the template
+    $tmpl = json_decode('{ "added":"'.date(DATE_ATOM).'",""site": "","region": "", 
+        "ip": "'.$device.'", "name": "", "type": "Server", "vendor": "", "model": "", 
+        "collectors": {"ping": [true,""], "snmp": [false,""], "configuration":[false,""], 
+            "services": [false,""], "netflow":[false,""]} }');
+    $dev = array_merge($arrSettings, $tmpl);
+
+    return writeToDocument('devices', $device, $dev);
 }
 
 // FUNCTIONS FOR SETTINGS //

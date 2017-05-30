@@ -9,10 +9,9 @@
 # 
 # Directory structure:
 # + /usr/share/[neosentry]   - default install directory
-# | +-- bin     owned by root. stores scripts and executables. ping/traceroute/snmp/etc collecting scripts
-# |  | neosentry.bin         [root]. aka handler.c. executable responsible for message queuing, scheduling, etc.
+# | +-- config  holds configs, mibs, etc.
+# | +-- lib     scripts folder
 # | +-- data    owned by apache. stores variable data & backups which are read from the front-end
-# |  + mibs     self explanatory
 # |  + backups
 # |  | devices.json     stores devices and device information.
 # |  | snmpmap.json     maps specific OID's to a name for easier parsing.
@@ -102,8 +101,8 @@ else
 
     # ---------- Install PHP 5 ----------
 	if ! hash php 2>/dev/null; then
-        echo Installing PHP 5
-        apt-get -m -y install php5 php-pear php5-mysql libapache2-mod-php5 php-pecl-ssh2
+        echo Installing PHP 7.0
+        apt-get -m -y install php7.0 php7.0-common php7.0-snmp php7.0-ldap php7.0-json libapache2-mod-php7.0
 	else
         echo " - PHP is already installed, skipping this step"
         echo " -- It is recommended to have PHP 7.1 but this will require manual installation on Debian based systems"
@@ -112,7 +111,7 @@ else
     # ---------- Install Database ----------
     #echo Installing MySQL
     #apt-get -m -y install mysql mysql-server mysql-devel
-	service mysqld start
+	#service mysqld start
     if ! hash mongodb 2>/dev/null; then
         echo "MongoDB is not installed and installation varies depending on the version of Debian"
         echo " - See https://docs.mongodb.com/manual/administration/install-on-linux/"
@@ -172,11 +171,11 @@ echo Configuring Apache
 # Consider prompting the user for the domain name and asking if this is the only website. Then modify the configuration accordingly.
 if [ -d "/etc/httpd/conf.d" ]; then 
 	# CentOS / RedHat Distros
-	cp 000-neosentry-apache.conf /etc/httpd/conf.d/NeoSentry.conf
+	cp config/000-neosentry-httpd.conf /etc/httpd/conf.d/neosentry.conf
 	/etc/init.d/httpd restart
 elif [ -d "/etc/apache2/sites-available" ]; then
 	# Assume Debian / Ubuntu Distros
-	cp 000-neosentry-apache.conf /etc/apache2/sites-available/000-neosentry.conf
+	cp config/000-neosentry-httpd.conf /etc/apache2/sites-available/000-neosentry.conf
 	ln -s /etc/apache2/sites-available/000-neosentry.conf /etc/apache2/sites-enabled/000-neosentry.conf
 	/etc/init.d/apache2 restart
 else
@@ -187,11 +186,17 @@ fi
 # Allow firewall connections if iptables is installed and the rule doesn't exist
 if hash iptables 2>/dev/null; then
 	echo iptables firewall detected...
-	echo Allowing port 80 and 443 connections if the rules dont already exist.
-	iptables -C INPUT -p tcp --dport 80 -j ACCEPT || iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-	iptables -C INPUT -p tcp --dport 443 -j ACCEPT || iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-	/sbin/service iptables save
-	#iptables -L -v #list all rules
+	read -p "Do you wish to allow ports 80/443 from any destination? [Y/n]" yn
+    case $yn in
+        [Nn]* ) ;;
+        * ) iptables -C INPUT -p tcp --dport 80 -j ACCEPT || iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+            iptables -C INPUT -p tcp --dport 443 -j ACCEPT || iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+            /sbin/service iptables save
+            echo "Allowed port 80 and 443 connections if the rules didn't already exist."
+	        #iptables -L -v #list all rules #this is done later
+            ;;
+    esac
+
 fi
 
 

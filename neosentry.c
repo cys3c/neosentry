@@ -56,23 +56,24 @@ int main(int argc, char *argv[]) {
     
     /* fork and execute */
     if (cmdrdy==1) {
-        //++argv; /* remove the first argument */
+        /*
         char *phpcmd = "/usr/bin/php";
         char *phpfile = "/usr/share/neosentry/neosentry.php";
-        char *newargs[sizeof(*argv)+1];//(char**)realloc(newargs, sizeof(*argv)+1);
+        char *newargs[argc+5];//(char**)realloc(newargs, sizeof(*argv)+1);
         newargs[0] = phpcmd;
         newargs[1] = phpfile;
+        */
+        const char *newargs[64] = {"/usr/bin/php" , "/usr/share/neosentry/neosentry.php"};
 
         int i;
-        for (i=1; i<sizeof(*argv)+1; i++) {
+        for (i=1; i<=sizeof(*argv); i++) {
             newargs[i+1] = argv[i];
         }
-
 
         int pid = fork();
         if(pid == 0){ /* the forked process will do this */
             //printf("Child's PID is %d. Parent's PID is %d\n", getpid(), getppid());
-            execv(newargs[0], newargs);
+            execv(newargs[0], (char **)newargs);
         } else { /* the main process will wait */
             wait(NULL);
             exit(0);
@@ -99,3 +100,45 @@ int checkfromfile(char *arg, char *settingsFile) {
     fclose(fp);
     
 }
+
+
+/* Alternate execute
+//run with:
+//  int exec_prog(const char **);
+//  const char    *my_argv[64] = {"/usr/bin/php" , "/usr/share/neosentry/neosentry.php"};
+//  int rc = exec_prog(my_argv);
+int exec_prog(const char **argv)
+{
+    pid_t   my_pid;
+    int     status, timeout ;// unused ifdef WAIT_FOR_COMPLETION
+
+    if (0 == (my_pid = fork())) {
+        if (-1 == execve(argv[0], (char **)argv , NULL)) {
+            perror("child process execve failed [%m]");
+            return -1;
+        }
+    }
+
+#ifdef WAIT_FOR_COMPLETION
+    timeout = 1000;
+
+    while (0 == waitpid(my_pid , &status , WNOHANG)) {
+        if ( --timeout < 0 ) {
+            perror("timeout");
+            return -1;
+        }
+        sleep(1);
+    }
+
+    printf("%s WEXITSTATUS %d WIFEXITED %d [status %d]\n",
+        argv[0], WEXITSTATUS(status), WIFEXITED(status), status);
+
+    if (1 != WIFEXITED(status) || 0 != WEXITSTATUS(status)) {
+        perror("%s failed, halt system");
+        return -1;
+    }
+
+#endif
+    return 0;
+}
+*/

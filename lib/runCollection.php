@@ -86,14 +86,20 @@ if ($device=="all" || $device=="*" || strpos($device, " ") > 0) {
 
 // Check configuration to see if we should collect the info
 $devInfo = getDeviceSettings($device);
+if (isset($devInfo["collectors"][$action][0]) && $devInfo["collectors"][$action][0] != true) {
+    //we shouldn't collect this information
+    echo "Device settings say we shouldn't collect $action on $device, so we won't.\n";
+    exit;
+}
+/*
 if (is_array($devInfo) && array_key_exists("collectors",$devInfo) && array_key_exists($action,$devInfo["collectors"])) {
-    if ($devInfo["collectors"][$action] == "no" || $devInfo["collectors"][$action] == false ) {
+    if ($devInfo["collectors"][$action][0] == "no" || $devInfo["collectors"][$action][0] == false ) {
         //we shouldn't collect this information
         echo "Device settings say we shouldn't collect $action on $device, so we won't.\n";
         exit;
     }
 }
-
+*/
 
 include_once "_db_flatfiles.php";
 writeLogFile($logFile, "Collecting ".$action." on single device: $device"); //also echos to the console

@@ -12,7 +12,8 @@
 
 function configurationGet($device, &$deviceInfo, $overrideScript = "", $overrideProfile = "") {
     //get the username and passwords from the assigned account profile name.
-    $accProfile = isset($devInfo['collectors']['configuration-profile'])?$devInfo['collectors']['configuration-profile']:"";
+    $accProfile = isset($devInfo['collectors']['configuration'])?$devInfo['collectors']['configuration']:"";
+    $accProfile = $accProfile[1]; //0 stores if it should collect config, 1 stores acc profile name
     $accVals = getSettingsValue(SETTING_CATEGORY_PROFILES, $accProfile, []);
     if (is_array($overrideProfile)) $accVals = $overrideProfile;
 

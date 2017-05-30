@@ -7,6 +7,7 @@
 chdir(dirname(__FILE__));
 
 include_once "lib/_functions.php";
+include_once "lib/_db_flatfiles.php";
 firstRunConfig(); // creates the settings files if they need to be created.
 
 //var_dump($argv);
@@ -16,20 +17,56 @@ $argMap = [];
 //add our command line arguments
 addArg("collect", true, 10, "", "Runs the collector against a device");
 
+//add account-profile <profile_name> username <username> password <password> password2 <2nd_password>
 addArg("add", false, false, "", "Add an element to the database");
-addArg("add account-profile", true, 1, "", "Add an account profile used to remotely log into a device to gather configs");
-addArg("add device", true, 1, "", "[hostname/IP] - The devices IP or hostname");
-addArg("add snmp-profile", true, 1, "", "Add SNMP connection info");
-addArg("add app-user", true, 1, "", "Add a user that can log into the Web UI");
-addArg("add alert", true, 1, "", "Add an alert rule");
+addArg("add account-profile", true, 1, "", "<profile_name> Add an account profile used to remotely log into a device to gather configs");
+addArg("add account-profile username", true, 1, "", "<account_username>");
+addArg("add account-profile password", true, 1, "", "<account_password>");
+addArg("add account-profile password2", false, 1, "", "[2nd_account_pw] Secondary account password, used for second level auth. For example Cisco's enable password");
 
+addArg("add config-rule", true, 1, "", "<rule> Add a configuration management rule. Encase rule in quotes.");
+
+//add device <ip_or_hostname> [additional_options]
+addArg("add device", true, 1, "", "<ip_or_hostname> Add a device to the database");
+addArg("add device name", false, 1, "", "[friendly_name] - The devices hostname or a friendly name");
+addArg("add device region", false, 1, "", "[region_name] - ex: Americas, EMEA, APAC...");
+addArg("add device site", false, 1, "", "[site_name] - Site identifier, for example the address");
+addArg("add device type", false, 1, "", "[device_type] - Server, Router, Firewall...");
+addArg("add device vendor", false, 1, "", "[device_vendor] - Cisco, Check Point, Palo Alto...");
+addArg("add device model", false, 1, "", "[device_model] - 3690, PA-5060, etc...");
+addArg("add device collect-ping", false, 0, "", "Collect ping data");
+addArg("add device collect-snmp", false, 1, "", "[snmp_profile] - collect snmp data, leave blank to auto-scan for valid profile");
+addArg("add device collect-config", false, 1, "", "[account_profile] - collect config data, use account profile for username/pass");
+
+addArg("add snmp-profile", true, 1, "", "<profile_name> Add SNMP connection info");
+addArg("add snmp-profile version", true, 1, "", "<snmp_version> 1, 2c, 3...");
+addArg("add snmp-profile string", true, 1, "", "<snmp_community_string> used to connect");
+addArg("add snmp-profile username", false, 1, "", "[username] used in version 3");
+addArg("add snmp-profile password", false, 1, "", "[password] used in version 3");
+
+//addArg("add app-user", true, 1, "", "Add a user that can log into the Web UI");
+//addArg("add alert", true, 1, "", "Add an alert rule");
 
 addArg("delete", true, 0, "", "Deletes an element from the database");
-addArg("show", true, 0, "", "Show various configuration options and stored data");
-addArg("set", true, 0, "", "Set/Update a configuration setting");
-addArg("scan", true, 0, "", "Scans an IP or range of IPs for active devices and outputs the commands to add the device");
-addArg("search", true, 0, "", "Searches the database for your inputted criteria");
+addArg("delete account-profile", true, 1, "", "<profile_name> Deletes an Account Profile from the database");
+addArg("delete config-rule", true, 1, "", "<rule_number> Deletes configuration management rule");
+addArg("delete device", true, 1, "", "<ip_or_hostname> Deletes a Device from the database");
+addArg("delete snmp-profile", true, 1, "", "<profile_name> Deletes an SNMP Profile from the database");
 
+addArg("show", true, 0, "", "Show various configuration options and stored data");
+addArg("show account-profiles", true, 0, "", "Show all account profiles");
+addArg("show device", true, 1, "", "<ip_or_hostname> Show details of a Device");
+addArg("show devices", true, 0, "", "Show all devices");
+addArg("show config-rules", true, 0, "", "Show all configuration management rules");
+addArg("show snmp-profiles", true, 0, "", "Show all SNMP Profiles");
+addArg("show settings", true, 0, "", "Show all Settings");
+
+addArg("set", true, 0, "", "Set/Update a configuration setting");
+addArg("set device", true, 0, "", "<device_name> Set/Update a device configuration setting");
+
+addArg("scan", true, 1, "", "<ip_list> Scans an IP or range of IPs for active devices and outputs the commands to add the device. Put the list of IPs in quotes separated by a space, tab, comma, or semi-colon");
+
+addArg("search", true, 1, "", "<search_string> Searches the database for your inputted criteria. Put search string in quotes.");
 
 
 
@@ -59,10 +96,8 @@ if (PHP_SAPI == "cli" && isset($argv)) {
 
         case "collect":
             $passTo = realpath(dirname(__FILE__)."/lib/runCollection.php");
-            echo "running: php $passTo $subject\n";
+            //echo "running: php $passTo $subject\n";
             system("php $passTo $subject");
-            //$ret = shell_exec("php $passTo $subject");
-            //echo $ret;
             break;
 
         default:
@@ -80,7 +115,12 @@ function addArg($path, $required = false, $takesInput = 0, $regexConstraint = ""
     //ex: addArg("add device host", true, 1, "[hostname/IP] Required. Takes 1 parameter, the devices IP or hostname");
     //Allow option chaining if there's no more sub-options. ie chaining under "add device" since host
     global $argMap;
-    $argMap[trim($path)] = array("required"=> $required, "input" => $takesInput, "constraint" => $regexConstraint, "description" => $description);
+    $arg = "";
+    $arg = substr($description,0,1) == "<" ? trim(substr($description,0,strpos($description,">")+1)) : $arg;
+    $arg = substr($description,0,1) == "[" ? trim(substr($description,0,strpos($description,"]")+1)) : $arg;
+    $description = trim(substr($description, strlen($arg)));
+
+    $argMap[trim($path)] = array("required"=> $required, "input" => $takesInput, "constraint" => $regexConstraint, "description" => $description, "arg" => $arg);
 }
 
 
@@ -208,10 +248,14 @@ function showHelp($path = "", $error = "") {
     }
 
     //we have a valid path now, get the help for each sub command
+    $usage = trim($validPath . " " . (isset($argMap[$validPath]["arg"])?$argMap[$validPath]["arg"]:"")) . " [options]";
     foreach ($argMap as $key => $arrParams) {
         if (substr($key,0,strlen($validPath)) == $validPath && substr_count($key," ") == substr_count(ltrim($validPath." "," ")," ")) {
             $cmd = trim(substr($key, strrpos($key," ")));
-            $req = $arrParams["required"] ? "" : "Optional ";
+            $cmd .= isset($arrParams["arg"]) ? " " . $arrParams["arg"] : "";
+            $req = $arrParams[ "required"] ? "" : "Optional ";
+            //$usage .= " " . trim($cmd) . (isset($arrParams["arg"]) ? " " . $arrParams["arg"] : "");
+            //$usage .= " " . $cmd;
             if (!$arrParams["input"]) $req = ""; //if it doesn't take input then we don't need to specify a requirement
 
             //for the help output and formatting of the output
@@ -242,7 +286,8 @@ function showHelp($path = "", $error = "") {
     } else {
         if ($error != "") echo "ERROR: $error\n";
         $s = ($validPath != "") ? " for '$validPath'" : "";
-        $out = "Available options".$s.":\n" . $strHelp;
+        $out = ($validPath != "") ? "usage: " . $usage . "\n\n" : "";
+        $out .= "Available options".$s.":\n" . $strHelp;
         consolePrint($out,str_repeat(" ",$longestWord)."    ");
     }
 
@@ -252,7 +297,7 @@ function showHelp($path = "", $error = "") {
 
 function consolePrint($text,$wrapPrefixString) {
     $cols = isWindows()?0:intval(exec('tput cols'));
-    if (strlen($wrapPrefixString) * 3 <= $cols) {
+    if (strlen($wrapPrefixString) * 1.8 <= $cols) {
         $arr = explode("\n",$text);
         foreach ($arr as $line) {
             //if (strlen($line) > $cols) {
@@ -315,7 +360,9 @@ function firstRunConfig() {
         "public": { "version":"2c", "string":"public", "username":"","password":"" }
     },
     "'.SETTING_CATEGORY_CONFIGMGMT.'":{
-        "Description": "Settings for connecting to devices to collect its configuration."
+        "Description": "Settings for connecting to devices to collect its configuration.",
+        "rules":["vendor contains \"check point\" or vendor contains \"checkpoint\" run checkpoint.php",
+            "vendor contains \"palo alto\" or vendor contains \"paloalto\" run paloalto.php"]
     },
     "'.SETTING_CATEGORY_ALERTS.'":{
         "Description": "Alert settings, only email alerts for now",
@@ -349,6 +396,8 @@ function firstRunConfig() {
     }
 
     if (!file_exists($gFileDevices)) {
+        writeDeviceSettings("localhost",array("name"=>"NeoSentry NMS", "type"=>"Server","collectors"=>array("ping"=>[true,""])));
+
         $s = '{
     "localhost": {
         "added": "'.date(DATE_ATOM).'",
@@ -358,20 +407,18 @@ function firstRunConfig() {
         "name": "NeoSentry NMS",
         "type": "Server",
         "vendor": "",
+        "model": "",
         "collectors": {
-            "ping": "yes",
-            "snmp": "no",
-            "snmp-profile":"public",
-            "configuration":"no",
-            "configuration-profile": "",
-            "services": "yes",
-            "service-ports": "22,80",
-            "netflow":"no",
-            "netflow-port": ""
+            "ping": [true,""],
+            "snmp": [false,"snmp-profile-name"],
+            "configuration":[false,"account-profile-name"],
+            "services": [false,"22,80"],
+            "netflow":[false,"netflow-settings"]
         }
     }
     
 }';
+        //file_put_contents($gFileDevices,$s);
 
     }
 
