@@ -51,6 +51,7 @@ switch ($method) {
         $devices = getDevicesArray();
         foreach ($devices as $dev=>$devData) {
           $devices[$dev]["ping"] = getDeviceData($dev,ACTION_PING);
+          if ( !isset($devices[$dev]["ip"]) ) $devices[$dev]["ip"] = $dev;
           $retArr[] = $devices[$dev];
         }
         $retJson = json_encode($retArr);

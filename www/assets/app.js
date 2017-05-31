@@ -129,14 +129,11 @@ app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
     };
     $scope.getData();
 
-
     $scope.sortBy = function(keyname){
         $scope.reverse = ($scope.sortKey === keyname ) ? !$scope.reverse : false; //if true make it false and vice versa
         $scope.sortKey = keyname;   //set the sortKey to the param passed
     };
     $scope.sortBy('name');
-
-
 
     //timer to collect the data
 	/*
@@ -144,6 +141,37 @@ app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
     $scope.stopCollection = function() { if (angular.isDefined(collectInterval)) { $interval.cancel(collectInterval);collectInterval = undefined;}};
     $scope.$on('$destroy', function() {$scope.stopCollection();});
     */
+
+	/* Add Device */
+	$scope.device = {};
+	$scope.devLoading = false;
+	$scope.postStatus = "";
+	$scope.postStatusMsg = "";
+    $scope.postDevice = function() {
+        $scope.devLoading = true;
+        $http.post("/api/devices/" + $scope.device.ip, $scope.device)
+            .then(function (response) {
+                $scope.devLoading = false;
+                $scope.postStatusMsg = response.data;
+                /* put it in the parent class for better response and global search functionality */
+                $scope.postStatus = response.status === 200 ? "Success" : "Error " + response.status;
+
+            }, function errorCallback(response) {
+                console.log("Error posting data: " + JSON.stringify(response));
+            });
+
+    };
+    $scope.devCheck = function() {
+        var tmp = {};
+        tmp = $scope.$parent.deviceData.find(function(dev){return dev.ip===$scope.device.ip});
+        if (tmp) {
+            $scope.device = JSON.parse(JSON.stringify(tmp));
+            $scope.devMsg = "Loaded existing device '" + tmp.ip + "'";
+        } else {
+            $scope.devMsg = "";
+        }
+    };
+
 });
 app.controller("devicesDetailCtrl", function ($scope, $http, $interval, gHandler) {
     $scope.$parent.activeTab = 'devices';
