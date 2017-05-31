@@ -8,7 +8,6 @@ chdir(dirname(__FILE__));
 
 include_once "lib/_functions.php";
 include_once "lib/_db_flatfiles.php";
-firstRunConfig(); // creates the settings files if they need to be created.
 
 //var_dump($argv);
 //echo "PHP_SAPI = ".PHP_SAPI;
@@ -24,6 +23,14 @@ addArg("add account-profile username", true, 1, "", "<account_username>");
 addArg("add account-profile password", true, 1, "", "<account_password>");
 addArg("add account-profile password2", false, 1, "", "[2nd_account_pw] Secondary account password, used for second level auth. For example Cisco's enable password");
 
+addArg("add app-user", true, 1, "", "<login_id> Add a user that can log into the Web UI");
+addArg("add app-user name", true, 1, "", "<full_name> Full name of the user");
+addArg("add app-user role", true, 1, "", "<role> Role to assign [admin, readonly, ...]");
+addArg("add app-user password", true, 1, "", "<password> This will be hashed");
+addArg("add app-user email", false, 1, "", "<email> Email of the user");
+
+//addArg("add alert", true, 1, "", "Add an alert rule");
+
 addArg("add config-rule", true, 1, "", "<rule> Add a configuration management rule. Encase rule in quotes.");
 
 //add device <ip_or_hostname> [additional_options]
@@ -34,8 +41,8 @@ addArg("add device site", false, 1, "", "[site_name] - Site identifier, for exam
 addArg("add device type", false, 1, "", "[device_type] - Server, Router, Firewall...");
 addArg("add device vendor", false, 1, "", "[device_vendor] - Cisco, Check Point, Palo Alto...");
 addArg("add device model", false, 1, "", "[device_model] - 3690, PA-5060, etc...");
-addArg("add device collect-ping", false, 0, "", "Collect ping data");
-addArg("add device collect-snmp", false, 1, "", "[snmp_profile] - collect snmp data, leave blank to auto-scan for valid profile");
+addArg("add device collect-ping", false, 1, "", "[true/false] Collect ping data");
+addArg("add device collect-snmp", false, 1, "", "[snmp_profile] - collect snmp data, include snmp profile name");
 addArg("add device collect-config", false, 1, "", "[account_profile] - collect config data, use account profile for username/pass");
 
 addArg("add snmp-profile", true, 1, "", "<profile_name> Add SNMP connection info");
@@ -44,11 +51,9 @@ addArg("add snmp-profile string", true, 1, "", "<snmp_community_string> used to 
 addArg("add snmp-profile username", false, 1, "", "[username] used in version 3");
 addArg("add snmp-profile password", false, 1, "", "[password] used in version 3");
 
-//addArg("add app-user", true, 1, "", "Add a user that can log into the Web UI");
-//addArg("add alert", true, 1, "", "Add an alert rule");
-
 addArg("delete", true, 0, "", "Deletes an element from the database");
 addArg("delete account-profile", true, 1, "", "<profile_name> Deletes an Account Profile from the database");
+addArg("delete app-user", true, 1, "", "<user_id> Deletes a user so they can't log in");
 addArg("delete config-rule", true, 1, "", "<rule_number> Deletes configuration management rule");
 addArg("delete device", true, 1, "", "<ip_or_hostname> Deletes a Device from the database");
 addArg("delete snmp-profile", true, 1, "", "<profile_name> Deletes an SNMP Profile from the database");
@@ -60,6 +65,7 @@ addArg("show devices", true, 0, "", "Show all devices");
 addArg("show config-rules", true, 0, "", "Show all configuration management rules");
 addArg("show snmp-profiles", true, 0, "", "Show all SNMP Profiles");
 addArg("show settings", true, 0, "", "Show all Settings");
+addArg("show app-users", true, 0, "", "Show all App Users");
 
 addArg("set", true, 0, "", "Set/Update a configuration setting");
 addArg("set device", true, 0, "", "<device_name> Set/Update a device configuration setting");
@@ -80,6 +86,9 @@ if (PHP_SAPI == "cli" && isset($argv)) {
     if (sizeof($argv) <=0 ) {
         showHelp();
         exit;
+    } elseif ($argv[0] == "firstrun") {
+        firstRunConfig(); // creates the settings files if they need to be created.
+        exit;
     }
 
     $arr = processArgs($argv);
@@ -88,17 +97,170 @@ if (PHP_SAPI == "cli" && isset($argv)) {
     $subject = $arr["full_cmdline"]; //the rest of the command, ie "device ..."
     $vals = $arr["args"];       //the arguments for the path
 
-    switch ($action) {
-        case "add":
-            echo "$path:\n";
-            print_r($vals);
+    switch ($path) {
+
+/* ADD */
+
+        case "add account-profile":
+            $name = array_shift($vals);
+            $vals["password"] = hashString($vals["password"]);
+            if (isset($vals["password2"])) $vals["password2"] = hashString($vals["password2"]);
+
+            $c = getSettingsValue(SETTING_CATEGORY_PROFILES,$name);
+            if ($c != "") {
+                echo "Error: Account profile with the name '$name' already exists\n";
+            } else {
+                $ret = writeSettingsValue(SETTING_CATEGORY_PROFILES,$name,$vals);
+                echo ($ret ? "Successfully created Account profile '$name'\n" : "Error: Could not save account profile...\n");
+            }
             break;
+
+        case "add app-user":
+            $name = array_shift($vals);
+            $vals["password"] = hashString($vals["password"]);
+            $vals["auth_type"] = "app";
+            $c = getUser($name);
+            if (!empty($c)) {
+                echo "Error: User with the name '$name' already exists\n";
+            } else {
+                $ret = writeUser($name,$vals);
+                echo ($ret ? "Successfully created User '$name'\n" : "Error: Could not save User...\n");
+            }
+            break;
+
+        case "add config-rule":
+            $rule = array_shift($vals);
+            $c = getSettingsValue(SETTING_CATEGORY_CONFIGMGMT,"rules");
+            if (in_array($rule,$c)) {
+                echo "Error: This rule already exists\n";
+            } else {
+                $c[] = $rule;
+                $ret = writeSettingsValue(SETTING_CATEGORY_CONFIGMGMT,"rules",$c);
+                echo ($ret ? "Successfully created Configuration Rule\n" : "Error: Could not save Configuration Rule...\n");
+            }
+            print_r($c);
+            break;
+
+        case "add device":
+            $name = array_shift($vals);
+            $ping = isset($vals["collect-ping"]) ? ($vals["collect-ping"]=="true" ? true : false) : false;
+            $vals["collectors"]["ping"] = [$ping,""];
+            if (isset($vals["collect-snmp"])) $vals["collectors"]["snmp"] = [true,$vals["collect-snmp"]];
+            if (isset($vals["collect-config"])) $vals["collectors"]["configuration"] = [true,$vals["collect-config"]];
+            unset($vals["collect-ping"]);
+            unset($vals["collect-snmp"]);
+            unset($vals["collect-config"]);
+
+            $d = getDeviceSettings($name);
+            if (!empty($d)) {
+                echo "Error: Device with the ip/hostname '$name' already exists\n";
+            } else {
+                $ret = writeDeviceSettings($name,$vals);
+                echo ($ret ? "Successfully added the device '$name' to the database\n" : "Error: Could not save device...\n");
+            }
+            //print_r($vals);
+            break;
+
+        case "add snmp-profile":
+            $name = array_shift($vals);
+            $c = getSettingsValue(SETTING_CATEGORY_SNMP,$name);
+            if (!empty($c)) {
+                echo "Error: SNMP profile with the name '$name' already exists\n";
+            } else {
+                $ret = writeSettingsValue(SETTING_CATEGORY_SNMP,$name,$vals);
+                echo ($ret ? "Successfully created SNMP profile '$test'\n" : "Error: Could not save SNMP profile...\n");
+            }
+            break;
+
+/* COLLECT */
 
         case "collect":
             $passTo = realpath(dirname(__FILE__)."/lib/runCollection.php");
             //echo "running: php $passTo $subject\n";
             system("php $passTo $subject");
             break;
+
+/* DELETE */
+
+        case "delete account-profiles":
+            $name = array_shift($vals);
+            $read = readline("Are you sure you want to delete Account Profile '$name'? [N/y] ");
+            if (strtolower($read)=="y") {
+                echo (deleteSettingsValue(SETTING_CATEGORY_PROFILES,$name) ? "Account Profile '$name' removed\n" : "Error deleting Account Profile...\n");
+            } else echo "Cancelled Operation\n";
+            break;
+
+        case "delete device":
+            $name = array_shift($vals);
+            $read = readline("Are you sure you want to delete Device '$name'? [N/y] ");
+            if (strtolower($read)=="y") {
+                echo (deleteDevice($name) ? "Device '$name' removed\n" : "Error deleting Device...\n");
+            } else echo "Cancelled Operation\n";
+            break;
+
+        case "delete config-rule":
+            $name = array_shift($vals);
+            $rules = getSettingsValue(SETTING_CATEGORY_CONFIGMGMT,"rules");
+            $read = readline("Are you sure you want to delete the following rule\n [$name] {$rules[$name]}\n? [N/y] ");
+            if (strtolower($read)=="y") {
+                unset($rules[$name]);
+                echo (writeSettingsValue(SETTING_CATEGORY_CONFIGMGMT,"rules",$rules) ? "Rule [$name] removed\n" : "Error deleting rule...\n");
+            } else echo "Cancelled Operation\n";
+            break;
+
+        case "delete snmp-profile":
+            $name = array_shift($vals);
+            $read = readline("Are you sure you want to delete SNMP Profile '$name'? [N/y] ");
+            if (strtolower($read)=="y") {
+                echo (deleteSettingsValue(SETTING_CATEGORY_SNMP, $name) ? "SNMP Profile '$name' removed\n" : "Error deleting SNMP Profile...\n");
+            } else echo "Cancelled Operation\n";
+            break;
+
+        case "delete app-user":
+            $name = array_shift($vals);
+            $read = readline("Are you sure you want to delete Application User '$name'? [N/y]");
+            if (strtolower($read)=="y") {
+                echo (deleteUser($name) ? "User '$name' removed\n" : "Error deleting user...\n");
+            } else echo "Cancelled Operation\n";
+            break;
+
+/* SHOW */
+
+        case "show account-profiles":
+            $j = json_encode(getSettingsArray(SETTING_CATEGORY_PROFILES), JSON_PRETTY_PRINT);
+            echo $j;
+            break;
+
+        case "show device":
+            $j = json_encode(getDeviceSettings($vals["device"]), JSON_PRETTY_PRINT);
+            echo $j;
+            break;
+
+        case "show devices":
+            $j = json_encode(getDevicesArray(), JSON_PRETTY_PRINT);
+            echo $j;
+            break;
+
+        case "show config-rules":
+            $j = json_encode(getSettingsValue(SETTING_CATEGORY_CONFIGMGMT,"rules"), JSON_PRETTY_PRINT);
+            echo $j;
+            break;
+
+        case "show snmp-profiles":
+            $j = json_encode(getSettingsArray(SETTING_CATEGORY_SNMP), JSON_PRETTY_PRINT);
+            echo $j;
+            break;
+
+        case "show settings":
+            $j = json_encode(getSettingsArray(), JSON_PRETTY_PRINT);
+            echo $j;
+            break;
+
+        case "show app-users":
+            $j = json_encode(getUsers(), JSON_PRETTY_PRINT);
+            echo $j;
+            break;
+
 
         default:
             echo "No logic added for command '$path'\n";
@@ -318,109 +480,75 @@ function consolePrint($text,$wrapPrefixString) {
 
 function firstRunConfig() {
     //initialize settings and unique values for this instance
-    global $gFileSettings, $gFileUsers, $gFileDevices;
 
-    if(!file_exists($gFileSettings)) {
+    if(empty(getSettingsArray(SETTING_CATEGORY_SESSION))) {
         echo "First Run Config: Writing Default Configuration Settings\n";
-        $s = '{
-    "'.SETTING_CATEGORY_SESSION.'":{
-        "login_max_failed": 5,
-        "login_lockout_time": 300,
-        "session_length_default": 3600,
-        "session_length_remember": 5184000
-    },
-    "'.SETTING_CATEGORY_MAIL.'":{
-        "host": "localhost",
-        "from": "NMS-Notifications@company.com",
-        "username": "authuser",
-        "password": "encrypted-pass",
-        "smtpauth": true,
-        "security": "tls/ssl",
-        "port": 587
-    },
-    "'.SETTING_CATEGORY_TASKS.'":{
-        "Ping": { "Enabled": true, "Interval": 300, "Description": "Pings all devices that have this collector enabled. If ping fails a traceroute will be performed to see if there was a network interruption." },
-        "Traceroute": { "Enabled": true, "Interval": 86400, "Description": "Performs a typical traceroute and fails over to an intelligent tcp traceroute if the standard method fails." },
-        "SNMP System": { "Enabled": true, "Interval": 86400, "Description": "Collects basic SYSTEM info via SNMP." },
-        "SNMP HW": { "Enabled": true, "Interval": 900, "Description": "Collects basic Hardware info via SNMP." },
-        "SNMP Network": { "Enabled": true, "Interval": 300, "Description": "Collects Network interfaces and throughput stats via SNMP." },
-        "SNMP Routing": { "Enabled": true, "Interval": 3600, "Description": "Collects the Routing table via SNMP." },
-        "SNMP Custom": { "Enabled": true, "Interval": 3600, "Description": "Collects vendor specific SNMP information that\'s defined in the snmpmap file located in the conf directory." },
-        "Configuration": { "Enabled": true, "Interval": 86400, "Description": "Runs custom scripts to collect vendor specific configuration info." }
-    },
-    "'.SETTING_CATEGORY_RETENTION.'": {
-        "Data History": 365,
-        "Change History": 365,
-        "Alert History": 365
-    },
-    "'.SETTING_CATEGORY_PROFILES.'": {
-        "Description": "List of remote Username/Password combos to get into the system. Elevated is the 2nd level password which is called in certain scripts. (ex. Cisco Enable"
-    },
-    "'.SETTING_CATEGORY_SNMP.'": {
-        "public": { "version":"2c", "string":"public", "username":"","password":"" }
-    },
-    "'.SETTING_CATEGORY_CONFIGMGMT.'":{
-        "Description": "Settings for connecting to devices to collect its configuration.",
-        "rules":["vendor contains \"check point\" or vendor contains \"checkpoint\" run checkpoint.php",
-            "vendor contains \"palo alto\" or vendor contains \"paloalto\" run paloalto.php"]
-    },
-    "'.SETTING_CATEGORY_ALERTS.'":{
-        "Description": "Alert settings, only email alerts for now",
-        "Email": "send-all-alerts-to-here@company.com",
-        "Alert Site Contacts": "yes/no, this will email the contact configured for the site where the device is located",
-        "Ping":{
-            "Enabled": true,
-            "Threshold": "5, trigger an alert after this many ping fails."
-        }
-    },
-    
-    "'.SETTING_CATEGORY_SITES.'":"",
-    "'.SETTING_CATEGORY_REGIONS.'":"",
-    "'.SETTING_CATEGORY_CONTACTS.'":""
-    
-}';
+        writeSettingsValue(SETTING_CATEGORY_SESSION,"login_max_failed",5);
+        writeSettingsValue(SETTING_CATEGORY_SESSION,"login_lockout_time",300);
+        writeSettingsValue(SETTING_CATEGORY_SESSION,"session_length_default",3600);
+        writeSettingsValue(SETTING_CATEGORY_SESSION,"session_length_remember",5184000);
 
-        file_put_contents($gFileSettings,$s);
+        writeSettingsValue(SETTING_CATEGORY_MAIL,"host","localhost");
+        writeSettingsValue(SETTING_CATEGORY_MAIL,"from","");
+        writeSettingsValue(SETTING_CATEGORY_MAIL,"username","");
+        writeSettingsValue(SETTING_CATEGORY_MAIL,"password","");
+        writeSettingsValue(SETTING_CATEGORY_MAIL,"smtpauth",true);
+        writeSettingsValue(SETTING_CATEGORY_MAIL,"security","tls/ssl");
+        writeSettingsValue(SETTING_CATEGORY_MAIL,"port",587);
 
+        writeSettingsValue(SETTING_CATEGORY_TASKS,"ping","pull from cronjobs");
+        //"Ping": { "Enabled": true, "Interval": 300, "Description": "Pings all devices that have this collector enabled. If ping fails a traceroute will be performed to see if there was a network interruption." },
+        //"Traceroute": { "Enabled": true, "Interval": 86400, "Description": "Performs a typical traceroute and fails over to an intelligent tcp traceroute if the standard method fails." },
+        //"SNMP System": { "Enabled": true, "Interval": 86400, "Description": "Collects basic SYSTEM info via SNMP." },
+        //"SNMP HW": { "Enabled": true, "Interval": 900, "Description": "Collects basic Hardware info via SNMP." },
+        //"SNMP Network": { "Enabled": true, "Interval": 300, "Description": "Collects Network interfaces and throughput stats via SNMP." },
+        //"SNMP Routing": { "Enabled": true, "Interval": 3600, "Description": "Collects the Routing table via SNMP." },
+        //"SNMP Custom": { "Enabled": true, "Interval": 3600, "Description": "Collects vendor specific SNMP information that\'s defined in the snmpmap file located in the conf directory." },
+        //"Configuration": { "Enabled": true, "Interval": 86400, "Description": "Runs custom scripts to collect vendor specific configuration info." }
+
+        writeSettingsValue(SETTING_CATEGORY_RETENTION,"data_history",365);
+        writeSettingsValue(SETTING_CATEGORY_RETENTION,"change_history",365);
+        writeSettingsValue(SETTING_CATEGORY_RETENTION,"alert_history",365);
+
+        writeSettingsValue(SETTING_CATEGORY_PROFILES,"description","List of remote Username/Password combos to get into the system. password2 is the 2nd level password which is called in certain scripts. (ex. Cisco Enable)");
+
+        writeSettingsValue(SETTING_CATEGORY_SNMP,"public",array("version"=>"2c","string"=>"public","username"=>"","password"=>""));
+
+        writeSettingsValue(SETTING_CATEGORY_CONFIGMGMT,"description","Settings for connecting to devices to collect its configuration.");
+        writeSettingsValue(SETTING_CATEGORY_CONFIGMGMT,"rules",
+            ['vendor contains "check point" or vendor contains checkpoint run checkpoint.php',
+             'vendor contains "palo alto" or vendor contains paloalto run paloalto.php']);
+
+        writeSettingsValue(SETTING_CATEGORY_ALERTS,"description","Alert settings and rules");
+        writeSettingsValue(SETTING_CATEGORY_ALERTS,"email","send-all-alerts-here@company.com");
+        writeSettingsValue(SETTING_CATEGORY_ALERTS,"rules",["array of rules"]);
+
+        writeSettingsValue(SETTING_CATEGORY_REGIONS,"Americas",array("notes"=>""));
+        writeSettingsValue(SETTING_CATEGORY_REGIONS,"EMEA",array("notes"=>""));
+        writeSettingsValue(SETTING_CATEGORY_REGIONS,"APAC",array("notes"=>""));
+        writeSettingsValue(SETTING_CATEGORY_SITES,"Headquarters",array("address"=>"","site-id"=>"","notes"=>""));
+        writeSettingsValue(SETTING_CATEGORY_CONTACTS,"Default Admin",array("name"=>"","email"=>"","notes"=>""));
+
+    } else {
+        echo "Settings are already initialized\n";
     }
 
-    if(!file_exists($gFileUsers)) {
+    if(empty(getUsers())) {
         echo "First Run Config: Adding Default User\n";
-        $u["admin"]["password"] = hashString("admin"); //default password
-        $u["admin"]["api_key"] = strtoupper(randomToken()); //default api key, can be used as a password for automated tasks
-        $u["admin"]["name"] = "Default Admin";
-        $u["admin"]["auth_type"] = "app";
-        $u["admin"]["role"] = "admin";
-        $u["admin"]["email"] = "";
-        file_put_contents($gFileUsers,json_encode($u));
+        writeUser("admin",array("password"=>hashString("admin"), "api_key"=>strtoupper(randomToken()),
+            "name"=>"Default Admin", "auth_type"=>"app", "role"=>"admin", "email"=>""));
+    } else {
+        echo "Users are already added\n";
     }
 
-    if (!file_exists($gFileDevices)) {
+    if (empty(getDevicesArray())) {
+        //$tmpl = TEMPLATE_DEVICE;
+        echo "Created the default device 'localhost'";
         writeDeviceSettings("localhost",array("name"=>"NeoSentry NMS", "type"=>"Server","collectors"=>array("ping"=>[true,""])));
-
-        $s = '{
-    "localhost": {
-        "added": "'.date(DATE_ATOM).'",
-        "site": "",
-        "region": "",
-        "ip": "localhost",
-        "name": "NeoSentry NMS",
-        "type": "Server",
-        "vendor": "",
-        "model": "",
-        "collectors": {
-            "ping": [true,""],
-            "snmp": [false,"snmp-profile-name"],
-            "configuration":[false,"account-profile-name"],
-            "services": [false,"22,80"],
-            "netflow":[false,"netflow-settings"]
-        }
-    }
-    
-}';
-        //file_put_contents($gFileDevices,$s);
-
+    } else {
+        echo "Devices are already added\n";
     }
 
+    echo "Done with first run config\n";
 
 }

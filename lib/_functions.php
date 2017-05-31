@@ -31,6 +31,13 @@ const ACTION_SNMP = 'snmp';
 const ACTION_CONFIGURATION = 'configuration';
 const ACTION_CONFIGMGMT = ACTION_CONFIGURATION;
 
+const TEMPLATE_DEVICE = array("added"=>"","site"=>"","region"=>"","ip"=>"","name"=>"","type"=>"","vendor"=>"","model"=>"",
+    "collectors"=>array("ping"=>[true,""],"snmp"=>[false,""],"configuration"=>[false,""]));
+    //add services:[], netflow:[]
+
+
+
+
 
 // Global File and Folder variables
 $gFolderData = realpath(dirname(__FILE__)."/../") . DIRECTORY_SEPARATOR . "data";
@@ -294,10 +301,15 @@ function writeToDocument($docName, $section, $arrValues) {
     //write and return
     return file_put_contents($gFolderConfigs . "/$docName.json", json_encode($content));
 }
-function deleteFromDocument($docName, $section) {
+function deleteFromDocument($docName, $section, $subName = '') {
     global $gFolderConfigs;
     $content = getDocument($docName);
-    unset($content[$section]);
+    if ($subName = '') {
+        unset($content[$section]);
+    } else {
+        unset($content[$section][$subName]);
+    }
+
     return file_put_contents($gFolderConfigs . "/$docName.json", json_encode($content));
 }
 
@@ -312,19 +324,22 @@ function getDeviceSettings($device){
 }
 function writeDeviceSettings($device, $arrSettings){
     //set up the template
-    $tmpl = json_decode('{ "added":"'.date(DATE_ATOM).'",""site": "","region": "", 
-        "ip": "'.$device.'", "name": "", "type": "Server", "vendor": "", "model": "", 
-        "collectors": {"ping": [true,""], "snmp": [false,""], "configuration":[false,""], 
-            "services": [false,""], "netflow":[false,""]} }');
+    $tmpl = TEMPLATE_DEVICE;
+    $tmpl["added"] = date(DATE_ATOM);
+    $tmpl["ip"] = $device;
     $dev = array_merge($arrSettings, $tmpl);
 
     return writeToDocument('devices', $device, $dev);
+}
+function deleteDevice($device){
+    return deleteFromDocument('devices', $device);
 }
 
 // FUNCTIONS FOR SETTINGS //
 
 function getSettingsArray($section = "") {
-    return getDocument('settings', $section);
+    $s = getDocument('settings', $section);
+    return (is_array($s) ? $s : []);
 }
 function getSettingsValue($section, $settingName, $defaultReturnValue = "") {
     $arrSettings = getDocument('settings', $section);
@@ -336,14 +351,25 @@ function writeSettingsValue($section, $settingName, $settingValue) {
     $arrSettings[$settingName] = $settingValue;
     return writeToDocument('settings', $section, $arrSettings);
 }
+function deleteSettingsValue($section, $settingName) {
+    return deleteFromDocument('settings', $section, $settingName);
+}
 
 // FUNCTIONS FOR USERS //
 
 function getUser($username) {
     return getDocument('auth', $username);
 }
+function getUsers() {
+    return getDocument('auth');
+}
 function writeUser($username, $arrValues) {
+    //add the api key and save
+    $arrValues["api_key"] = strtoupper(randomToken());
     return writeToDocument('auth',$username, $arrValues);
+}
+function deleteUser($username) {
+    return deleteFromDocument('auth',$username);;
 }
 
 // FUNCTIONS FOR LOGGING INFORMATION //
