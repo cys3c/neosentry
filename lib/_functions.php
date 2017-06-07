@@ -364,8 +364,17 @@ function getUsers() {
     return getDocument('auth');
 }
 function writeUser($username, $arrValues) {
+    //exit if the user exists
+    if (!empty(getUser($username))) return false;
+
     //add the api key and save
+    $arrValues['created'] = date(DATE_ATOM);
     $arrValues["api_key"] = strtoupper(randomToken());
+    return writeToDocument('auth',$username, $arrValues);
+}
+function updateUser($username, $arrValues) {
+    //exit if the user doesn't exists
+    if (empty(getUser($username))) return false;
     return writeToDocument('auth',$username, $arrValues);
 }
 function deleteUser($username) {

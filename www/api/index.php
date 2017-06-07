@@ -47,8 +47,9 @@ switch ($method) {
       $retJson = '{"Server Stats":{"serverHD":['.$diskUsed[0].',"'.$diskUsed[1].'"],"serverRAM":['.$ramUsed[0].',"'.$ramUsed[1].'"],"serverCPU":['.$cpuUsed[0].',"'.$cpuUsed[1].'"]}}';
 
     } elseif ($table == "devices") {
-      if ($key == '') {   //get all devices
-        $devices = getDevicesArray();
+      if ($key == '') {
+        //get all devices
+        $devices = getDevicesArray(); $retArr = [];
         foreach ($devices as $dev=>$devData) {
           $devices[$dev]["ping"] = getDeviceData($dev,ACTION_PING);
           if ( !isset($devices[$dev]["ip"]) ) $devices[$dev]["ip"] = $dev;
@@ -57,11 +58,30 @@ switch ($method) {
         $retJson = json_encode($retArr);
         //$ret["columns"] =
 
-      } else {    //only get the one device
-        $data = getDeviceSettings($key);
+      } else {
+        //get the one device
+        $dev["Settings"] = getDeviceSettings($key);
+        $dev["Ping"] = getDeviceData($key, ACTION_PING);
+        $dev["Traceroute"] = getDeviceData($key, ACTION_TRACEROUTE);
+        $dev["Configuration"] = getDeviceData($key, ACTION_CONFIGURATION);
+        $dev["SNMP"] = getDeviceData($key, ACTION_SNMP);
+
+        $retJson = json_encode($dev);
+
       }
 
+    } elseif ($table == "settings") {
+        $ret = getSettingsArray();
+        foreach ($ret[SETTING_CATEGORY_PROFILES] as $k=>$v) {
+            if (is_array($v)) $ret[SETTING_CATEGORY_PROFILES][$k]['password'] = '';
+        }
+        $ret["Users"] = getUsers();
+        foreach ($ret["Users"] as $k=>$user) {
+            unset($ret['Users'][$k]["api_key"]);
+            unset($ret['Users'][$k]['password']);
+        }
 
+        $retJson = json_encode($ret);
 
     } else { //get the table requested
 

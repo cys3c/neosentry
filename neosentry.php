@@ -9,6 +9,7 @@ chdir(dirname(__FILE__));
 include_once "lib/_functions.php";
 include_once "lib/_db_flatfiles.php";
 
+const NO = -1;
 //var_dump($argv);
 //echo "PHP_SAPI = ".PHP_SAPI;
 
@@ -17,7 +18,7 @@ $argMap = [];
 addArg("collect", true, 10, "", "Runs the collector against a device");
 
 //add account-profile <profile_name> username <username> password <password> password2 <2nd_password>
-addArg("add", false, false, "", "Add an element to the database");
+addArg("add", false, null, "", "Add an element to the database");
 addArg("add account-profile", true, 1, "", "<profile_name> Add an account profile used to remotely log into a device to gather configs");
 addArg("add account-profile username", true, 1, "", "<account_username>");
 addArg("add account-profile password", true, 1, "", "<account_password>");
@@ -51,14 +52,14 @@ addArg("add snmp-profile string", true, 1, "", "<snmp_community_string> used to 
 addArg("add snmp-profile username", false, 1, "", "[username] used in version 3");
 addArg("add snmp-profile password", false, 1, "", "[password] used in version 3");
 
-addArg("delete", true, 0, "", "Deletes an element from the database");
+addArg("delete", true, null, "", "Deletes an element from the database");
 addArg("delete account-profile", true, 1, "", "<profile_name> Deletes an Account Profile from the database");
 addArg("delete app-user", true, 1, "", "<user_id> Deletes a user so they can't log in");
 addArg("delete config-rule", true, 1, "", "<rule_number> Deletes configuration management rule");
 addArg("delete device", true, 1, "", "<ip_or_hostname> Deletes a Device from the database");
 addArg("delete snmp-profile", true, 1, "", "<profile_name> Deletes an SNMP Profile from the database");
 
-addArg("show", true, 0, "", "Show various configuration options and stored data");
+addArg("show", true, null, "", "Show various configuration options and stored data");
 addArg("show account-profiles", true, 0, "", "Show all account profiles");
 addArg("show device", true, 1, "", "<ip_or_hostname> Show details of a Device");
 addArg("show devices", true, 0, "", "Show all devices");
@@ -67,7 +68,7 @@ addArg("show snmp-profiles", true, 0, "", "Show all SNMP Profiles");
 addArg("show settings", true, 0, "", "Show all Settings");
 addArg("show app-users", true, 0, "", "Show all App Users");
 
-addArg("set", true, 0, "", "Set/Update a configuration setting");
+addArg("set", true, null, "", "Set/Update a configuration setting");
 addArg("set device", true, 0, "", "<device_name> Set/Update a device configuration setting");
 
 addArg("scan", true, 1, "", "<ip_list> Scans an IP or range of IPs for active devices and outputs the commands to add the device. Put the list of IPs in quotes separated by a space, tab, comma, or semi-colon");
@@ -321,6 +322,10 @@ function processArgs(&$argv) {
                 $vals[$key] = $val;
 
                 //the path is complete at the first command that takes input
+                $pathComplete = true;
+            } elseif (!is_null($argMap[$path]["input"])) {
+                //no input required, set the variable to true
+                $vals[$key] = true;
                 $pathComplete = true;
             }
         } else {

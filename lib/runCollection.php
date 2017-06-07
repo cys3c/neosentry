@@ -27,7 +27,7 @@ $o = getopt("a:d:",["snmp-type:", "config-script:","config-profile:"]); // 1 : i
 $action = array_key_exists("a",$o) ? trim($o["a"]) : "";
 $device = array_key_exists("d",$o) ? trim($o["d"]) : "";
 if ($action=="") { echo "Action is required. \n$help"; exit; }
-if ($device=="") { echo "Device is required. \n$help"; exit; }
+//if ($device=="") { echo "Device is required. \n$help"; exit; }
 //clean up extra characters that may be used to separate devices
 $device = str_replace(["\t","\r","\n","|",";",","]," ",$device);
 while(strpos($device,"  ") > 0) { $device = str_replace("  "," ",$device); }
