@@ -42,13 +42,14 @@ addArg("add device site", false, 1, "", "[site_name] - Site identifier, for exam
 addArg("add device type", false, 1, "", "[device_type] - Server, Router, Firewall...");
 addArg("add device vendor", false, 1, "", "[device_vendor] - Cisco, Check Point, Palo Alto...");
 addArg("add device model", false, 1, "", "[device_model] - 3690, PA-5060, etc...");
+addArg("add device serial", false, 1, "", "[serial_number] - Serail # of the device");
 addArg("add device collect-ping", false, 1, "", "[true/false] Collect ping data");
 addArg("add device collect-snmp", false, 1, "", "[snmp_profile] - collect snmp data, include snmp profile name");
 addArg("add device collect-config", false, 1, "", "[account_profile] - collect config data, use account profile for username/pass");
 
 addArg("add snmp-profile", true, 1, "", "<profile_name> Add SNMP connection info");
 addArg("add snmp-profile version", true, 1, "", "<snmp_version> 1, 2c, 3...");
-addArg("add snmp-profile string", true, 1, "", "<snmp_community_string> used to connect");
+addArg("add snmp-profile community", true, 1, "", "<snmp_community> community string used to connect");
 addArg("add snmp-profile username", false, 1, "", "[username] used in version 3");
 addArg("add snmp-profile password", false, 1, "", "[password] used in version 3");
 
@@ -70,6 +71,15 @@ addArg("show app-users", true, 0, "", "Show all App Users");
 
 addArg("set", true, null, "", "Set/Update a configuration setting");
 addArg("set device", true, 0, "", "<device_name> Set/Update a device configuration setting");
+addArg("set device name", false, 1, "", "[friendly_name] - The devices hostname or a friendly name");
+addArg("set device region", false, 1, "", "[region_name] - ex: Americas, EMEA, APAC...");
+addArg("set device site", false, 1, "", "[site_name] - Site identifier, for example the address");
+addArg("set device type", false, 1, "", "[device_type] - Server, Router, Firewall...");
+addArg("set device vendor", false, 1, "", "[device_vendor] - Cisco, Check Point, Palo Alto...");
+addArg("set device model", false, 1, "", "[device_model] - 3690, PA-5060, etc...");
+addArg("set device collect-ping", false, 1, "", "[true/false] Collect ping data");
+addArg("set device collect-snmp", false, 1, "", "[snmp_profile] - collect snmp data, include snmp profile name");
+addArg("set device collect-config", false, 1, "", "[account_profile] - collect config data, use account profile for username/pass");
 
 addArg("scan", true, 1, "", "<ip_list> Scans an IP or range of IPs for active devices and outputs the commands to add the device. Put the list of IPs in quotes separated by a space, tab, comma, or semi-colon");
 
@@ -169,7 +179,7 @@ if (PHP_SAPI == "cli" && isset($argv)) {
                 echo "Error: SNMP profile with the name '$name' already exists\n";
             } else {
                 $ret = writeSettingsValue(SETTING_CATEGORY_SNMP,$name,$vals);
-                echo ($ret ? "Successfully created SNMP profile '$test'\n" : "Error: Could not save SNMP profile...\n");
+                echo ($ret ? "Successfully created SNMP profile '$name'\n" : "Error: Could not save SNMP profile...\n");
             }
             break;
 
@@ -183,7 +193,7 @@ if (PHP_SAPI == "cli" && isset($argv)) {
 
 /* DELETE */
 
-        case "delete account-profiles":
+        case "delete account-profile":
             $name = array_shift($vals);
             $read = readline("Are you sure you want to delete Account Profile '$name'? [N/y] ");
             if (strtolower($read)=="y") {

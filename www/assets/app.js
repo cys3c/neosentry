@@ -27,17 +27,12 @@ app.config(function($routeProvider, $locationProvider) {
     $routeProvider
         .when("/", {
             templateUrl : "dashboard.html",
-			controller : "dashboardCtrl"
+            controller : "dashboardCtrl"
         })
         .when("/dashboard", {
             templateUrl : "dashboard.html",
             controller : "dashboardCtrl",
             activeTab: 'dashboard'
-        })
-        .when("/settings", {
-            templateUrl : "settings.html",
-            controller : "settingsCtrl",
-            activeTab: 'settings'
         })
         .when("/devices", {
             templateUrl : "device-list.html",
@@ -45,7 +40,7 @@ app.config(function($routeProvider, $locationProvider) {
             activeTab: 'devices'
         })
         .when("/devices/:deviceId", {
-            templateUrl : "device-detail.html",
+            templateUrl : "device-details.html",
             controller : "devicesDetailCtrl",
             activeTab: 'devices'
         })
@@ -54,8 +49,12 @@ app.config(function($routeProvider, $locationProvider) {
             controller : "logsCtrl",
             activeTab: 'logs'
         })
-
-        .otherwise("/");
+        .when("/settings", {
+            templateUrl : "settings.html",
+            controller : "settingsCtrl",
+            activeTab: 'settings'
+        })
+      .otherwise("/");
 
 
     // use the HTML5 History API
@@ -85,57 +84,62 @@ app.controller("mainCtrl", function ($scope, $http, gHandler) {
             console.log("Error getting Main Controller data: " + JSON.stringify(response));
         });
 });
+
+/* DASHBOARD */
 app.controller("dashboardCtrl", function ($scope, $http, $interval, gHandler) {
-    $scope.$parent.activeTab = 'dashboard';
+	$scope.$parent.activeTab = 'dashboard';
 
 	/* Get the Data for the dashboard */
 	$scope.getData = function() {
-        $http.get("/api/dashboard")
-            .then(function (response) {
-                $scope.data = response.data;
-                $scope.updated = Date.now();
-                dashboardRedraw(response.data);
-            }, function errorCallback(response) {
-                console.log("Error getting dashboard data: " + JSON.stringify(response));
-            });
-    };
-    $scope.getData();
+		$http.get("/api/dashboard")
+			.then(function (response) {
+				$scope.data = response.data;
+				$scope.updated = Date.now();
+				dashboardRedraw(response.data);
+			}, function errorCallback(response) {
+				console.log("Error getting dashboard data: " + JSON.stringify(response));
+			});
+	};
+	$scope.getData();
 
 	//timer to collect the data
-    var collectInterval = $interval(function(){$scope.getData();}, 5000); //delay in milliseconds
-    $scope.stopCollection = function() { if (angular.isDefined(collectInterval)) { $interval.cancel(collectInterval);collectInterval = undefined;}};
-    $scope.$on('$destroy', function() {$scope.stopCollection();});
+	var collectInterval = $interval(function(){$scope.getData();}, 5000); //delay in milliseconds
+	$scope.stopCollection = function() { if (angular.isDefined(collectInterval)) { $interval.cancel(collectInterval);collectInterval = undefined;}};
+	$scope.$on('$destroy', function() {$scope.stopCollection();});
 
 
 });
 
-app.controller("settingsCtrl", function ($scope, $http, $interval, gHandler) {
+/* SETTINGS */
+app.controller("settingsCtrl", function ($scope, $http, $interval, $anchorScroll, gHandler) {
     $scope.$parent.activeTab = 'settings';
+    $anchorScroll();
 });
 
+/* DEVICE LIST */
 app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
 	$scope.$parent.activeTab = 'devices';
 
-    /* Get the Data  */
-    $scope.getData = function() {
-        $http.get("/api/devices")
-            .then(function (response) {
-                $scope.$parent.deviceData = response.data; /* put it in the parent class for better response and global search functionality */
-                $scope.updated = Date.now();
+	/* Get the Data  */
+	$scope.getData = function() {
+		$http.get("/api/devices")
+			.then(function (response) {
+				$scope.$parent.deviceData = response.data; /* put it in the parent class for better response and global search functionality */
+				$scope.updated = Date.now();
 
-            }, function errorCallback(response) {
-                console.log("Error getting device list data: " + JSON.stringify(response));
-            });
-    };
-    $scope.getData();
+			}, function errorCallback(response) {
+				console.log("Error getting device list data: " + JSON.stringify(response));
+			});
+	};
+	$scope.getData();
 
-    $scope.sortBy = function(keyname){
-        $scope.reverse = ($scope.sortKey === keyname ) ? !$scope.reverse : false; //if true make it false and vice versa
-        $scope.sortKey = keyname;   //set the sortKey to the param passed
-    };
-    $scope.sortBy('name');
+	$scope.sortBy = function(keyname){
+			$scope.reverse = ($scope.sortKey === keyname ) ? !$scope.reverse : false; //if true make it false and vice versa
+			$scope.sortKey = keyname;   //set the sortKey to the param passed
+	};
+	$scope.sortBy('name');
 
-    //timer to collect the data
+	//timer to collect the data
 	/*
     var collectInterval = $interval(function(){$scope.getData();}, 5000); //delay in milliseconds
     $scope.stopCollection = function() { if (angular.isDefined(collectInterval)) { $interval.cancel(collectInterval);collectInterval = undefined;}};
@@ -147,39 +151,74 @@ app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
 	$scope.devLoading = false;
 	$scope.postStatus = "";
 	$scope.postStatusMsg = "";
-    $scope.postDevice = function() {
-        $scope.devLoading = true;
-        $http.post("/api/devices/" + $scope.device.ip, $scope.device)
-            .then(function (response) {
-                $scope.devLoading = false;
-                $scope.postStatusMsg = response.data;
-                /* put it in the parent class for better response and global search functionality */
-                $scope.postStatus = response.status === 200 ? "Success" : "Error " + response.status;
+	$scope.postDevice = function() {
+		$scope.devLoading = true;
+		$http.post("/api/devices/" + $scope.device.ip, $scope.device)
+			.then(function (response) {
+				$scope.devLoading = false;
+				$scope.postStatusMsg = response.data;
+				/* put it in the parent class for better response and global search functionality */
+				$scope.postStatus = response.status === 200 ? "Success" : "Error " + response.status;
 
-            }, function errorCallback(response) {
-                console.log("Error posting data: " + JSON.stringify(response));
-            });
+			}, function errorCallback(response) {
+				console.log("Error posting data: " + JSON.stringify(response));
+			});
 
-    };
-    $scope.devCheck = function() {
-        var tmp = {};
-        tmp = $scope.$parent.deviceData.find(function(dev){return dev.ip===$scope.device.ip});
-        if (tmp) {
-            $scope.device = JSON.parse(JSON.stringify(tmp));
-            $scope.devMsg = "Loaded existing device '" + tmp.ip + "'";
-        } else {
-            $scope.devMsg = "";
-        }
-    };
+	};
+
+	$scope.devCheck = function() {
+			var tmp = {};
+			tmp = $scope.$parent.deviceData.find(function(dev){return dev.ip===$scope.device.ip});
+			if (tmp) {
+					$scope.device = JSON.parse(JSON.stringify(tmp));
+					$scope.devMsg = "Loaded existing device '" + tmp.ip + "'";
+			} else {
+					$scope.devMsg = "";
+			}
+	};
 
 });
-app.controller("devicesDetailCtrl", function ($scope, $http, $interval, gHandler) {
-    $scope.$parent.activeTab = 'devices';
+
+/* DEVICE DETAIL */
+app.controller("devicesDetailCtrl", function ($scope, $routeParams, $http, $interval, $anchorScroll, gHandler) {
+	$scope.$parent.activeTab = 'devices';
+	$scope.params = $routeParams;
+	$scope.devInfo = $scope.$parent.deviceData.find(function(dev){return dev.ip===$scope.params.deviceId});
+
+	/* Get the Data  */
+	$scope.getData = function() {
+		$http.get("/api/devices?key="+$scope.params.deviceId)
+			.then(function (response) {
+				$scope.devInfo = response.data.settings; //.settings, .data
+				$scope.devData = response.data.data;
+				$scope.updated = Date.now();
+
+			}, function errorCallback(response) {
+				console.log("Error getting device list data: " + JSON.stringify(response));
+			});
+	};
+	$scope.getData();
+
+	$scope.getType = function(t) {return typeof t};
+
+	//timer to collect the data
+	//var collectInterval = $interval(function(){$scope.getData();}, 1000); //5s, delay in milliseconds
+	//$scope.stopCollection = function() { if (angular.isDefined(collectInterval)) { $interval.cancel(collectInterval);collectInterval = undefined;}};
+	//$scope.$on('$destroy', function() {$scope.stopCollection();});
+
+
+
+
+	$anchorScroll();
 });
 
+/* LOGS AND ALERTS */
 app.controller("logsCtrl", function ($scope, $http, $interval, gHandler) {
     $scope.$parent.activeTab = 'logs';
 });
+
+/* PROFILE */
+
 
 
 

@@ -11,12 +11,13 @@ and open the template in the editor.
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>
-        Devices
+        {{devInfo.ip}}
         <small>Last Updated {{updated | date:"h:mm:ss a"}}</small>
     </h1>
     <ol class="breadcrumb">
         <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Device List</li>
+        <li><a href="/devices">Devices</a></li>
+        <li class="active">{{params.deviceId}}</li>
     </ol>
 </section>
 
@@ -26,19 +27,12 @@ and open the template in the editor.
     <div class="row">
         <div class="col-xs-12">
             <div class="box box-info">
-                <div class="box-header">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Overview <small></small></h3>
 
-                    <!-- Search Box -->
-                    <div class="input-group input-group-sm pull-left" style="width: 250px;">
-                        <input ng-model="devSearch" type="text" name="table_search" class="form-control pull-left" placeholder="Search" >
-                        <div class="input-group-btn">
-                            <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                        </div>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                     </div>
-
-                    <!-- Action Buttons -->
-                    <button id="addDevice" type="submit" class="btn btn-success btn-sm pull-right"><i class="fa fa-plus"></i> Add Device</button>
-
                 </div>
 
                 <!-- /.box-header -->
@@ -46,62 +40,145 @@ and open the template in the editor.
                     <table class="table table-hover">
                         <thead>
                         <tr>
-                            <th width="40"><a href="" ng-click="sort('ping')">Status&nbsp;<i ng-show="sortKey=='ping'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th><a href="" ng-click="sort('region')">Region&nbsp;<i ng-show="sortKey=='region'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th><a href="" ng-click="sort('site')">Site&nbsp;<i ng-show="sortKey=='site'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th><a href="" ng-click="sort('ip')">IP / Host&nbsp;<i ng-show="sortKey=='ip'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th><a href="" ng-click="sort('name')">Name&nbsp;<i ng-show="sortKey=='name'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th><a href="" ng-click="sort('type')">Type&nbsp;<i ng-show="sortKey=='type'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th><a href="" ng-click="sort('vendor')">Vendor&nbsp;<i ng-show="sortKey=='vendor'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th><a href="" ng-click="sort('model')">Model&nbsp;<i ng-show="sortKey=='model'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th><a href="" ng-click="sort('collectors')">Collectors&nbsp;<i ng-show="sortKey=='collectors'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                            <th width="40">Action</th>
-
+                            <th width="40">Status</th>
+                            <th>Region</th>
+                            <th>Site</th>
+                            <th>IP / Host</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Vendor</th>
+                            <th>Model</th>
+                            <th>Serial</th>
+                            <th>Collectors</th>
+                            <!--<th width="40">Action</th>-->
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="(key, item) in devData">
-                            <td><span class="label" ng-class="item.ping.status != 'up' ? 'label-danger' : (item.ping.ms < 500 ? 'label-success' : 'label-warning')" data-toggle="tooltip" title="{{ 'last updated ' + (item.ping.last_updated | date:'medium')}}">{{(item.ping.status=='up') ? item.ping.ms + ' ms' : item.ping.status}}</span></td>
-                            <td>{{item.region}}</td>
-                            <td>{{item.site}}</td>
-                            <td><a href="/devices/{{key}}">{{key}}</a></td>
-                            <td>{{item.name}}</td>
-                            <td>{{item.type}}</td>
-                            <td>{{item.vendor}}</td>
-                            <td>{{item.model}}</td>
-                            <td>{{item.collectors.ping}}</td>
-                            <td><a href="" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-pencil"></i> Edit</a></td>
+                        <tr>
+                            <td><span class="label"
+                                      ng-class="devData.Ping.status != 'up' ? (devData.Ping.status == null ? 'label-default' : 'label-danger') : (devData.Ping.ms < 500 ? 'label-success' : 'label-warning')"
+                                      data-toggle="tooltip"
+                                      title="{{devData.Ping.last_updated == null ? 'ping not yet collected' : 'last updated ' + (devData.Ping.last_updated | date:'medium')}}">
+																			{{(devData.Ping.status=='up') ? devData.Ping.ms + ' ms' : (devData.Ping.status == null ? 'na' : devData.Ping.status)}}</span></td>
+                            <td>{{devInfo.region}}</td>
+                            <td>{{devInfo.site}}</td>
+                            <td>{{devInfo.ip}}</a></td>
+                            <td>{{devInfo.name}}</td>
+                            <td>{{devInfo.type}}</td>
+                            <td>{{devInfo.vendor}}</td>
+                            <td>{{devInfo.model}}</td>
+                            <td>{{devInfo.serial}}</td>
+                            <td>
+                                <i class="fa fa-circle-o" ng-class="{'text-muted':!devInfo.collectors.ping[0], 'text-green':devInfo.collectors.ping[0]}" data-toggle="tooltip" title="ping: {{devInfo.collectors.ping[0]?'enabled':'disabled'}}"></i>
+                                <i class="fa fa-heartbeat" ng-class="{'text-muted':!devInfo.collectors.snmp[0], 'text-green':devInfo.collectors.snmp[0]}" data-toggle="tooltip" title="snmp: {{devInfo.collectors.snmp[0]?'enabled with snmp profile \''+devInfo.collectors.snmp[1]+'\'':'disabled'}}"></i>
+                                <i class="fa fa-cog" ng-class="{'text-muted':!devInfo.collectors.configuration[0], 'text-green':devInfo.collectors.configuration[0]}" data-toggle="tooltip" title="config: {{devInfo.collectors.configuration[0]?'enabled with account profile \''+devInfo.collectors.configuration[1]+'\'':'disabled'}}"></i>
 
+                            </td>
+                            <!--<td><a href="" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-pencil"></i> Edit</a></td>-->
                         </tr>
                         </tbody>
 
-                        <!-- For paging
-                        <tfoot>
-                        <td colspan="6">
-                            <div class="pagination pull-right">
-                                <ul>
-                                    <li ng-class="{disabled: currentPage == 0}">
-                                        <a href ng-click="prevPage()">« Prev</a>
-                                    </li>
-                                    <li ng-repeat="n in range(pagedItems.length)"
-                                        ng-class="{active: n == currentPage}"
-                                        ng-click="setPage()">
-                                        <a href ng-bind="n + 1">1</a>
-                                    </li>
-                                    <li ng-class="{disabled: currentPage == pagedItems.length - 1}">
-                                        <a href ng-click="nextPage()">Next »</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                        </tfoot>
-                        -->
-
                     </table>
+
                 </div>
                 <!-- /.box-body -->
+                <!-- /.box-footer -->
+                <div class="box-footer">
+                    <strong>Notes:</strong>
+                    <p>{{devInfo.notes}}</p>
+                </div>
+                <!-- /.box-footer -->
             </div>
             <!-- /.box -->
+        </div>
+    </div>
+
+
+    <!-- Loop through the data and display -->
+    <div class="row" ng-repeat="(key, data) in devData">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{{key}}</h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+
+                <div class="box-body" style="display: block;">
+                    <span ng-if="key=='Ping'">
+                        <p>{{data.last_updated == null ? 'ping not yet collected' : "last updated " + (data.last_updated | date:'medium') + ' from ip ' + data.ip }}</p>
+                        History Graph: {{data.history}}
+                    </span>
+
+                    <span ng-if="key=='Traceroute'">
+                        <p>{{data.last_updated == null ? 'traceroute not yet collected' : 'last updated ' + (data.last_updated | date:'medium')}}</p>
+                         <table class="table table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{data}}</td>
+                                </tr>
+                            </tbody>
+                         </table>
+                    </span>
+
+                    <span ng-if="key=='SNMP'">
+                        <p>{{data.last_updated == null ? 'snmp not yet collected' : 'last updated ' + (data.last_updated | date:'medium')}}</p>
+                        History Graph:
+                    </span>
+
+                    <span ng-if="key=='Configuration'">
+                        <p>{{data.last_updated == null ? 'configuration not yet collected' : 'last updated ' + (data.last_updated | date:'medium')}}</p>
+                        <div class="with-border" ng-repeat="(key, row) in data">
+
+                            <span ng-if="getType(row)=='string' && key != 'last_updated'">
+                                <p><strong>{{key}}:</strong> {{row}}</p>
+                            </span>
+                            <span ng-if="getType(row)=='object'">
+
+                                <h3 class="box-title">{{key}}</h3>
+
+                                <div class="input-group input-group-sm" style="width: 150px;">
+                                  <input type="text" name="table_search" class="form-control pull-left" placeholder="Filter">
+
+                                  <div class="input-group-btn">
+                                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                  </div>
+                                </div>
+
+
+                                <table class="table table-hover table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th ng-repeat="h in Object.keys(row[0])">{{h}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="(n,row) in row">
+                                            <td>{{n}}</td>
+                                            <td ng-repeat="col in row">{{col}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+
+                            </span>
+
+                        </div>
+
+                    </span>
+
+                </div>
+
+            </div>
         </div>
     </div>
 

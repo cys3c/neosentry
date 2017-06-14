@@ -78,41 +78,6 @@ Apply one or more of the following classes to get the desired effect
       <!-- Navbar Right Menu -->
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
-          <!-- Messages: style can be found in dropdown.less-->
-          <li class="dropdown messages-menu">
-            <!-- Menu toggle button -->
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="fa fa-envelope-o"></i>
-              <span class="label label-success">4</span>
-            </a>
-            <ul class="dropdown-menu">
-              <li class="header">You have 4 messages</li>
-              <li>
-                <!-- inner menu: contains the messages -->
-                <ul class="menu">
-                  <li><!-- start message -->
-                    <a href="#">
-                      <div class="pull-left">
-                        <!-- User Image -->
-                        <img src="assets/images/user.jpg" class="img-circle" alt="User Image">
-                      </div>
-                      <!-- Message title and timestamp -->
-                      <h4>
-                        Support Team
-                        <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                      </h4>
-                      <!-- The message -->
-                      <p>Why not buy a new awesome theme?</p>
-                    </a>
-                  </li>
-                  <!-- end message -->
-                </ul>
-                <!-- /.menu -->
-              </li>
-              <li class="footer"><a href="#">See All Messages</a></li>
-            </ul>
-          </li>
-          <!-- /.messages-menu -->
 
           <!-- Notifications Menu -->
           <li class="dropdown notifications-menu">
@@ -122,13 +87,13 @@ Apply one or more of the following classes to get the desired effect
               <span class="label label-warning">10</span>
             </a>
             <ul class="dropdown-menu">
-              <li class="header">You have 10 notifications</li>
+              <li class="header">You have 10 alerts</li>
               <li>
                 <!-- Inner Menu: contains the notifications -->
                 <ul class="menu">
                   <li><!-- start notification -->
                     <a href="#">
-                      <i class="fa fa-users text-aqua"></i> 5 new members joined today
+                      <i class="fa fa-users text-aqua"></i> a new member joined today
                     </a>
                   </li>
                   <!-- end notification -->
@@ -137,42 +102,8 @@ Apply one or more of the following classes to get the desired effect
               <li class="footer"><a href="#">View all</a></li>
             </ul>
           </li>
-          <!-- Tasks Menu -->
-          <li class="dropdown tasks-menu">
-            <!-- Menu Toggle Button -->
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="fa fa-flag-o"></i>
-              <span class="label label-danger">9</span>
-            </a>
-            <ul class="dropdown-menu">
-              <li class="header">You have 9 tasks</li>
-              <li>
-                <!-- Inner menu: contains the tasks -->
-                <ul class="menu">
-                  <li><!-- Task item -->
-                    <a href="#">
-                      <!-- Task title and progress text -->
-                      <h3>
-                        Design some buttons
-                        <small class="pull-right">20%</small>
-                      </h3>
-                      <!-- The progress bar -->
-                      <div class="progress xs">
-                        <!-- Change the css width attribute to simulate progress -->
-                        <div class="progress-bar progress-bar-aqua" style="width: 20%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                          <span class="sr-only">20% Complete</span>
-                        </div>
-                      </div>
-                    </a>
-                  </li>
-                  <!-- end task item -->
-                </ul>
-              </li>
-              <li class="footer">
-                <a href="#">View all tasks</a>
-              </li>
-            </ul>
-          </li>
+
+
 
           <!-- User Account Menu -->
           <li class="dropdown user user-menu">
@@ -211,7 +142,7 @@ Apply one or more of the following classes to get the desired effect
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-left">
-                  <a href="#" class="btn btn-default btn-flat">Profile</a>
+                  <a href="/profile" class="btn btn-default btn-flat">Profile</a>
                 </div>
                 <div class="pull-right">
                     <form action="/login.php" method="post">
@@ -254,26 +185,41 @@ Apply one or more of the following classes to get the desired effect
       
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu">
-        <li class="header">NAVIGATION</li>
+        <li class="header">DATA</li>
         <!-- Optionally, you can add icons to the links -->
         <li ng-class="{active: activeTab == 'dashboard'}"><a href="/dashboard"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
-        <li ng-class="{active: activeTab == 'settings'}"><a href="/settings"><i class="fa fa-sliders"></i> <span>Settings</span></a></li>
         <li ng-class="{active: activeTab == 'devices'}"><a href="/devices"><i class="fa fa-laptop"></i> <span>Devices</span></a></li>
-        <li ng-class="{active: activeTab == 'logs'}"><a href="/logs"><i class="fa fa-book"></i> <span>Logs & Alerts</span></a></li>
-        
-        <!-- SAMPLE
-        <li class="treeview">
-          <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span>
-            <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-          </a>
-          <ul class="treeview-menu">
-            <li><a href="#">Link in level 2</a></li>
-            <li><a href="#">Link in level 2</a></li>
-          </ul>
-        </li>
-        -->
+				<li class="treeview">
+					<a href="#"><i class="fa fa-magnet"></i> <span>Collectors</span>
+						<span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
+					</a>
+					<ul class="treeview-menu">
+						<li ng-class="{active: activeTab == 'col-ping'}"><a href="/collector/ping"><i class="fa fa-circle-o"></i> Ping / Traceroute</a></li>
+						<li ng-class="{active: activeTab == 'col-snmp'}"><a href="/collector/snmp"><i class="fa fa-circle-o"></i> SNMP</a></li>
+						<li ng-class="{active: activeTab == 'col-conf'}"><a href="/collector/configuration"><i class="fa fa-circle-o"></i> Configuration</a></li>
+						<!-- <li><a href="/collector/ports"><i class="fa fa-circle-o"></i> Port Services</a></li>
+						<li><a href="/collector/netflow"><i class="fa fa-circle-o"></i> Netflow</a></li>
+						<li><a href="/collector/vulnerability"><i class="fa fa-circle-o"></i> Vulnerability Scans</a></li> -->
+					</ul>
+				</li>
+				<li ng-class="{active: activeTab == 'logs'}"><a href="/logs"><i class="fa fa-book"></i> <span>Logs & Alerts</span></a></li>
+				<li class="header">ADMINISTRATION</li>
+        <li ng-class="{active: activeTab == 'settings'}"><a href="/settings"><i class="fa fa-sliders"></i> <span>Settings</span></a></li>
+				<li ng-class="{active: activeTab == 'users'}"><a href="/users"><i class="fa fa-users"></i> <span>Users</span></a></li>
+
+          <!-- SAMPLE
+          <li class="treeview">
+            <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span>
+              <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+            </a>
+            <ul class="treeview-menu">
+              <li><a href="#">Link in level 2</a></li>
+              <li><a href="#">Link in level 2</a></li>
+            </ul>
+          </li>
+          -->
       </ul>
       <!-- /.sidebar-menu -->
     </section>

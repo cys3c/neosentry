@@ -2,8 +2,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <h1>
-        Devices
-        <small>Last Updated {{updated | date:"h:mm:ss a"}}</small>
+        Devices <small><a ng-click="getData()"><span data-toggle="tooltip" title="Update Device List" class="fa fa-refresh" ng-class="{'fa-spin':hover}" ng-mouseenter="hover=true" ng-mouseleave="hover=false"></span></a> Last Updated {{updated | date:"h:mm:ss a"}}</small>
       </h1>
       <ol class="breadcrumb">
         <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -26,7 +25,7 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <button id="addDevice" type="submit" class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#modalDevice"><i class="fa fa-plus"></i> Add Device</button>
+                        <!--<button id="addDevice" type="submit" class="btn btn-success btn-sm pull-right" data-toggle="modal" data-target="#modalDevice"><i class="fa fa-plus"></i> Add Device</button>-->
 
                     </div>
 
@@ -43,14 +42,18 @@
                                     <th><a href="" ng-click="sortBy('type')">Type&nbsp;<i ng-show="sortKey==='type'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
                                     <th><a href="" ng-click="sortBy('vendor')">Vendor&nbsp;<i ng-show="sortKey==='vendor'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
                                     <th><a href="" ng-click="sortBy('model')">Model&nbsp;<i ng-show="sortKey==='model'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
+                                    <th><a href="" ng-click="sortBy('serial')">Serial&nbsp;<i ng-show="sortKey==='serial'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
                                     <th><a href="" ng-click="sortBy('collectors')">Collectors&nbsp;<i ng-show="sortKey==='collectors'" class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></i></a></th>
-                                    <th width="40">Action</th>
-
+                                    <!--<th width="40">Action</th>-->
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr ng-repeat="item in $parent.deviceData | orderBy:sortKey:reverse | filter:devSearch">
-                                    <td><span class="label" ng-class="item.ping.status != 'up' ? 'label-danger' : (item.ping.ms < 500 ? 'label-success' : 'label-warning')" data-toggle="tooltip" title="{{ 'last updated ' + (item.ping.last_updated | date:'medium')}}">{{(item.ping.status=='up') ? item.ping.ms + ' ms' : item.ping.status}}</span></td>
+                                    <td><span class="label"
+																							ng-class="item.ping.status != 'up' ? (item.ping.status == null ? 'label-default' : 'label-danger') : (item.ping.ms < 500 ? 'label-success' : 'label-warning')"
+																							data-toggle="tooltip"
+																							title="{{item.ping.last_updated == null ? 'ping not yet collected' : 'last updated ' + (item.ping.last_updated | date:'medium')}}">
+																			{{(item.ping.status=='up') ? item.ping.ms + ' ms' : (item.ping.status == null ? 'na' : item.ping.status)}}</span></td>
                                     <td>{{item.region}}</td>
                                     <td>{{item.site}}</td>
                                     <td><a href="/devices/{{item.ip}}">{{item.ip}}</a></td>
@@ -58,9 +61,14 @@
                                     <td>{{item.type}}</td>
                                     <td>{{item.vendor}}</td>
                                     <td>{{item.model}}</td>
-                                    <td>{{item.collectors.ping}}</td>
-                                    <td><a href="" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-pencil"></i> Edit</a></td>
+                                    <td>{{item.serial}}</td>
+                                    <td>
+																			<i class="fa fa-circle-o" ng-class="{'text-muted':!item.collectors.ping[0], 'text-green':item.collectors.ping[0]}" data-toggle="tooltip" title="ping: {{item.collectors.ping[0]?'enabled':'disabled'}}"></i>
+																			<i class="fa fa-heartbeat" ng-class="{'text-muted':!item.collectors.snmp[0], 'text-green':item.collectors.snmp[0]}" data-toggle="tooltip" title="snmp: {{item.collectors.snmp[0]?'enabled with snmp profile \''+item.collectors.snmp[1]+'\'':'disabled'}}"></i>
+																			<i class="fa fa-cog" ng-class="{'text-muted':!item.collectors.configuration[0], 'text-green':item.collectors.configuration[0]}" data-toggle="tooltip" title="config: {{item.collectors.configuration[0]?'enabled with account profile \''+item.collectors.configuration[1]+'\'':'disabled'}}"></i>
 
+																		</td>
+                                    <!--<td><a href="" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-pencil"></i> Edit</a></td>-->
                                 </tr>
                             </tbody>
 

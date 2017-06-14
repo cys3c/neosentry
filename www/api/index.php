@@ -27,8 +27,13 @@ $table = preg_replace('/[^a-z0-9_]+/i','',array_shift($request));
 $key = trim(substr(array_shift($request),0,128));  // to get only a number use: array_shift($request)+0;
 
 //if a url path wasn't used, then lets try the GET variables
-if ($table=='') trim(substr(filter_input(INPUT_GET, 'table', FILTER_SANITIZE_STRING),0,64));
-if ($key=='') trim(substr(filter_input(INPUT_GET, 'key', FILTER_SANITIZE_STRING),0,64));
+if ($table=='') $table = trim(substr(filter_input(INPUT_GET, 'table', FILTER_SANITIZE_STRING),0,64));
+if ($key=='') $key = trim(substr(filter_input(INPUT_GET, 'key', FILTER_SANITIZE_STRING),0,128));
+
+//look for additional GET variables
+$apiIP = trim(substr(filter_input(INPUT_GET, 'ip', FILTER_SANITIZE_STRING),0,128));
+$apiSearch = trim(substr(filter_input(INPUT_GET, 'search', FILTER_SANITIZE_STRING),0,512));
+
 
 //perform actions based on what REST action the user wants to take
 $retJson = '';
@@ -47,7 +52,7 @@ switch ($method) {
       $retJson = '{"Server Stats":{"serverHD":['.$diskUsed[0].',"'.$diskUsed[1].'"],"serverRAM":['.$ramUsed[0].',"'.$ramUsed[1].'"],"serverCPU":['.$cpuUsed[0].',"'.$cpuUsed[1].'"]}}';
 
     } elseif ($table == "devices") {
-      if ($key == '') {
+    	if ($key == '') {
         //get all devices
         $devices = getDevicesArray(); $retArr = [];
         foreach ($devices as $dev=>$devData) {
@@ -60,11 +65,11 @@ switch ($method) {
 
       } else {
         //get the one device
-        $dev["Settings"] = getDeviceSettings($key);
-        $dev["Ping"] = getDeviceData($key, ACTION_PING);
-        $dev["Traceroute"] = getDeviceData($key, ACTION_TRACEROUTE);
-        $dev["Configuration"] = getDeviceData($key, ACTION_CONFIGURATION);
-        $dev["SNMP"] = getDeviceData($key, ACTION_SNMP);
+        $dev["settings"] = getDeviceSettings($key);
+				$dev["data"]["Ping"] = getDeviceData($key, ACTION_PING);
+        $dev["data"]["Traceroute"] = getDeviceData($key, ACTION_TRACEROUTE);
+        $dev["data"]["Configuration"] = getDeviceData($key, ACTION_CONFIGURATION);
+        $dev["data"]["SNMP"] = getDeviceData($key, ACTION_SNMP);
 
         $retJson = json_encode($dev);
 

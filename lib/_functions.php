@@ -112,6 +112,20 @@ function get_string_between($string, $start, $end){
     return substr($string, $ini, $len);
 }
 
+/** Values in array2 will overwrite values in array1 */
+function array_merge_recursive_distinct(array &$array1, array &$array2) {
+    $merged = $array1;
+    foreach ( $array2 as $key => &$value ) {
+        if ( is_array($value) && isset($merged[$key]) && is_array($merged[$key])){
+            $merged[$key] = array_merge_recursive_distinct($merged[$key], $value);
+        } else {
+            $merged[$key] = $value;
+        }
+    }
+
+    return $merged;
+}
+
 function isWindows(){
     return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 }
@@ -304,7 +318,7 @@ function writeToDocument($docName, $section, $arrValues) {
 function deleteFromDocument($docName, $section, $subName = '') {
     global $gFolderConfigs;
     $content = getDocument($docName);
-    if ($subName = '') {
+    if ($subName == '') {
         unset($content[$section]);
     } else {
         unset($content[$section][$subName]);
@@ -327,7 +341,7 @@ function writeDeviceSettings($device, $arrSettings){
     $tmpl = TEMPLATE_DEVICE;
     $tmpl["added"] = date(DATE_ATOM);
     $tmpl["ip"] = $device;
-    $dev = array_merge($arrSettings, $tmpl);
+    $dev = array_merge_recursive_distinct($tmpl, $arrSettings);
 
     return writeToDocument('devices', $device, $dev);
 }

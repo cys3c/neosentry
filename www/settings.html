@@ -12,8 +12,7 @@ and open the template in the editor.
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <h1>
-        Settings
-        <small>System | Email | Ping | SNMP | Netflow | Log Retention</small>
+        Settings <small>Email | Alert Rules | Ping / Traceroute | SNMP | Configuration</small>
       </h1>
       <ol class="breadcrumb">
         <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -23,144 +22,111 @@ and open the template in the editor.
 
     <!-- Main content -->
     <section class="content">
-        <div class="row">
-            <div class="col-md-12">
-              <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title">System Settings <small>Host | DNS | Date/Time</small></h3>
 
-                  <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                    </button>
-                    <!-- <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button> -->
-                  </div>
+
+      <div class="row" id="email">
+        <div class="col-md-12">
+          <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Email Settings <small>SMTP Servers Only</small></h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                 </div>
-                <!-- /.box-header -->
-                <form role="form">
-                <div class="box-body" style="display: block;">
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label for="inputHost">Host Name</label>
-                            <input type="text" class="form-control" id="inputHost">
+            </div>
+            <!-- /.box-header -->
+            <form role="form">
+            <div class="box-body" style="display: block;">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="inputHost">Email Server</label>
+                        <input type="text" class="form-control" id="inputEmailSvr">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputHost">From Email</label>
+                        <input type="text" class="form-control" id="inputEmailAddress" placeholder="neosentry@rootsecure.me">
+                    </div>
+
+                    <p>Enter a test destination email below to test these settings:</p>
+                    <div class="input-group input-group-sm">
+                        <input type="email" class="form-control" id='inputEmailTest'>
+                            <span class="input-group-btn">
+                              <button type="button" class="btn btn-info btn-flat" id='btnEmailTest'>Test!</button>
+                            </span>
+                    </div>
+
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="inputHost">Username <small>Leave blank if it's not required</small></label>
+                        <input type="text" class="form-control" id="inputEmailUser">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputHost">Password</label>
+                        <input type="password" class="form-control" id="inputEmailPass">
+                    </div>
+                    <div class="form-group">
+                        <p><label for="inputHost">Security & Port</label></p>
+                        <div class="col-xs-6">
+                            <select class="form-control" id="inputEmailSecurity" data-toggle="tooltip" title="Try TLS first since SSL is depreciated.">
+                            <option>None</option>
+                            <option>TLS</option>
+                            <option>SSL</option>
+                            </select>
                         </div>
-                        <div class="form-group">
-                            <label for="inputDNS1">DNS List</label>
-                            <input type="text" class="form-control" id="inputDNS1" placeholder="Primary DNS">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="inputDNS2" placeholder="Secondary DNS">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="inputDNS3" placeholder="Tertiary DNS">
+                        <div class="col-xs-6">
+                        <input type="text" class="form-control" id="inputEmailPort"
+                               data-toggle="tooltip" title="No Security = 25. Gmail uses 587. " placeholder='likely to be 25, 465 or 587'>
                         </div>
                     </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Date / Time</label>
-                            <div class="input-group"><div class="input-group-addon"><i class="fa fa-calendar"></i></div>
-                                <input type="text" class="form-control pull-right" id="inputDate" placeholder="mm/dd/yy">
-                            </div>
-                        </div>
-                        <div class="bootstrap-timepicker"><div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-addon"><i class="fa fa-clock-o"></i></div>
-                                <input type="text" class="form-control" id="inputTime">
-                            </div>
-                        </div></div>
-                        
-                        <div class="form-group">
-                            <label><input type="checkbox"> Enable NTP Servers</label>
-                            <input type="text" class="form-control" id="inputNTP1" placeholder="time.nist.gov">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" id="inputNTP2" placeholder="pool.ntp.org">
-                        </div>
-                  </div>
+                </div>
 
-                </div>
-                <div class="box-footer">
-                    <button id="cfgSettingsReset" type="submit" class="btn btn-default">Reset</button>
-                    <button id="cfgSettingsSubmit" type="submit" class="btn btn-success pull-right">Save</button>
-                </div>
-                </form>
+            </div>
+            <div class="box-footer">
+                <button id="cfgEmailReset" type="submit" class="btn btn-default">Reset</button>
+                <button id="cfgEmailSubmit" type="submit" class="btn btn-success pull-right">Save</button>
+            </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row" id="alerts">
+        <div class="col-md-12">
+          <div class="box box-info">
+            <div class="box-header with-border">
+              <h3 class="box-title">Alert Rules <small></small></h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
               </div>
             </div>
-        </div>
-        
-        
-        <div class="row">
-            <div class="col-md-12">
-              <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Email Settings <small>SMTP Servers Only</small></h3>
+            <!-- /.box-header -->
+            <form role="form" class="form-horizontal">
+              <div class="box-body">
 
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                    </div>
+                <div class="col-sm-12">
+                  <!-- Table with Alert Rules -->
                 </div>
-                <!-- /.box-header -->
-                <form role="form">
-                <div class="box-body" style="display: block;">
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label for="inputHost">Email Server</label>
-                            <input type="text" class="form-control" id="inputEmailSvr">
-                        </div>
-                        <div class="form-group">
-                            <label for="inputHost">From Email</label>
-                            <input type="text" class="form-control" id="inputEmailAddress" placeholder="neosentry@rootsecure.me">
-                        </div>
-                        
-                        <p>Enter a test destination email below to test these settings:</p>
-                        <div class="input-group input-group-sm">
-                            <input type="email" class="form-control" id='inputEmailTest'>
-                                <span class="input-group-btn">
-                                  <button type="button" class="btn btn-info btn-flat" id='btnEmailTest'>Test!</button>
-                                </span>
-                        </div>
-                        
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label for="inputHost">Username <small>Leave blank if it's not required</small></label>
-                            <input type="text" class="form-control" id="inputEmailUser">
-                        </div>
-                        <div class="form-group">
-                            <label for="inputHost">Password</label>
-                            <input type="password" class="form-control" id="inputEmailPass">
-                        </div>
-                        <div class="form-group">
-                            <p><label for="inputHost">Security & Port</label></p>
-                            <div class="col-xs-6">
-                                <select class="form-control" id="inputEmailSecurity" data-toggle="tooltip" title="Try TLS first since SSL is depreciated.">
-                                <option>None</option>
-                                <option>TLS</option>
-                                <option>SSL</option>
-                                </select>
-                            </div>
-                            <div class="col-xs-6">
-                            <input type="text" class="form-control" id="inputEmailPort" 
-                                   data-toggle="tooltip" title="No Security = 25. Gmail uses 587. " placeholder='likely to be 25, 465 or 587'>
-                            </div>
-                        </div>
-                    </div>
 
-                </div>
-                <div class="box-footer">
-                    <button id="cfgEmailReset" type="submit" class="btn btn-default">Reset</button>
-                    <button id="cfgEmailSubmit" type="submit" class="btn btn-success pull-right">Save</button>
-                </div>
-                </form>
               </div>
-            </div>
+              <div class="box-footer">
+                <button id="cfgSNMPReset" type="submit" class="btn btn-default">Reset</button>
+                <button id="cfgSNMPSubmit" type="submit" class="btn btn-success pull-right">Save</button>
+              </div>
+            </form>
+          </div>
         </div>
-        
-        
-        <div class="row">
+      </div>
+
+
+
+        <div class="row" id="ping">
             <div class="col-md-12">
               <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Ping & Traceroute Monitoring <small>Settings</small></h3>
+                    <h3 class="box-title">Ping & Traceroute Settings <small></small></h3>
 
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
@@ -191,11 +157,11 @@ and open the template in the editor.
         </div>
         
         
-        <div class="row">
+        <div class="row" id="snmp">
             <div class="col-md-12">
               <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title">SNMP Monitoring <small>Settings</small></h3>
+                    <h3 class="box-title">SNMP Settings <small></small></h3>
 
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
@@ -226,11 +192,11 @@ and open the template in the editor.
         </div>
         
         
-        <div class="row">
+        <div class="row" id="configuration">
             <div class="col-md-12">
               <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Netflow Settings <small>Collection, Data Processing</small></h3>
+                    <h3 class="box-title">Configuration Settings </h3>
 
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
