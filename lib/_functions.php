@@ -9,6 +9,7 @@ error_reporting(E_ALL);
 //$globalErrorVar = '';
 
 //Global Constants
+const SETTING_CATEGORY_GENERAL = "General Settings";
 const SETTING_CATEGORY_SESSION = "Session Settings";
 const SETTING_CATEGORY_MAIL = "Mail Settings";
 const SETTING_CATEGORY_TASKS = "Task Scheduler";

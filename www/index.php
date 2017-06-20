@@ -17,22 +17,22 @@ sessionProtect(); //if (!isLoggedIn()) {header("Location: login.php");}
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Neosentry NMS</title>
-  <link rel="shortcut icon" href="assets/images/favicon.png">
+  <link rel="shortcut icon" href="/assets/images/favicon.png">
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="assets/fonts/fonts.css" > <!-- Fonts: FontAwesome, Google Fonts  -->
-  <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css"> <!-- Bootstrap 3.3.6 -->
-  <link rel="stylesheet" href="assets/app-framework.min.css">  <!-- AdminLTE Theme style, skin-blue -->
+  <link rel="stylesheet" href="/assets/fonts/fonts.css" > <!-- Fonts: FontAwesome, Google Fonts  -->
+  <link rel="stylesheet" href="/assets/plugins/bootstrap/css/bootstrap.min.css"> <!-- Bootstrap 3.3.6 -->
+  <link rel="stylesheet" href="/assets/app-framework.min.css">  <!-- AdminLTE Theme style, skin-blue -->
 
   <!-- JS SCRIPTS -->
-    <script src="assets/plugins/jQuery/jquery-3.2.1.min.js"></script>
-    <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/plugins/angular/angular-all.min.js"></script> <!-- Angular Core & Routing -->
-    <script src="assets/app-framework.js"></script> <!-- AdminLTE App Framework, includes fastclick -->
+    <script src="/assets/plugins/jQuery/jquery-3.2.1.min.js"></script>
+    <script src="/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/assets/plugins/angular/angular-all.min.js"></script> <!-- Angular Core & Routing -->
+    <script src="/assets/app-framework.js"></script> <!-- AdminLTE App Framework, includes fastclick -->
 
-    <script src="assets/app.js"></script> <!-- Custom code for this app -->
+    <script src="/assets/app.js"></script> <!-- Custom code for this app -->
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -64,9 +64,9 @@ Apply one or more of the following classes to get the desired effect
     <!-- Logo -->
     <a href="#" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><img src="assets/images/Lakitu-32.png" class="img-circle"/></span>
+      <span class="logo-mini"><img src="/assets/images/Lakitu-32.png" class="img-circle"/></span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><img src="assets/images/Lakitu-32.png" class="img-circle"/> <b>Neosentry</b>NMS</span>
+      <span class="logo-lg"><img src="/assets/images/Lakitu-32.png" class="img-circle"/> <b>Neosentry</b>NMS</span>
     </a>
 
     <!-- Header Navbar -->
@@ -110,14 +110,14 @@ Apply one or more of the following classes to get the desired effect
             <!-- Menu Toggle Button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <!-- The user image in the navbar-->
-              <img src="assets/images/user.jpg" class="user-image" alt="">
+              <img src="/assets/images/user.jpg" class="user-image" alt="">
               <!-- hidden-xs hides the username on small devices so only the image appears. -->
               <span class="hidden-xs"><?php echo $_SESSION['name'] ?></span>
             </a>
             <ul class="dropdown-menu">
               <!-- The user image in the menu -->
               <li class="user-header">
-                <img src="assets/images/user.jpg" class="img-circle" alt="">
+                <img src="/assets/images/user.jpg" class="img-circle" alt="">
 
                 <p>
                   {{this.session.name}}

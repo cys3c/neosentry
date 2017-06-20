@@ -2,7 +2,9 @@
 /**
  * Used to get raw data for the front end to display.
  * For an example of a REST api in php see: https://www.leaseweb.com/labs/2015/10/creating-a-simple-rest-api-in-php/
- */
+ *
+ * This requires no other files or folders within this path
+  */
 
 //required libraries
 include "../../lib/_functions.php";
@@ -17,10 +19,10 @@ sessionProtect(true,''); //redirect to the login page if not logged in (aka no r
 // get the HTTP method, path and body of the request
 $remoteIP = $_SERVER['REMOTE_ADDR'];
 $method = $_SERVER['REQUEST_METHOD'];
-$path = trim($_SERVER['PATH_INFO'],'/');//array_key_exists('PATH_INFO',$_SERVER)?trim($_SERVER['PATH_INFO'],'/'):"";
+$path = isset($_SERVER['PATH_INFO']) ? trim($_SERVER['PATH_INFO'],'/') : "";
 $request = explode('/', $path);
 $input = json_decode(file_get_contents('php://input'),true);
-//print_r($request);
+//print_r($_SERVER);
 
 // retrieve the table and key from the path. in /api/device/10.1.1.1 :: $table='device', $key='10.1.1.1'
 $table = preg_replace('/[^a-z0-9_]+/i','',array_shift($request));

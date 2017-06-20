@@ -183,16 +183,16 @@ app.controller("devicesCtrl", function ($scope, $http, $interval, gHandler) {
 app.controller("devicesDetailCtrl", function ($scope, $routeParams, $http, $interval, $anchorScroll, gHandler) {
 	$scope.$parent.activeTab = 'devices';
 	$scope.params = $routeParams;
-	$scope.devInfo = $scope.$parent.deviceData.find(function(dev){return dev.ip===$scope.params.deviceId});
-
+	if ($scope.$parent.deviceData) $scope.devInfo = $scope.$parent.deviceData.find(function(dev){return dev.ip===$scope.params.deviceId});
+	
 	/* Get the Data  */
 	$scope.getData = function() {
-		$http.get("/api/devices?key="+$scope.params.deviceId)
+		$http.get("/api/devices/"+$scope.params.deviceId)
 			.then(function (response) {
 				$scope.devInfo = response.data.settings; //.settings, .data
 				$scope.devData = response.data.data;
 				$scope.updated = Date.now();
-
+				
 			}, function errorCallback(response) {
 				console.log("Error getting device list data: " + JSON.stringify(response));
 			});

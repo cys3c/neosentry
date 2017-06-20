@@ -99,7 +99,7 @@ else
     apt-get -m -y install apache2 python3 libapache2-mod-python
 
 
-    # ---------- Install PHP 5 ----------
+    # ---------- Install PHP ----------
 	if ! hash php 2>/dev/null; then
         echo Installing PHP 7.0
         apt-get -m -y install php7.0 php7.0-common php7.0-snmp php7.0-ldap php7.0-json libapache2-mod-php7.0
@@ -144,7 +144,7 @@ ln neosentry /usr/bin/neosentry
 # ---------- Make directories, copy files, and set permissions ----------
 
 INSTALL_DIR="/usr/share/neosentry"
-if [ "$PWD" == "$INSTALL_DIR" ]; then
+if [ ! "$PWD" == "$INSTALL_DIR" ]; then
     echo Moving files and directories to $INSTALL_DIR and making APACHE the Owner
     mkdir -p $INSTALL_DIR
     mv www $INSTALL_DIR/
@@ -156,6 +156,8 @@ else
     echo " - No need to move files, you're already in $INSTALL_DIR"
 fi
 
+find $INSTALL_DIR -type d -exec chmod 755 {} +
+find $INSTALL_DIR -type f -exec chmod 644 {} +
 chmod -R g+w $INSTALL_DIR/data
 
 if hash chcon 2>/dev/null; then
@@ -168,15 +170,26 @@ fi
 # ---------- Configure Apache ----------
 
 echo Configuring Apache
-# Consider prompting the user for the domain name and asking if this is the only website. Then modify the configuration accordingly.
+
+# Disable the default website
+# Consider prompting the user for the web root and fqdn for a virtual server config.
+read -p "Would you like to disable the default apache website? [Y/n]" yn
+    case $yn in
+        [Nn]* ) ;;
+        * ) a2dissite 000-default;;
+    esac
+
+# Enable some important settings
+a2enmod mod_rewrite
+
 if [ -d "/etc/httpd/conf.d" ]; then 
 	# CentOS / RedHat Distros
 	cp config/000-neosentry-httpd.conf /etc/httpd/conf.d/neosentry.conf
 	/etc/init.d/httpd restart
 elif [ -d "/etc/apache2/sites-available" ]; then
 	# Assume Debian / Ubuntu Distros
-	cp config/000-neosentry-httpd.conf /etc/apache2/sites-available/000-neosentry.conf
-	ln -s /etc/apache2/sites-available/000-neosentry.conf /etc/apache2/sites-enabled/000-neosentry.conf
+	cp config/000-neosentry-httpd.conf /etc/apache2/sites-available/neosentry.conf
+	ln -s /etc/apache2/sites-available/neosentry.conf /etc/apache2/sites-enabled/neosentry.conf
 	/etc/init.d/apache2 restart
 else
 	echo "! ERROR ! A valid Apache installation was not found. You will have to manually configure the web service to use the applications installation directory of $INSTALL_DIR"
