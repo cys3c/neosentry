@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 /*
  * Main core logic to handle elevated and centralized tasks

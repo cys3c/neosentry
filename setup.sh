@@ -99,7 +99,7 @@ else
     apt-get -m -y install apache2 python3 libapache2-mod-python
 
 
-    # ---------- Install PHP 5 ----------
+    # ---------- Install PHP ----------
 	if ! hash php 2>/dev/null; then
         echo Installing PHP 7.0
         apt-get -m -y install php7.0 php7.0-common php7.0-snmp php7.0-ldap php7.0-json libapache2-mod-php7.0
@@ -144,7 +144,7 @@ ln neosentry /usr/bin/neosentry
 # ---------- Make directories, copy files, and set permissions ----------
 
 INSTALL_DIR="/usr/share/neosentry"
-if [ "$PWD" == "$INSTALL_DIR" ]; then
+if [ ! "$PWD" == "$INSTALL_DIR" ]; then
     echo Moving files and directories to $INSTALL_DIR and making APACHE the Owner
     mkdir -p $INSTALL_DIR
     mv www $INSTALL_DIR/
@@ -156,6 +156,8 @@ else
     echo " - No need to move files, you're already in $INSTALL_DIR"
 fi
 
+find $INSTALL_DIR -type d -exec chmod 755 {} +
+find $INSTALL_DIR -type f -exec chmod 644 {} +
 chmod -R g+w $INSTALL_DIR/data
 
 if hash chcon 2>/dev/null; then

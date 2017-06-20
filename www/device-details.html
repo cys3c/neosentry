@@ -11,7 +11,7 @@ and open the template in the editor.
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>
-        {{devInfo.ip}}
+        <a href="javascript:history.back()"><i class="fa fa-chevron-left"></i></a> {{devInfo.ip}}
         <small>Last Updated {{updated | date:"h:mm:ss a"}}</small>
     </h1>
     <ol class="breadcrumb">
@@ -94,12 +94,13 @@ and open the template in the editor.
     </div>
 
 
-    <!-- Loop through the data and display -->
-    <div class="row" ng-repeat="(key, data) in devData">
-        <div class="col-md-12">
-            <div class="box box-info">
+    <!-- PING & TRACEROUTE -->
+    <div class="row">
+        <!-- PING -->
+        <div class="col-md-6" id="Ping">
+            <div class="box" ng-class="devData.Ping.status != 'up' ? 'box-danger' : (devData.Ping.ms < 500 ? 'box-success' : 'box-warning')">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{{key}}</h3>
+                    <h3 class="box-title">Ping <small>{{devData.Ping.last_updated == null ? 'Not yet collected' : "Last updated " + (devData.Ping.last_updated | date:'medium') + ' from IP ' + devData.Ping.ip }}</small></h3>
 
                     <div class="box-tools pull-right">
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
@@ -108,14 +109,27 @@ and open the template in the editor.
                 <!-- /.box-header -->
 
                 <div class="box-body" style="display: block;">
-                    <span ng-if="key=='Ping'">
-                        <p>{{data.last_updated == null ? 'ping not yet collected' : "last updated " + (data.last_updated | date:'medium') + ' from ip ' + data.ip }}</p>
-                        History Graph: {{data.history}}
-                    </span>
+                    History Graph: {{devData.Ping.history}}
+                </div>
 
+            </div>
+        </div>
+
+        <!-- TRACEROUTE -->
+        <div class="col-md-6" id="Traceroute">
+            <div class="box" ng-class="devData.Traceroute.last_updated == null ? 'box-default' : 'box-info'">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Traceroute <small>{{devData.Traceroute.last_updated == null ? 'Not yet collected' : 'Last updated ' + (devData.Traceroute.last_updated | date:'medium')}}</small></h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+
+                <div class="box-body" style="display: block;">
                     <span ng-if="key=='Traceroute'">
-                        <p>{{data.last_updated == null ? 'traceroute not yet collected' : 'last updated ' + (data.last_updated | date:'medium')}}</p>
-                         <table class="table table-hover table-bordered">
+                        <table class="table table-hover table-bordered">
                             <thead>
                                 <tr>
                                     <th>Data</th>
@@ -126,61 +140,114 @@ and open the template in the editor.
                                     <td>{{data}}</td>
                                 </tr>
                             </tbody>
-                         </table>
+                        </table>
                     </span>
-
-                    <span ng-if="key=='SNMP'">
-                        <p>{{data.last_updated == null ? 'snmp not yet collected' : 'last updated ' + (data.last_updated | date:'medium')}}</p>
-                        History Graph:
-                    </span>
-
-                    <span ng-if="key=='Configuration'">
-                        <p>{{data.last_updated == null ? 'configuration not yet collected' : 'last updated ' + (data.last_updated | date:'medium')}}</p>
-                        <div class="with-border" ng-repeat="(key, row) in data">
-
-                            <span ng-if="getType(row)=='string' && key != 'last_updated'">
-                                <p><strong>{{key}}:</strong> {{row}}</p>
-                            </span>
-                            <span ng-if="getType(row)=='object'">
-
-                                <h3 class="box-title">{{key}}</h3>
-
-                                <div class="input-group input-group-sm" style="width: 150px;">
-                                  <input type="text" name="table_search" class="form-control pull-left" placeholder="Filter">
-
-                                  <div class="input-group-btn">
-                                    <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                                  </div>
-                                </div>
-
-
-                                <table class="table table-hover table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th ng-repeat="h in Object.keys(row[0])">{{h}}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr ng-repeat="(n,row) in row">
-                                            <td>{{n}}</td>
-                                            <td ng-repeat="col in row">{{col}}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-
-                            </span>
-
-                        </div>
-
-                    </span>
-
                 </div>
 
             </div>
         </div>
     </div>
+
+    <!-- SNMP -->
+    <div class="row">
+        <div class="col-md-12" id="SNMP">
+            <div class="box" ng-class="devData.SNMP.last_updated == null ? 'box-default collapsed-box' : 'box-info'">
+                <div class="box-header with-border">
+                    <h3 class="box-title">SNMP <small>{{devData.SNMP.last_updated == null ? 'Not yet collected' : 'Last updated ' + (devData.SNMP.last_updated | date:'medium')}}</small></h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa" ng-class="devData.SNMP.last_updated == null ? 'fa-plus' : 'fa-minus'"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+
+                <div class="box-body" style="display: block;">
+                    History Graph:
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIGURATION -->
+    <div class="row">
+        <div class="col-md-12" id="Configuration">
+            <div class="box" ng-class="devData.Configuration.last_updated == null ? 'box-default collapsed-box' : 'box-info'">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Configuration <small>{{devData.Configuration.last_updated == null ? 'Not yet collected' : 'Last updated ' + (devData.Configuration.last_updated | date:'medium')}}</small></h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa" ng-class="devData.Configuration.last_updated == null ? 'fa-plus' : 'fa-minus'"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+
+                <div class="box-body" style="display: block;">
+
+                    <div class="with-border" ng-repeat="(key, row) in devData.Configuration">
+
+                        <span ng-if="getType(row)=='string' && key != 'last_updated'">
+                            <p><strong>{{key}}:</strong> {{row}}</p>
+                        </span>
+                        <span ng-if="getType(row)=='object'">
+
+                            <h3 class="box-title">{{key}}</h3>
+
+                            <div class="input-group input-group-sm" style="width: 150px;">
+                                <input type="text" name="table_search" class="form-control pull-left" placeholder="Filter">
+
+                                <div class="input-group-btn">
+                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+
+
+                            <table class="table table-hover table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th ng-repeat="h in Object.keys(row[0])">{{h}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="(n,row) in row">
+                                        <td>{{n}}</td>
+                                        <td ng-repeat="col in row">{{col}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+                        </span>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- EXTRA TEMPLATE 
+    <div class="row">
+        <div class="col-md-12" id="SNMP">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">SNMP <small>{{devData.SNMP.last_updated == null ? 'Not yet collected' : 'Last updated ' + (devData.SNMP.last_updated | date:'medium')}}</small></h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+
+                <div class="box-body" style="display: block;">
+                    History Graph:
+                </div>
+
+            </div>
+        </div>
+    </div>
+    -->
+
 
 
 
