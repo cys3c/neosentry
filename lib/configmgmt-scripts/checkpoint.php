@@ -81,7 +81,7 @@ function runCollector($device, $username, $password, $password2="") {
     outputText("connecting to $device");
     $ssh = new Net_SSH2($device);
     if (!$ssh->login($username, $password)) {
-        return "Error: Login Failed using username '$username'. " . $ssh->getLastError();
+        return "Error: Login Failed to $device using username '$username'. " . $ssh->getLastError();
     }
     $scp = new Net_SCP($ssh);
 
@@ -90,75 +90,108 @@ function runCollector($device, $username, $password, $password2="") {
     $ret = $ssh->exec('whoami');
     if (strpos($ret,"whoami")>0) {
         //not in expert
-        $err =  "Error: Incorrect shell detected. To collect this devices configuration then log in as Expert and run the following command: 'chsh -s /bin/bash $username'";
-        outputText($err);
-        return $err;
+        //$err =  "Error: Incorrect shell detected. To collect this devices configuration then log in as Expert and run the following command: 'chsh -s /bin/bash $username'";
+        outputText("Non-elevated shell detected, logging into expert mode.");
+        
+        sshRunCommand($ssh, 'expert', 3, 'Enter expert password:');
+        $ret = trim(sshRunCommand($ssh, $password2, 3, "[Expert@$device]# ", false));
+        //echo "\n'$ret'\n" . strpos("blah","not in here");
+        if (strpos($ret,'Wrong password') !== false) {
+            $err = "Error: Could not log into expert mode. Alternatively you could try changing the users shell so an expert login isn't required with the command: 'chsh -s /bin/bash $username'";
+            outputText($err . "\n" . $ret);
+            return $err . "\n" . $ret;
+        }
         //$ssh->write("expert\n");
         //$buf = $ssh->read('Enter expert password:');
         //$ssh->write($password2."\n");
 
     }
+    //we're now successfully connected to an expert shell
+    outputText("Connected. Running Check Point Collection Script");
+    
+
+    // On newer versions with the clish shell, we can get a configuration output similar to palo alto and cisco
+    outputText("Attempting to get the newer version of the configuration settings... ");
+    $config = sshRunCommand($ssh, '/etc/cli.sh -c "show configuration"');
+    if (strlen($config) < 100) {
+        $config = "";
+        outputText("Failed, cli.sh not present.");
+    } else {
+        outputText("Success!");
+        $arrConfig["Configuration"] = $config;
+    }
 
 
     // Get the version of Check Point we're working with so we know the right folder
-    outputText("Connected. Running Check Point Collection Script");
-    $ver = trim($ssh->exec('ls /opt | grep CPsuite | sort -r | head -n1'));
+    //$ssh->enablePTY();
+    $ver = trim(sshRunCommand($ssh, 'ls /opt | grep CPsuite | sort -r | head -n1'));
 
-    // Find the latest objects file and get its contents
-    $objFiles = ["/opt/$ver/fw1/database/objects.C", "/opt/$ver/fw1/conf/objects_5_0.C", "/opt/$ver/fw1/conf/objects.C_41", "/opt/$ver/fw1/conf/objects.C"];
+    // Find the latest objects file
+    $ret = sshRunCommand($ssh, "cd /opt/$ver/fw1/");
+    $objFiles = ["database/objects.C", "conf/objects_5_0.C", "conf/objects.C_41", "conf/objects.C"];
     $objFile = trim($objFiles[0]);
     $objMod = 0;
-    foreach ($objFiles AS $f) {
+    foreach ($objFiles as $f) {
         // loop through each possible file and find the newest
-        $ret = intval($ssh->exec("stat -c %Y $f"));
+        $ret = intval(sshRunCommand($ssh, "stat -c %Y $f"));
         if ($ret > $objMod) {
             $objMod = $ret;
             $objFile = $f;
         }
     }
 
-    // we have the latest file, lets convert its contents
+    // we have the latest file, lets get convert its contents
     outputText("Collecting " . $objFile . " with last modified date of " . date("M d, Y h:m:s", $objMod));
-    //$ret = $ssh->exec("cat $objFile");
-    //file_put_contents($saveToFolder . "/configmgmt_objects.C", $ret);
+    $ret = sshRunCommand($ssh, "tr -dc '[:print:]\\n' < $objFile"); //sshRunCommand($ssh, "cat '$objFile'");
+    //$ret = $scp->get("/opt/$ver/fw1/" . $objFile);
+    outputText("Saving objects file");
+    file_put_contents($saveToFolder . "/configmgmt_objects.C", $ret);
 
     //So i have to do it this way because for some reason something in the objects.C file was closing the SSH connection
     // and when transferring the file, they don't match up, giving an unzip error.
-    $ret = $ssh->exec("cp $objFile $objFile"."2");
-    $ret = $ssh->exec("gzip -1 -f $objFile"."2");
-    $ret = $scp->get($objFile."2.gz", $saveToFolder . "/configmgmt_objects.C.gz");
-    shell_exec("gunzip < $saveToFolder/configmgmt_objects.C.gz > $saveToFolder/configmgmt_objects.C 2> /dev/null");
+    //$ret = sshRunCommand($ssh, "cp $objFile $objFile"."2");
+    //$ret = sshRunCommand($ssh, "gzip -1 -f $objFile"."2");
+    //$ret = $scp->get($objFile."2.gz", $saveToFolder . "/configmgmt_objects.C.gz");
+    //shell_exec("gunzip < $saveToFolder/configmgmt_objects.C.gz > $saveToFolder/configmgmt_objects.C 2> /dev/null");
 
-    if (!file_exists($saveToFolder."/configmgmt_objects.C")) return "Could not load the objects.C file required to convert checkpoint objects into ip addresses.";
-    $ret = file_get_contents($saveToFolder."/configmgmt_objects.C");
+    if (!file_exists($saveToFolder."/configmgmt_objects.C")) {  //error
+        outputText("Could not load the objects.C file required to convert checkpoint objects into ip addresses.");
+    
+    } else {    //SUCCESS, got objects file
+        $ret = file_get_contents($saveToFolder."/configmgmt_objects.C");
 
-    outputText("Converting and Importing Objects File.");
-    $objJSON = parseToJson($ret);
-    file_put_contents($saveToFolder . "/configmgmt_objects.json", $objJSON);
-    $arrObjects = json_decode($objJSON, true);
-    if (json_last_error()) {    // there was something wrong with the conversion, lets save the bad json file to look at
-        outputText(" - " . json_last_error_msg());
-    } else {    // successfully converted, save the json.
-        outputText(" - Success");
+        outputText("Converting and Importing Objects File.");
+        $objJSON = parseToJson($ret);
+        file_put_contents($saveToFolder . "/configmgmt_objects.json", $objJSON);
+        $arrObjects = json_decode($objJSON, true);
+        if (json_last_error()) {    // there was something wrong with the conversion, lets save the bad json file to look at
+            outputText(" - " . json_last_error_msg());
+        } else {    // successfully converted, save the json.
+            outputText(" - Success");
+        }
     }
+    
 
 
     // Now find the latest firewall rule and nat file and get its contents
-    $ruleFiles = ["/opt/$ver/fw1/database/rules.C", "/opt/$ver/fw1/conf/rulebases_5_0.fws"];
+    $ret = sshRunCommand($ssh, "cd /opt/$ver/fw1/"); 
+    $ruleFiles = ["database/rules.C", "conf/rulebases_5_0.fws"];
     $ruleFile = "";
     $ruleMod = 0;
-    foreach ($ruleFiles AS $f) {
+    foreach ($ruleFiles as $f) {
         // loop through each possible file and find the newest
-        $ret = intval($ssh->exec("stat -c %Y $f"));
+        $ret = sshRunCommand($ssh, "stat -c %Y $f");
+        outputText("stat of '$f' returned '$ret'");
         if ($ret > $ruleMod) {
             $ruleMod = $ret;
             $ruleFile = $f;
         }
     }
+    
 
     // we have the latest file, lets convert its contents
     outputText("Collecting " . $ruleFile . " with last modified date of " . date("M d, Y h:m:s", $ruleMod));
-    $ret = $ssh->exec("cat $ruleFile");
+    $ret = sshRunCommand($ssh, "cat '$ruleFile'");
     file_put_contents($saveToFolder . "/configmgmt_rules.C", $ret);
 
     outputText("Converting and Importing Rules File.");
@@ -174,70 +207,67 @@ function runCollector($device, $username, $password, $password2="") {
         file_put_contents($saveToFolder . "/configmgmt_rules.json", json_encode($arrRules, JSON_PRETTY_PRINT));
 
         //Convert the Firewall Rules
-        foreach ($arrRules["rules"] AS $key => &$item) {
+        foreach ($arrRules["rules"] as $key => &$item) {
             //Note: if the $item[..]["objects"] section doesn't exist then ANY is inferred
             $id = $key;//key($item);
             $section = "Firewall Rules";
-            $arrConfig[$section][$id]["Disabled"] = $item["disabled"];
-            $arrConfig[$section][$id]["Rulenum"] = $item["unified_rulenum"];
-            $arrConfig[$section][$id]["Hits"] = 0;
-            $arrConfig[$section][$id]["Name"] = $item["name"];
-            $arrConfig[$section][$id]["Source"] = getCPObjects($item["src"], $arrObjects);
-            $arrConfig[$section][$id]["Destination"] = getCPObjects($item["dst"], $arrObjects);
-            $arrConfig[$section][$id]["VPN"] = $item["through"]["ReferenceObject"]["Name"];
-            $arrConfig[$section][$id]["Services"] = getCPObjects($item["services"], $arrObjects, "servobj");
-            $arrConfig[$section][$id]["Action"] = key($item["action"]);
-            $arrConfig[$section][$id]["Track"] = rtrim(implode(", ", getCPObjects($item["track"])), ', ');
-            $arrConfig[$section][$id]["Install On"] = rtrim(implode(", ", getCPObjects($item["install"])), ', ');
-            $arrConfig[$section][$id]["Time"] = getCPObjects($item["time"]); //key($item["time"]);
+
+            $arrTemp = [];
+            $arrTemp["ID"] = $id;
+            $arrTemp["Disabled"] = $item["disabled"];
+            $arrTemp["Rulenum"] = $item["unified_rulenum"];
+            $arrTemp["Hits"] = 0;
+            $arrTemp["Name"] = $item["name"];
+            $arrTemp["Source"] = getCPObjects($item["src"], $arrObjects);
+            $arrTemp["Destination"] = getCPObjects($item["dst"], $arrObjects);
+            $arrTemp["VPN"] = $item["through"]["ReferenceObject"]["Name"];
+            $arrTemp["Services"] = getCPObjects($item["services"], $arrObjects, "servobj");
+            $arrTemp["Action"] = key($item["action"]);
+            $arrTemp["Track"] = rtrim(implode(", ", getCPObjects($item["track"])), ', ');
+            $arrTemp["Install On"] = rtrim(implode(", ", getCPObjects($item["install"])), ', ');
+            $arrTemp["Time"] = getCPObjects($item["time"]); //key($item["time"]);
             //$arrConfig["Firewall Rules"][$id]["Comments"] = 0; //this is stored in the policy .W file
 
             //determine if the src, dst, or services cell is negated and add a value.
-            if ($item["src"]["op"] == "not in") array_unshift($arrConfig[$section][$id]["Source"], "!NEGATED!");
-            if ($item["dst"]["op"] == "not in") array_unshift($arrConfig[$section][$id]["Destination"], "!NEGATED!");
-            if ($item["services"]["op"] == "not in") array_unshift($arrConfig[$section][$id]["Services"], "!NEGATED!");
+            if ($item["src"]["op"] == "not in") array_unshift($arrTemp["Source"], "!NEGATED!");
+            if ($item["dst"]["op"] == "not in") array_unshift($arrTemp["Destination"], "!NEGATED!");
+            if ($item["services"]["op"] == "not in") array_unshift($arrTemp["Services"], "!NEGATED!");
 
+            //add the rule to the array
+            $arrConfig[$section][] = $arrTemp;
         }
 
         //Convert the NAT Rules
-        foreach ($arrRules["rules-adtr"] AS $key => $item) {
+        foreach ($arrRules["rules-adtr"] as $key => $item) {
             $id = $key; //key($item);
             $section = "NAT Rules";
-            $arrConfig[$section][$id]["Disabled"] = $item["disabled"];
-            $arrConfig[$section][$id]["Hits"] = 0;
-            $arrConfig[$section][$id]["Name"] = $item["name"];
-            $arrConfig[$section][$id]["Original Source"] = getCPObjects($item["src_adtr"], $arrObjects);
-            $arrConfig[$section][$id]["Original Destination"] = getCPObjects($item["dst_adtr"], $arrObjects);
-            $arrConfig[$section][$id]["Original Service"] = getCPObjects($item["services_adtr"], $arrObjects, "servobj");
-            $arrConfig[$section][$id]["Translated Source"] = getCPObjects($item["src_adtr_translated"], $arrObjects);
-            //$arrConfig[$section][$id]["src_adtr_method"] = $item["src_adtr_translated"]["adtr_method"];
-            $arrConfig[$section][$id]["Translated Destination"] = getCPObjects($item["dst_adtr_translated"], $arrObjects);
-            //$arrConfig[$section][$id]["dst_adtr_method"] = $item["dst_adtr_translated"]["adtr_method"];
-            $arrConfig[$section][$id]["Translated Services"] = getCPObjects($item["services_adtr_translated"], $arrObjects, "servobj");
-            //$arrConfig[$section][$id]["services_adtr_method"] = $item["services_adtr_translated"]["adtr_method"];
-            $arrConfig[$section][$id]["Install On"] = rtrim(implode(", ", getCPObjects($item["install"])), ', ');
+
+            $arrTemp = [];
+            $arrTemp["ID"] = $id;
+            $arrTemp["Disabled"] = $item["disabled"];
+            $arrTemp["Hits"] = 0;
+            $arrTemp["Name"] = $item["name"];
+            $arrTemp["Original Source"] = getCPObjects($item["src_adtr"], $arrObjects);
+            $arrTemp["Original Destination"] = getCPObjects($item["dst_adtr"], $arrObjects);
+            $arrTemp["Original Service"] = getCPObjects($item["services_adtr"], $arrObjects, "servobj");
+            $arrTemp["Translated Source"] = getCPObjects($item["src_adtr_translated"], $arrObjects);
+            //$arrTemp["src_adtr_method"] = $item["src_adtr_translated"]["adtr_method"];
+            $arrTemp["Translated Destination"] = getCPObjects($item["dst_adtr_translated"], $arrObjects);
+            //$arrTemp["dst_adtr_method"] = $item["dst_adtr_translated"]["adtr_method"];
+            $arrTemp["Translated Services"] = getCPObjects($item["services_adtr_translated"], $arrObjects, "servobj");
+            //$arrTemp["services_adtr_method"] = $item["services_adtr_translated"]["adtr_method"];
+            $arrTemp["Install On"] = rtrim(implode(", ", getCPObjects($item["install"])), ', ');
 
             //get the NAT method and add it to the objects array
-            array_unshift($arrConfig[$section][$id]["Translated Source"], "!" . str_replace("adtr_", "", getElement($item["src_adtr_translated"]["adtr_method"])) . "!");
-            array_unshift($arrConfig[$section][$id]["Translated Destination"], "!" . str_replace("adtr_", "", getElement($item["dst_adtr_translated"]["adtr_method"])) . "!");
-            array_unshift($arrConfig[$section][$id]["Translated Services"], "!" . str_replace("adtr_", "", getElement($item["services_adtr_translated"]["adtr_method"])) . "!");
+            array_unshift($arrTemp["Translated Source"], "!" . str_replace("adtr_", "", getElement($item["src_adtr_translated"]["adtr_method"])) . "!");
+            array_unshift($arrTemp["Translated Destination"], "!" . str_replace("adtr_", "", getElement($item["dst_adtr_translated"]["adtr_method"])) . "!");
+            array_unshift($arrTemp["Translated Services"], "!" . str_replace("adtr_", "", getElement($item["services_adtr_translated"]["adtr_method"])) . "!");
 
+            //add the rule to the array
+            $arrConfig[$section][] = $arrTemp;
         }
 
     }
-
-
-    // On newer versions with the clish shell, we can get a configuration output similar to palo alto and cisco
-    outputText("Attempting to get the newer version of the configuration settings... ");
-    $config = $ssh->exec('/etc/cli.sh -c "show configuration"');
-    if (strlen($config) < 100) {
-        $config = "";
-        outputText("Failed, cli.sh not present.");
-    } else {
-        outputText("Success!");
-        $arrConfig["Configuration"] = $config;
-    }
-
 
 
 
@@ -272,18 +302,19 @@ function runCollector($device, $username, $password, $password2="") {
 
     outputText("Collecting hit count from $strStart to $strEnd");
 
-    $ssh->enablePTY();
-    $ssh->setTimeout(5);
-    $readTo = "===[ Script Completed ]===";
-    $ssh->read();
+    //$ssh->enablePTY();
+    //$ssh->setTimeout(5);
+    //$readTo = "===[ Script Completed ]===";
+    //$ssh->read();
     //if ($ssh->isTimeout()) $readTo = substr($ret, strrpos($ret,"\n"));
-    $ssh->write($cmd . " ; echo \"$readTo\"\n");
-    $ssh->setTimeout(300); //reading the rules could take time so lets set the timeout to 30 minutes (1800 seconds)
-    $ret = $ssh->read("\n".$readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    //$ssh->write($cmd . " ; echo \"$readTo\"\n");
+    //$ssh->setTimeout(300); //reading the rules could take time so lets set the timeout to 30 minutes (1800 seconds)
+    //$ret = $ssh->read("\n".$readTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    $ret = sshRunCommand($ssh, $cmd, 1200); //20 minute timeout to collect
     outputText("Text read from hit-count collection:\n$ret");
 
-    //$ret = $ssh->exec($cmd);
-    //if (strpos($ret,"command not found") > 0) $ret = $ssh->exec($cmd2);
+    //$ret = sshRunCommand($ssh, $cmd);
+    //if (strpos($ret,"command not found") > 0) $ret = sshRunCommand($ssh, $cmd2);
     $collected = false;
     foreach (explode("\n", $ret) as $line) {
         //cleanup the line for easy processing
@@ -294,10 +325,10 @@ function runCollector($device, $username, $password, $password2="") {
         if (substr_count($line," ") == 2) {
             list($name, $num, $cnt) = explode(" ", $line);
             $collected = true;
-            if($name == "rule" && isset($arrConfig["Firewall Rules"]["rule-$num"])) {
-                $arrConfig["Firewall Rules"]["rule-$num"]["Hits"] += intval($cnt);
-            } elseif ($name == "NAT_rulenum" && isset($arrConfig["NAT Rules"]["rule-$num"])) {
-                $arrConfig["NAT Rules"]["rule-$num"]["Hits"] += intval($cnt);
+            if($name == "rule" && isset($arrConfig["Firewall Rules"][$num-1])) {
+                $arrConfig["Firewall Rules"][$num-1]["Hits"] = intval($cnt);
+            } elseif ($name == "NAT_rulenum" && isset($arrConfig["NAT Rules"][$num-1])) {
+                $arrConfig["NAT Rules"][$num-1]["Hits"] = intval($cnt);
             }
         }
     }
@@ -531,10 +562,88 @@ function getLastJsonError(){
 
 }
 
+
+function sshRunCommand(&$sshSession, $cmd, $timeout = 10, $sshNewReadTo = '', $logCmd = true){
+    //return $sshSession->exec($cmd);
+    static $sshReadTo;
+    if ($sshNewReadTo != '' || !isset($sshReadTo)) $sshReadTo = $sshNewReadTo;
+
+    //run the command
+    if ($logCmd) outputText("> ".$cmd);
+    outputText("+ Reading until prompt: $sshReadTo");
+    //write in chunks otherwise the session may insert newlines
+    foreach(str_split($cmd,32) as $chunk) { $sshSession->write($chunk); $sshSession->setTimeout(0.1); $sshSession->read(); }
+    $sshSession->write("\n");
+    //$sshSession->setTimeout(0.1);
+    //$sshSession->read();
+
+    $sshSession->setTimeout($timeout);
+    $ret = $sshSession->read($sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    
+    //detect a timeout and change the prompt accordingly
+    if($sshSession->isTimeout()) { 
+        $sshReadTo = substr($ret, strrpos($ret,"\n")+1); 
+        outputText("+ Timeout reached. Changed detected prompt to '$sshReadTo'"); 
+    }
+    
+    //remove the command and prompt from the output
+    if (strpos($ret,$cmd) !== false) $ret = substr($ret,strlen($cmd));
+    $p = strrpos($ret, $sshReadTo);
+    if ($p !== false) $ret = substr($ret,0, $p);
+    $ret = trim($ret,"\n\r");
+
+    //return the cleaned up output
+    outputText("+ " . strlen($ret) . " bytes read.");
+    return $ret;
+
+}
+
 function outputText($string){
     //echo $string . "\n";
-    file_put_contents(LOG_FILE,$string . "\n",FILE_APPEND);
+    file_put_contents(LOG_FILE,date(DATE_ATOM) . ": " . $string . "\n",FILE_APPEND);
 }
+
+/* OLD RUN COMMAND
+function sshRunCommand(&$sshSession, $cmd, $timeout = 10, $sshNewReadTo = '', $logCmd = true){
+    //return $sshSession->exec($cmd);
+    static $sshReadTo;
+    if ($sshNewReadTo != '') $sshReadTo = $sshNewReadTo;
+    
+    if (!isset($sshReadTo)) {
+        //get the command prompt
+        outputText("Detecting prompt...");
+        $sshSession->read(); //clear out the buffer
+        $sshSession->write("\n");
+        $sshSession->setTimeout(3);
+        $read = "\n" . $sshSession->read('>');
+        $sshReadTo = trim(substr($read, strrpos($read,"\n")+1));
+        outputText("Found prompt: $sshReadTo");
+    }
+
+    //run the command
+    if ($logCmd) outputText("> ".$cmd);
+    outputText("+ Reading until prompt: $sshReadTo");
+    $cmd .= "\n";
+    $sshSession->write($cmd);
+    //$sshSession->read(); //clear out the command echo
+    //$sshSession->write("\n");
+    $sshSession->setTimeout($timeout);
+    $ret = $sshSession->read($sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    
+    if($sshSession->isTimeout()) { $sshReadTo = substr($ret, strrpos($ret,"\n")+1); outputText("+ Timeout reached. Changed detected shell to '$sshReadTo'"); }
+    
+    //remove the command and prompt from the output
+    $ret = strpos($ret,$cmd) !== false ? substr($ret,strlen($cmd)) : $ret;  //remove the command
+    //$ret = str_replace($sshReadTo,"",$ret); //remove the prompt
+    $p = strrpos($ret, $sshReadTo);
+    if ($p !== false) $ret = substr($ret,$p);
+
+    outputText("+ " . strlen($ret) . " bytes read.");
+    //outputText("+ Prompt is now: $sshReadTo");
+    return $ret;
+
+}
+*/
 
 /*
  *   END CHECK POINT SCRIPT

@@ -1,0 +1,32 @@
+connecting to 10.38.56.221
+Non-elevated shell detected, logging into expert mode.
+> expert
++ Reading until prompt: Enter expert password:
++ 2 bytes read.
+> 1<3@n0v3mb3rm00n#
++ Reading until prompt: [Expert@10.38.56.221]# 
++ Timeout reached. Changed detected shell to '[Expert@Boca-Wireless-FW:0]# '
++ 93 bytes read.
+Connected. Running Check Point Collection Script
+> ls /opt | grep CPsuite | sort -r | head -n1
++ Reading until prompt: [Expert@Boca-Wireless-FW:0]# 
++ 15 bytes read.
+> stat -c %Y /opt/CPsuite-R77/fw1/database/objects.C
++ Reading until prompt: [Expert@Boca-Wireless-FW:0]# 
++ 14 bytes read.
+> stat -c %Y /opt/CPsuite-R77/fw1/conf/objects_5_0.C
++ Reading until prompt: [Expert@Boca-Wireless-FW:0]# 
++ 14 bytes read.
+> stat -c %Y /opt/CPsuite-R77/fw1/conf/objects.C_41
++ Reading until prompt: [Expert@Boca-Wireless-FW:0]# 
++ 14 bytes read.
+> stat -c %Y /opt/CPsuite-R77/fw1/conf/objects.C
++ Reading until prompt: [Expert@Boca-Wireless-FW:0]# 
++ 14 bytes read.
+Collecting /opt/CPsuite-R77/fw1/database/objects.C with last modified date of May 30, 2017 02:05:11
+> cp /opt/CPsuite-R77/fw1/database/objects.C /opt/CPsuite-R77/fw1/database/objects.C2
++ Reading until prompt: [Expert@Boca-Wireless-FW:0]# 
++ 2 bytes read.
+> gzip -1 -f /opt/CPsuite-R77/fw1/database/objects.C2
++ Reading until prompt: [Expert@Boca-Wireless-FW:0]# 
++ 3 bytes read.

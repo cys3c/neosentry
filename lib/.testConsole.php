@@ -3,6 +3,10 @@
  * Test script for ssh connections
  */
 
+ error_reporting(E_COMPILE_ERROR);
+
+
+
 $help = '
 Usage: ... -d <device> -u <username> -p <password>
 ';
@@ -34,7 +38,7 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
     echo $ssh->getBannerMessage();
 
     //$ssh->write("?");
-    //$ssh->enablePTY();
+    $ssh->enablePTY();
 
     // Give console access
     echo "\nConnected to " . $device . "\n";
@@ -43,19 +47,20 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
     echo "** Files will be copied to " . $saveToFolder . "\n\n";
 
     //get the prompt
-    $ssh->write("\n");
-    sleep(2);
-    $read = $ssh->read(); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
-    $readTo = substr($read, strrpos($read,"\n"));
-    echo "+ Detected prompt: $readTo\n";
-    echo $read;
+    //$ssh->write("\n");
+    //sleep(2);
+    //$read = $ssh->read(); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    //$readTo = substr($read, strrpos($read,"\n"));
+    //echo "+ Detected prompt: $readTo\n";
+    //echo $read;
     //get the console prompt so we know when to stop reading text
     //if ($ssh->isTimeout()) $readTo = substr($ssh->read(), strrpos($read,"\n"));
 
-    //sshRunCommand($ssh, "\n",2);
+    sshRunCommand($ssh, "", 1);
 
     while($ssh->isConnected()) {
-        $cmd = rtrim(readline());
+        echo "\n";
+        $cmd = rtrim(readline("Enter Command> "));
 
         if ($cmd=="quit") break;
         if (strstr($cmd,'$fileget')) { //$fileget [remote file] [local file]
@@ -83,9 +88,8 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
             //if we reached a timeout then we have a new console prompt, lets get it so we know where to read till
             if ($ssh->isTimeout()) $readTo = trim(substr($read, strrpos($read,"\n")));
             */
-            $ret = sshRunCommand($ssh,$cmd,$readTo);
-            echo $ret;
-            echo $readTo;
+            $ret = sshRunCommand($ssh,$cmd);
+            echo "'$ret'";
 
         }
 
@@ -99,7 +103,41 @@ function showConsoleConnection($device, $username, $password, $saveToFolder = ".
     echo "\nConnection Closed\n";
 }
 
-function sshRunCommand(&$sshSession, $cmd, $readTo = '', $timeout = 5){
+function sshRunCommand(&$sshSession, $cmd, $timeout = 10, $sshNewReadTo = '', $logCmd = true){
+    //return $sshSession->exec($cmd);
+    static $sshReadTo;
+    if ($sshNewReadTo != '' || !isset($sshReadTo)) $sshReadTo = $sshNewReadTo;
+
+    //run the command
+    if ($logCmd) outputText("> ".$cmd);
+    outputText("+ Reading until prompt: $sshReadTo");
+    //write in chunks otherwise the session may insert newlines
+    foreach(str_split($cmd,32) as $chunk) { $sshSession->write($chunk); $sshSession->setTimeout(0.1); $sshSession->read(); }
+    $sshSession->write("\n");
+    
+    $sshSession->setTimeout($timeout);
+    $ret = $sshSession->read($sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    
+    //detect a timeout and change the prompt accordingly
+    if($sshSession->isTimeout()) { 
+        $sshReadTo = substr($ret, strrpos($ret,"\n")+1); 
+        outputText("+ Timeout reached. Changed detected prompt to '$sshReadTo'"); 
+    }
+    
+    //remove the command and prompt from the output
+    if (strpos($ret,$cmd) !== false) $ret = substr($ret,strlen($cmd));
+    $p = strrpos($ret, $sshReadTo);
+    if ($p !== false) $ret = substr($ret,0, $p);
+    $ret = trim($ret,"\n\r");
+
+    //return the cleaned up output
+    outputText("+ " . strlen($ret) . " bytes read.");
+    return $ret;
+
+}
+
+
+function sshRunCommand2(&$sshSession, $cmd, $readTo = '', $timeout = 5){
     //run the command
     $cmd = rtrim($cmd,"\n") . "\n";
     $sshSession->write($cmd);

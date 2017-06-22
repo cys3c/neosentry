@@ -91,13 +91,17 @@ function runCollector($device, $username, $password, $password2="") {
         return "Error: Login Failed using username '$username'. " . $ssh->getLastError();
     }
     $scp = new Net_SCP($ssh);
+    $ssh->enablePTY();
 
 
-    //turn off paging so we get the whole output at once without line breaks
-    $ret = sshRunCommand($ssh,'set cli pager off');
+    //turn off paging so we get the whole output at once without line breaks. Enable scripting-mode so output is displayed properly
+    $ret = sshRunCommand($ssh,'set cli pager off', 3);
+    $ret = sshRunCommand($ssh,'set cli scripting-mode on', 3);
 
     //get Configuration
-    $ret = trim(sshRunCommand($ssh,'show config merged')); //get the local policy and panorama policy
+    sleep(1);
+    sshRunCommand($ssh,'', 3);
+    $ret = trim(sshRunCommand($ssh,'show config merged', 20)); //get the local policy and panorama policy.
     file_put_contents($scratchFolder."/collected_configuration.original",$ret);
     $arrConfig["Configuration"] = $ret;
 
@@ -109,22 +113,27 @@ function runCollector($device, $username, $password, $password2="") {
     file_put_contents($scratchFolder."/collected_nat_rules.parsed",json_encode($arrRules["nat"],JSON_PRETTY_PRINT));
 
     $cnt = 0;
-    foreach ($arrRules["nat"] AS $key => $item) {
+    foreach ($arrRules["nat"] as $key => $item) {
         $id = $key; //key($item);
         $section = "NAT Rules";
         //make sure we only collect a valid rule
         if(isset($item['source']) && isset($item['destination'])) {
-            $arrConfig[$section][$id]["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
-            $arrConfig[$section][$id]["Rulenum"] = $cnt;
-            $arrConfig[$section][$id]["Hits"] = 0;
-            $arrConfig[$section][$id]["Name"] = $key;
-            $arrConfig[$section][$id]["Original Source"] = $item['source'];
-            $arrConfig[$section][$id]["Source Zone"] = $item['from'];
-            $arrConfig[$section][$id]["Original Destination"] = $item['destination'];
-            $arrConfig[$section][$id]["Destination Zone"] = $item['to'];
-            $arrConfig[$section][$id]["Original Service"] = $item['service'];
-            $arrConfig[$section][$id]["Translated To"] = $item['translate-to'];
-            $arrConfig[$section][$id]["Nat Type"] = $item['nat-type'];
+            $arrTemp = [];
+            //$arrTemp["ID"] = $id;
+            $arrTemp["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
+            $arrTemp["Rulenum"] = $cnt;
+            $arrTemp["Hits"] = 0;
+            $arrTemp["Name"] = $key;
+            $arrTemp["Original Source"] = $item['source'];
+            $arrTemp["Source Zone"] = $item['from'];
+            $arrTemp["Original Destination"] = $item['destination'];
+            $arrTemp["Destination Zone"] = $item['to'];
+            $arrTemp["Original Service"] = $item['service'];
+            $arrTemp["Translated To"] = $item['translate-to'];
+            $arrTemp["Nat Type"] = $item['nat-type'];
+
+            //add the rule to the array
+            $arrConfig[$section][] = $arrTemp;
 
             $cnt++;
         }
@@ -141,25 +150,32 @@ function runCollector($device, $username, $password, $password2="") {
     file_put_contents($scratchFolder."/collected_firewall_rules.parsed",json_encode($arrRules["fw"],JSON_PRETTY_PRINT));
 
     $cnt = 0;
-    foreach ($arrRules["fw"] AS $key => $item) {
+    $fwNameMap = []; //ex $fwNameMap["Cleanup"] = 12; maps name to rule number. used for adding hitcounts
+    foreach ($arrRules["fw"] as $key => $item) {
         $id = $key; //key($item);
         $section = "Firewall Rules";
         //only collect a valid rule
         if(isset($item['source']) && isset($item['destination'])) {
-            $arrConfig[$section][$id]["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
-            $arrConfig[$section][$id]["Rulenum"] = $cnt;
-            $arrConfig[$section][$id]["Hits"] = 0;
-            $arrConfig[$section][$id]["Name"] = $key;
-            $arrConfig[$section][$id]["Source"] = $item['source'];
-            $arrConfig[$section][$id]["Source Zone"] = $item['from'];
-            $arrConfig[$section][$id]["Destination"] = $item['destination'];
-            $arrConfig[$section][$id]["Destination Zone"] = $item['to'];
-            $arrConfig[$section][$id]["Destination Region"] = $item['destination-region'];
-            $arrConfig[$section][$id]["Services"] = $item['application/service'];
-            $arrConfig[$section][$id]["Action"] = $item['action'];
-            $arrConfig[$section][$id]["User"] = $item['user'];
-            $arrConfig[$section][$id]["Category"] = $item['category'];
-            $arrConfig[$section][$id]["Terminal"] = $item['terminal'];
+            $arrTemp = [];
+            //$arrTemp["ID"] = $id;
+            $arrTemp["Disabled"] = isset($item["disabled"]) ? $item["disabled"] : "no";
+            $arrTemp["Rulenum"] = $cnt;
+            $arrTemp["Hits"] = 0;
+            $arrTemp["Name"] = $key;
+            $arrTemp["Source"] = $item['source'];
+            $arrTemp["Source Zone"] = $item['from'];
+            $arrTemp["Destination"] = $item['destination'];
+            $arrTemp["Destination Zone"] = $item['to'];
+            $arrTemp["Destination Region"] = $item['destination-region'];
+            $arrTemp["Services"] = $item['application/service'];
+            $arrTemp["Action"] = $item['action'];
+            $arrTemp["User"] = $item['user'];
+            $arrTemp["Category"] = $item['category'];
+            $arrTemp["Terminal"] = $item['terminal'];
+
+            //add the rule to the array
+            $fwNameMap[$key] = $cnt;
+            $arrConfig[$section][] = $arrTemp;
 
             $cnt++;
         }
@@ -169,58 +185,29 @@ function runCollector($device, $username, $password, $password2="") {
     //traffic logs for rule hit count?
     //show log traffic
     $stime = file_exists($scratchFolder."/collected_logs.out")?filemtime($scratchFolder."/collected_logs.out"):0;
-    $etime = filemtime($scratchFolder."/collected_firewall_rules.out");
+    $etime = filemtime($scratchFolder."/collected_firewall_rules.original");
     $dayAgo = $etime - 86400;
     if ($stime < $dayAgo || $stime >= $etime - 60) $stime = $dayAgo; //we only want to collect a max of 24 hours of logs due to resource utilization
-    $strStart = date("Y/M/d@h:m:s", $stime);
-    $strEnd = date("Y/M/d@h:m:s", $etime);
+    $strStart = date("Y/m/d@h:m:s", $stime);
+    $strEnd = date("Y/m/d@h:m:s", $etime);
     $cmd = 'show log traffic start-time equal ' . $strStart . ' end-time equal ' . $strEnd . ' csv-output equal yes';
     outputText("Collecting logs to see hitcounts: " . $cmd);
     $ret = "";
-    //$ret = sshRunCommand($ssh,$cmd,1800);
+    $cnt=0;
+    //$ret = sshRunCommand($ssh,$cmd,1200); //20 minute timeout
     foreach (explode("\n",$ret) as $line) {
         $a = explode(",",$line);
-        $rulename = isset($a[11]) ? $a[11] : "";
-        if (isset($arrConfig["Firewall Rules"][$rulename])) $arrConfig["Firewall Rules"][$rulename]["Hits"]++;
+        if (sizeof($a) >= 10) {
+            $rulename = isset($a[11]) ? $a[11] : "";
+            if (isset($arrConfig["Firewall Rules"][$fwNameMap[$rulename]])) $arrConfig["Firewall Rules"][$fwNameMap[$rulename]]["Hits"]++;
+            $cnt++;
+        }
     }
+    outputText("Done collecting logs. $cnt log entries parsed.");
 
 
     //return the array
     return $arrConfig;
-}
-
-function sshRunCommand($sshSession, $cmd, $timeout = 10){
-    static $sshReadTo;
-    if (!isset($sshReadTo)) {
-        //get the command prompt
-        outputText("Detecting prompt...");
-        $sshSession->read(); //clear out the buffer
-        $sshSession->write("\n");
-        $sshSession->setTimeout(3);
-        $read = "\n" . $sshSession->read('>');
-        $sshReadTo = trim(substr($read, strrpos($read,"\n")+1));
-        outputText("Found prompt: $sshReadTo");
-    }
-
-    //run the command
-    outputText("> ".$cmd);
-    outputText("+ Reading until prompt: $sshReadTo");
-    $sshSession->write($cmd);
-    $sshSession->read(); //clear out the command echo
-    $sshSession->write("\n");
-    $sshSession->setTimeout($timeout);
-    $ret = $sshSession->read($sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
-    //if($sshSession->isTimeout()) { outputText("+ Timeout reached."); $sshReadTo = substr($ret, strrpos($ret,"\n")+1); }
-    $ret = str_replace($sshReadTo,"",$ret); //remove the prompt
-
-    outputText("+ " . strlen($ret) . " bytes read.");
-    //outputText("+ Prompt is now: $sshReadTo");
-    return $ret;
-
-}
-function outputText($string){
-    //echo $string . "\n";
-    file_put_contents(LOG_FILE,date(DATE_ATOM) . ": " . $string . "\n",FILE_APPEND);
 }
 
 function paloJsonToArray(&$outputArray) {
@@ -228,7 +215,7 @@ function paloJsonToArray(&$outputArray) {
     $retArr = [];
 
     $level++;
-    outputText("starting json conversion on level $level");
+    //outputText("starting json conversion on level $level");
     do {
         //echo "in do statement\n";
         while (count($outputArray) > 0) {
@@ -264,3 +251,74 @@ function paloJsonToArray(&$outputArray) {
     return $retArr;
 
 }
+
+
+function sshRunCommand(&$sshSession, $cmd, $timeout = 10, $sshNewReadTo = '', $logCmd = true){
+    //return $sshSession->exec($cmd);
+    static $sshReadTo;
+    if ($sshNewReadTo != '' || !isset($sshReadTo)) $sshReadTo = $sshNewReadTo;
+
+    //run the command
+    if ($logCmd) outputText("> ".$cmd);
+    outputText("+ Reading until prompt: $sshReadTo");
+    //write in chunks otherwise the session may insert newlines
+    foreach(str_split($cmd,32) as $chunk) { $sshSession->write($chunk); $sshSession->setTimeout(0.1); $sshSession->read(); }
+    $sshSession->write("\n");
+
+    $sshSession->setTimeout($timeout);
+    $ret = $sshSession->read($sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    
+    //detect a timeout and change the prompt accordingly
+    if($sshSession->isTimeout()) { 
+        $sshReadTo = substr($ret, strrpos($ret,"\n")+1); 
+        outputText("+ Timeout reached. Changed detected prompt to '$sshReadTo'"); 
+    }
+    
+    //remove the command and prompt from the output
+    if (strpos($ret,$cmd) !== false) $ret = substr($ret,strlen($cmd));
+    $p = strrpos($ret, $sshReadTo);
+    if ($p !== false) $ret = substr($ret,0, $p);
+    $ret = trim($ret,"\n\r");
+
+    //return the cleaned up output
+    outputText("+ " . strlen($ret) . " bytes read.");
+    return $ret;
+
+}
+
+function outputText($string){
+    //echo $string . "\n";
+    file_put_contents(LOG_FILE,date(DATE_ATOM) . ": " . $string . "\n",FILE_APPEND);
+}
+
+/* OLD RUN COMMAND
+function sshRunCommand($sshSession, $cmd, $timeout = 10){
+    static $sshReadTo;
+    if (!isset($sshReadTo)) {
+        //get the command prompt
+        outputText("Detecting prompt...");
+        $sshSession->read(); //clear out the buffer
+        $sshSession->write("\n");
+        $sshSession->setTimeout(3);
+        $read = "\n" . $sshSession->read('>');
+        $sshReadTo = trim(substr($read, strrpos($read,"\n")+1));
+        outputText("Found prompt: $sshReadTo");
+    }
+
+    //run the command
+    outputText("> ".$cmd);
+    outputText("+ Reading until prompt: $sshReadTo");
+    $sshSession->write($cmd);
+    $sshSession->read(); //clear out the command echo
+    $sshSession->write("\n");
+    $sshSession->setTimeout($timeout);
+    $ret = $sshSession->read($sshReadTo); //$ssh->read('_.*@.*[$#>]_', NET_SSH2_READ_REGEX);
+    //if($sshSession->isTimeout()) { outputText("+ Timeout reached."); $sshReadTo = substr($ret, strrpos($ret,"\n")+1); }
+    $ret = str_replace($sshReadTo,"",$ret); //remove the prompt
+
+    outputText("+ " . strlen($ret) . " bytes read.");
+    //outputText("+ Prompt is now: $sshReadTo");
+    return $ret;
+
+}
+*/

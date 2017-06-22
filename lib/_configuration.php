@@ -12,8 +12,8 @@
 
 function configurationGet($device, &$deviceInfo, $overrideScript = "", $overrideProfile = "") {
     //get the username and passwords from the assigned account profile name.
-    $accProfile = isset($devInfo['collectors']['configuration'])?$devInfo['collectors']['configuration']:"";
-    $accProfile = $accProfile[1]; //0 stores if it should collect config, 1 stores acc profile name
+    $accProfile = isset($deviceInfo['collectors']['configuration'])?$deviceInfo['collectors']['configuration']:[];
+    $accProfile = isset($accProfile[1]) ? $accProfile[1] : ""; //0 stores if it should collect config, 1 stores acc profile name
     $accVals = getSettingsValue(SETTING_CATEGORY_PROFILES, $accProfile, []);
     if (is_array($overrideProfile)) $accVals = $overrideProfile;
 
@@ -68,7 +68,7 @@ function configurationGet($device, &$deviceInfo, $overrideScript = "", $override
     chdir($curDir); //change the cwd back
     echo $ret;
     $retArr = json_decode($ret,true);
-    if (!is_array($retArr)) $retArr = array("Error"=>"Script $scriptName did not return the expected JSON configuration.", "Return Data"=>$ret);
+    if (!is_array($retArr)) $retArr = array("Error"=>"Script $scriptName did not return the expected JSON configuration. \n\nReturn Data: \n$ret");
     echo "Execution completed in " . (microtime(true) - $start) . " seconds\n";
 
 

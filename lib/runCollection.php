@@ -156,7 +156,7 @@ function processDevice($device, $action, $devInfo = [], $opts = []) {
             //Now compare
             if (isset($newConfig['Error'])) {
                 //there was an error so display it instead of comparing
-                echo "Error: " . $newConfig['Error'] . "\n" . substr($newConfig["Return Data"],0,512) . "...\n";
+                echo "Error: " . substr($newConfig['Error'],0,1024) . "\n";
                 //echo json_encode($newConfig,JSON_PRETTY_PRINT) . "\n";
             } else {
                 $confDiff = configurationCompare($oldConfig, $newConfig); //returns a string describing the difference or an empty string
